@@ -1,8 +1,4 @@
-# 力了么 — Cici 负责模块：账号与社交
-
-> **分支名：** `feat-auth-binding-(Cici-Liu)`
->
-> **项目仓库：** [github.com/hm37-blip/Li-Le-Me](https://github.com/hm37-blip/Li-Le-Me)
+Cici 负责模块：账号与社交
 
 ---
 
