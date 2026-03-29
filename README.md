@@ -4,7 +4,7 @@
 
 ## 项目简介
 
-「力了么」是一款微信小程序，通过社交排行榜和每日"LeetCode 步数"推送，激励学生会成员保持算法练习习惯。本文档覆盖项目的**数据层**与**后端引擎**部分，包括 LeetCode 数据抓取、定时结算、排行榜接口，以及供前端调用的云函数 API。
+「力了么」是一款微信小程序，通过社交排行榜和每日"LeetCode 步数"推送，激励学生会成员保持算法练习习惯。本文档覆盖项目的**数据层**与**后端引擎**部分，包括 LeetCode 数据抓取、定时结算、排行榜接口，以及供前端调用的 RESTful API。
 
 ---
 
@@ -22,33 +22,49 @@
 
 ## 技术栈
 
-- **运行环境**：微信云开发 (WeChat Cloud Development)
-- **云函数**：Node.js
-- **数据库**：云开发内置 NoSQL (MongoDB-like)
+- **后端框架**：Spring Boot (Java)
+- **数据库**：MySQL
+- **ORM**：MyBatis / MyBatis-Plus（或 Spring Data JPA，视团队习惯而定）
+- **定时任务**：Spring `@Scheduled` / Quartz
+- **HTTP 客户端**：RestTemplate / WebClient（用于调用 LeetCode GraphQL API）
 - **数据源**：LeetCode GraphQL API (`https://leetcode.com/graphql`)
-- **定时触发**：云函数定时触发器 (Cron)
 - **前端框架**：微信小程序原生 + WeUI
 
 ---
 
 ## 数据库设计 (Data Schema)
 
-### `users` 集合
+### `users` 表
 
 | 字段名 | 类型 | 说明 |
 |--------|------|------|
-| `openid` | String | 微信用户唯一标识 |
-| `lc_id` | String | LeetCode 账号名 |
-| `total_solved` | Number | 截止目前的总刷题数 |
-| `daily_steps` | Number | 今日新增题数 (今日 total − 昨日 total) |
-| `history_logs` | Array | 每日数值快照数组，供前端图表渲染使用 |
-| `last_update` | Timestamp | 上次抓取数据的时间 |
+| `id` | BIGINT (PK, AUTO_INCREMENT) | 主键 |
+| `openid` | VARCHAR(128) UNIQUE | 微信用户唯一标识 |
+| `lc_id` | VARCHAR(64) | LeetCode 账号名 |
+| `total_solved` | INT | 截止目前的总刷题数 |
+| `daily_steps` | INT | 今日新增题数 (今日 total − 昨日 total) |
+| `last_update` | DATETIME | 上次抓取数据的时间 |
 
-> **注意**：此 Schema 可根据开发需要调整，但须同步通知前端开发成员（A 和 C）。
+### `daily_logs` 表
+
+| 字段名 | 类型 | 说明 |
+|--------|------|------|
+| `id` | BIGINT (PK, AUTO_INCREMENT) | 主键 |
+| `openid` | VARCHAR(128) | 关联用户 |
+| `log_date` | DATE | 记录日期 |
+| `total_solved` | INT | 当日截止总题数 |
+| `daily_steps` | INT | 当日新增题数 |
+| `easy_count` | INT | 简单题累计数 |
+| `medium_count` | INT | 中等题累计数 |
+| `hard_count` | INT | 困难题累计数 |
+| `daily_points` | INT | 当日加权积分 |
+| `created_at` | DATETIME | 记录创建时间 |
+
+> **注意**：原文档中的 `history_logs` (Array) 在关系型数据库中拆分为独立的 `daily_logs` 表，每天一条记录，便于前端图表查询。Schema 可根据开发需要调整，但须同步通知前端开发成员（A 和 C）。
 
 ---
 
-## 核心云函数 / API 接口
+## 核心 RESTful API 接口
 
 ### 1. 账号与社交模块
 
@@ -111,18 +127,18 @@
 
 ### 3. 数据处理中心 (Backend Engine)
 
-| 功能 | 函数名 | 触发方式 | 说明 |
-|------|--------|----------|------|
-| GraphQL 抓取引擎 | `LcEngine` | 即时调用 | 输入 `leetcode_username`，返回 `totalSolved` 及难度分布 |
-| 定时结算任务 | `DailySettleJob` | 每天 22:00 自动触发 | 全员扫描 → 计算差值 → 写入快照 → 更新数据库 |
+| 功能 | 接口/服务 | 触发方式 | 说明 |
+|------|-----------|----------|------|
+| GraphQL 抓取引擎 | `LcEngineService` | 即时调用 | 输入 `leetcode_username`，返回 `totalSolved` 及难度分布 |
+| 定时结算任务 | `DailySettleJob` | 每天 22:00 `@Scheduled` 触发 | 全员扫描 → 计算差值 → 写入快照 → 更新数据库 |
 
 **Cron Job 执行逻辑**：
 
 1. 遍历所有用户的 `lc_id`
-2. 调用 `LcEngine` 抓取最新 `total_solved`
+2. 调用 `LcEngineService` 抓取最新 `total_solved`
 3. 计算步数：`今日步数 = 最新总数 − 数据库昨日总数`
 4. 计算加权分数（按 easy/medium/hard 权重）
-5. 存入历史：将结果写入 `history_logs` 数组
+5. 存入历史：将结果写入 `daily_logs` 表
 6. 更新状态：把最新总数覆盖写入数据库
 
 > ⚠️ **频率控制**：抓取请求间隔至少 0.5 秒，避免被 LeetCode 限流。
@@ -156,39 +172,31 @@
 
 ## LeetCode GraphQL 抓取方法
 
-```javascript
-// 校验用户是否存在
-const query = `
-  query getUserProfile($username: String!) {
-    matchedUser(username: $username) {
-      username
+```java
+// GraphQL 请求体 — 校验用户是否存在
+String validateQuery = """
+    {
+      "query": "query getUserProfile($username: String!) { matchedUser(username: $username) { username } }",
+      "variables": { "username": "%s" }
     }
-  }
-`;
+    """.formatted(leetcodeUsername);
 
-// 获取刷题数据
-const statsQuery = `
-  query getUserStats($username: String!) {
-    matchedUser(username: $username) {
-      submitStats {
-        acSubmissionNum {
-          difficulty
-          count
-        }
-      }
+// GraphQL 请求体 — 获取刷题数据
+String statsQuery = """
+    {
+      "query": "query getUserStats($username: String!) { matchedUser(username: $username) { submitStats { acSubmissionNum { difficulty count } } } }",
+      "variables": { "username": "%s" }
     }
-  }
-`;
+    """.formatted(leetcodeUsername);
 
-// 请求示例
-const response = await fetch("https://leetcode.com/graphql", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    query: statsQuery,
-    variables: { username: "example_user" }
-  })
-});
+// 使用 RestTemplate 发送请求
+HttpHeaders headers = new HttpHeaders();
+headers.setContentType(MediaType.APPLICATION_JSON);
+
+HttpEntity<String> request = new HttpEntity<>(statsQuery, headers);
+ResponseEntity<String> response = restTemplate.postForEntity(
+    "https://leetcode.com/graphql", request, String.class
+);
 ```
 
 ---
@@ -224,10 +232,19 @@ cd lilema
 # 2. 切换到开发分支
 git checkout dev
 
-# 3. 安装微信开发者工具并导入项目
+# 3. 配置数据库（修改 application.yml 中的 MySQL 连接信息）
+#    spring.datasource.url=jdbc:mysql://localhost:3306/lilema
+#    spring.datasource.username=root
+#    spring.datasource.password=<your_password>
 
-# 4. 云函数本地调试
-# 在微信开发者工具中右键云函数目录 → 本地调试
+# 4. 初始化数据库
+mysql -u root -p < sql/init.sql
+
+# 5. 启动后端服务
+mvn spring-boot:run
+
+# 6. 微信小程序前端
+# 安装微信开发者工具，导入前端项目目录，配置后端 API 地址
 ```
 
 ---
