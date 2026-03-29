@@ -1,9 +1,5 @@
 # 力了么 — 后端服务模块
 
-> 项目周期：2026.03.28 – 2026.04.28（30 天）  
-> 负责人：杜雨泽 (Dennis) — Backend & Data Engine  
-> Tech Lead：KJ ｜ Product Lead：Wendy
-
 ---
 
 ## 项目简介
