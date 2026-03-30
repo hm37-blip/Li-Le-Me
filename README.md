@@ -59,6 +59,7 @@
 | `hard_count` | INT | 困难题累计数 |
 | `daily_points` | INT | 当日加权积分 |
 | `created_at` | DATETIME | 记录创建时间 |
+| `rank_tier` | VARCHAR(16) | 等级标签（夯 / 顶级 / 人上人 / NPC / 拉完了） |
 
 > **注意**：原文档中的 `history_logs` (Array) 在关系型数据库中拆分为独立的 `daily_logs` 表，每天一条记录，便于前端图表查询。Schema 可根据开发需要调整，但须同步通知前端开发成员（A 和 C）。
 
@@ -78,6 +79,8 @@
 | 分享裂变 | `ShareInviteID` | `invite_code`, `user_nickname` | `invite_code`（新用户确认后触发 `VerifyInviteCode`） |
 | 更换头像 | `UpdateUserAvatar` | `openid`, `new_avatar_file_id` | `update_avatar_success` (Boolean) |
 | 销号 | `DeleteUserAccount` | `openid` | `delete_user_success` (Boolean) |
+
+`DeleteUserAccount` 级联逻辑：删号时须同步执行以下操作：① 删除该用户在 `daily_logs` 表中的所有历史记录；② 将该用户所属战队的 `member_count` 减 1；③ 若战队人数降至 0，则将战队状态标记为 `is_active = false`。以上操作应在同一事务中完成。
 
 ### 2. 排行榜模块
 
@@ -122,7 +125,7 @@
   }
 }
 ```
-
+`rank_change` 计算逻辑：对比 T-1（昨日）与 T-2（前日）的排名快照。若 T-1 排名 < T-2 排名则为 `"up"`，T-1 > T-2 则为 `"down"`，相等则为 `"keep"`。用户首次结算（无 T-2 数据）时默认返回 `"keep"`
 **排名同分处理**：当日积分相同时，按历史总积分 (`total_points`) 降序排名。
 
 ### 3. 数据处理中心 (Backend Engine)
@@ -139,7 +142,8 @@
 3. 计算步数：`今日步数 = 最新总数 − 数据库昨日总数`
 4. 计算加权分数（按 easy/medium/hard 权重）
 5. 存入历史：将结果写入 `daily_logs` 表
-6. 更新状态：把最新总数覆盖写入数据库
+6. 计算等级：根据战队内当日积分百分位排名，写入 `rank_tier`（夯 / 顶级 / 人上人 / NPC / 拉完了）
+7. 更新状态：把最新总数覆盖写入数据库
 
 > ⚠️ **频率控制**：抓取请求间隔至少 0.5 秒，避免被 LeetCode 限流。
 
