@@ -90,15 +90,20 @@
   }
 }
 ```
+| 功能 | 函数名 | 输入 (Input) | 输出 (Output) |
+|------|--------|-------------|--------------|
+| 趋势图表数据 | GetTrendData | openid (String), range_days (Int，默认7) | JSON（包含 dates[] + daily_points_change[]，用于折线图） |
+| 难度分布数据 | GetDifficultyDistribution | openid (String) | JSON（包含 type：YEARLY（当年总计）或 MONTHLY（本月新增），以及难度分布数据） |
 
 ---
 
 ## 五、后端逻辑
 
 趋势：
-1. 查history_logs
+1. 查dates[]和daily_points_change[]
 2. 截取N天
-3. 拆成数组
+3. 查dates[]缺失天数，再daily_points_change[]中填入0防止折线图数据出错
+4. 拆成数组
 
 难度：
 1. 调LeetCode
