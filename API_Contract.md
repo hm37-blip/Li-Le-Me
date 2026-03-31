@@ -29,6 +29,11 @@ Response Status: Return code: 401 (Unauthorized).
 Frontend Handling: Clear local storage and guide the user to retrigger the WeChat Login process.
 
 
+Module,Primary Owner(s),Role / Core Function
+UserController,Cici Liu,"User profile management, authentication, and account settings."
+SquadController,Cici Liu / Denis Du,Collaborative logic for team formation and group interactions.
+RankController,Denis Du,"Scoring algorithms, leaderboards, and competitive ranking logic."
+AnalyticsController,Andy Jiang,"Data aggregation, usage metrics, and statistical reporting."
 
 Modules：UserController（Cici Liu），SquadController（Cici Liu/Denis Du），RankController（Denis Du），AnalyticsController（Andy Jiang）
 
