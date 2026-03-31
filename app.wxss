@@ -1,0 +1,78 @@
+/* 全局样式 - LeetCode 橙灰主题配色 */
+
+/* 全局页面设置 */
+page {
+  background-color: #f5f5f5;
+  font-family: -apple-system-font, "Helvetica Neue", sans-serif;
+  font-size: 14px;
+  color: #282828;
+  line-height: 1.6;
+}
+
+/* LeetCode 主色调 - 橙色+灰色 */
+.leetcode-primary {
+  color: #FFA116;
+}
+
+.leetcode-dark {
+  color: #282828;
+}
+
+.leetcode-bg-primary {
+  background-color: #FFA116;
+}
+
+.leetcode-bg-dark {
+  background-color: #282828;
+}
+
+/* 难度颜色 - 橙灰配色 */
+.difficulty-easy {
+  color: #999999;
+}
+
+.difficulty-medium {
+  color: #FFA116;
+}
+
+.difficulty-hard {
+  color: #666666;
+}
+
+/* 字体大小规范 */
+.text-title {
+  font-size: 16px;
+}
+
+.text-body {
+  font-size: 14px;
+}
+
+.text-caption {
+  font-size: 12px;
+}
+
+/* 通用工具类 */
+.text-center {
+  text-align: center;
+}
+
+.text-bold {
+  font-weight: 600;
+}
+
+.mt-10 {
+  margin-top: 10rpx;
+}
+
+.mt-20 {
+  margin-top: 20rpx;
+}
+
+.mb-10 {
+  margin-bottom: 10rpx;
+}
+
+.mb-20 {
+  margin-bottom: 20rpx;
+}

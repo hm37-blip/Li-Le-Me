@@ -1,0 +1,8 @@
+<canvas
+  type="2d"
+  class="ec-canvas"
+  id="{{canvasId}}"
+  bindtouchstart="touchStart"
+  bindtouchmove="touchMove"
+  bindtouchend="touchEnd">
+</canvas>

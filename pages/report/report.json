@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "个人战报",
+  "navigationBarBackgroundColor": "#282828",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#282828",
+  "backgroundTextStyle": "light",
+  "usingComponents": {
+    "ec-canvas": "/components/ec-canvas/ec-canvas"
+  }
+}

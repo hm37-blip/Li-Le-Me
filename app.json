@@ -1,0 +1,16 @@
+{
+  "pages": [
+    "pages/report/report"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#282828",
+    "navigationBarTitleText": "LeetCode 个人战报",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#282828",
+    "enablePullDownRefresh": false
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "usingComponents": {}
+}
