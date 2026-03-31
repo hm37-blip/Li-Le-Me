@@ -20,7 +20,6 @@
 | 前端     | 微信小程序（原生开发）                            |
 | 后端     | Spring Boot                                       |
 | 用户认证 | 微信 OAuth（`wx.login()` → `js_code` → `openid`） |
-| 文件存储 | 微信云存储（头像上传）                            |
 | 社交分享 | 微信 `onShareAppMessage` API                      |
 
 ---
