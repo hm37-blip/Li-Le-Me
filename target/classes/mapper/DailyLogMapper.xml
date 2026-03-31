@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cesa.lilema.mapper.DailyLogMapper">
+
+    <resultMap id="DailyLogResultMap" type="com.cesa.lilema.entity.DailyLog">
+        <id     column="id"           property="id"/>
+        <result column="openid"       property="openid"/>
+        <result column="log_date"     property="logDate"/>
+        <result column="total_solved" property="totalSolved"/>
+        <result column="daily_steps"  property="dailySteps"/>
+        <result column="easy_count"   property="easyCount"/>
+        <result column="medium_count" property="mediumCount"/>
+        <result column="hard_count"   property="hardCount"/>
+        <result column="daily_points" property="dailyPoints"/>
+        <result column="created_at"   property="createdAt"/>
+        <result column="rank_tier"    property="rankTier"/>
+    </resultMap>
+
+    <!--
+        Select all daily logs for users in a squad on a given date.
+        Joins daily_logs with users to filter by squad_id.
+    -->
+    <select id="selectBySquadAndDate" resultMap="DailyLogResultMap">
+        SELECT dl.*
+        FROM daily_logs dl
+                 INNER JOIN users u ON dl.openid = u.openid
+        WHERE u.squad_id = #{squadId}
+          AND dl.log_date = #{date}
+    </select>
+
+    <!-- Select the daily log for a specific user on a specific date -->
+    <select id="selectByOpenidAndDate" resultMap="DailyLogResultMap">
+        SELECT *
+        FROM daily_logs
+        WHERE openid = #{openid}
+          AND log_date = #{date}
+    </select>
+
+</mapper>

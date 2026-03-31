@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cesa.lilema.mapper.UserMapper">
+
+    <resultMap id="UserResultMap" type="com.cesa.lilema.entity.User">
+        <id     column="id"           property="id"/>
+        <result column="openid"       property="openid"/>
+        <result column="lc_id"        property="lcId"/>
+        <result column="nickname"     property="nickname"/>
+        <result column="avatar_url"   property="avatarUrl"/>
+        <result column="total_solved" property="totalSolved"/>
+        <result column="total_points" property="totalPoints"/>
+        <result column="daily_steps"  property="dailySteps"/>
+        <result column="squad_id"     property="squadId"/>
+        <result column="last_update"  property="lastUpdate"/>
+        <result column="created_at"   property="createdAt"/>
+    </resultMap>
+
+    <!-- Select all users in a specific squad -->
+    <select id="selectBySquadId" resultMap="UserResultMap">
+        SELECT *
+        FROM users
+        WHERE squad_id = #{squadId}
+    </select>
+
+    <!-- Select all users who have a bound LeetCode account -->
+    <select id="selectAllWithLcId" resultMap="UserResultMap">
+        SELECT *
+        FROM users
+        WHERE lc_id IS NOT NULL
+          AND lc_id != ''
+    </select>
+
+</mapper>
