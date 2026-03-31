@@ -29,6 +29,7 @@ Response Status: Return code: 401 (Unauthorized).
 Frontend Handling: Clear local storage and guide the user to retrigger the WeChat Login process.
 
 
+🧩 Module distribution and ownership
 | Module | Primary Owner(s) | Core Function |
 | --- | --- | --- |
 |UserController|Cici Liu|User profile management, authentication, and account settings.|
