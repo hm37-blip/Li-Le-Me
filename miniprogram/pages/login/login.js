@@ -4,6 +4,17 @@ Page({
   },
 
   onLoad() {
+    const app = getApp();
+    if (app.globalData.openid && app.globalData.token) {
+      const status = Number(wx.getStorageSync('registration_status'));
+      if (status === 1) {
+        wx.redirectTo({ url: '/pages/invite/invite' });
+        return;
+      } else if (status === 2) {
+        wx.redirectTo({ url: '/pages/home/home' });
+        return;
+      }
+    }
     this.handleWechatLogin();
   },
 

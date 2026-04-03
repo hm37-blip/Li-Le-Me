@@ -1,0 +1,40 @@
+<view class="container admin-page">
+
+  <view class="header-row">
+    <text class="page-title">管理员控制台</text>
+    <button class="add-btn" bindtap="toggleForm">{{showForm ? '取消' : '+ 新建战队'}}</button>
+  </view>
+
+  <!-- 新建战队表单 -->
+  <view class="card form-card" wx:if="{{showForm}}">
+    <view class="form-title">新建战队</view>
+    <input class="input mt-16" placeholder="战队名称" value="{{newSquadName}}" bindinput="onSquadNameInput" />
+    <input class="input mt-16" placeholder="邀请码（唯一）" value="{{newInviteCode}}" bindinput="onInviteCodeInput" />
+    <input class="input mt-16" placeholder="人数上限（默认50）" type="number" value="{{newMaxMembers}}" bindinput="onMaxMembersInput" />
+    <text class="error-text" wx:if="{{formError}}">{{formError}}</text>
+    <button class="submit-btn mt-16" type="primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="handleCreateSquad">
+      {{submitting ? '创建中...' : '确认创建'}}
+    </button>
+  </view>
+
+  <!-- 战队列表 -->
+  <view wx:if="{{loadingSquads && squads.length === 0}}" class="hint">加载中...</view>
+  <view wx:elif="{{squads.length === 0}}" class="hint">暂无战队</view>
+
+  <view class="card squad-card" wx:for="{{squads}}" wx:key="id">
+    <view class="squad-name">{{item.squad_name}}</view>
+    <view class="squad-row">
+      <text class="label">邀请码</text>
+      <text class="value code">{{item.invite_code}}</text>
+    </view>
+    <view class="squad-row">
+      <text class="label">成员</text>
+      <text class="value">{{item.member_count}} / {{item.max_members}}</text>
+    </view>
+    <view class="squad-row">
+      <text class="label">状态</text>
+      <text class="value {{item.is_active ? 'active' : 'inactive'}}">{{item.is_active ? '开放' : '已关闭'}}</text>
+    </view>
+  </view>
+
+</view>
