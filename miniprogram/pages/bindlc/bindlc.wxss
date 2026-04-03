@@ -40,6 +40,35 @@
   font-weight: 500;
 }
 
+.rules-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.rule {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.rule-icon {
+  font-size: 26rpx;
+  color: #bbbbbb;
+  width: 28rpx;
+  text-align: center;
+}
+
+.rule-text {
+  font-size: 24rpx;
+  color: #999999;
+}
+
+.rule.pass .rule-icon,
+.rule.pass .rule-text {
+  color: #07c160;
+}
+
 .submit-btn {
   background-color: #07c160 !important;
   border: none;

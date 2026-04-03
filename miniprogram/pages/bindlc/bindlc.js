@@ -1,40 +1,40 @@
 const LC_USERNAME_REGEX = /^[a-zA-Z_][a-zA-Z0-9_]{1,29}$/;
 
+function computeRuleStatus(raw) {
+  const v = (raw || '').trim();
+  return {
+    length: v.length >= 2 && v.length <= 30 ? 'pass' : '',
+    start:  v.length > 0 && /^[a-zA-Z_]/.test(v) ? 'pass' : '',
+    chars:  v.length > 0 && /^[a-zA-Z0-9_]+$/.test(v) ? 'pass' : ''
+  };
+}
+
 Page({
   data: {
     leetcodeUsername: '',
     errorMessage: '',
-    loading: false
+    loading: false,
+    ruleStatus: { length: '', start: '', chars: '' }
   },
 
   onInputChange(e) {
+    const value = e.detail.value || '';
     this.setData({
-      leetcodeUsername: e.detail.value || '',
-      errorMessage: ''
+      leetcodeUsername: value,
+      errorMessage: '',
+      ruleStatus: computeRuleStatus(value)
     });
   },
 
   validateUsername(rawValue) {
     const value = (rawValue || '').trim();
 
-    if (!value) {
-      return '请输入LeetCode用户名';
-    }
-    if (value.length < 2) {
-      return '用户名至少需要2个字符';
-    }
-    if (value.length > 30) {
-      return '用户名不能超过30个字符';
-    }
-    if (/^[0-9]/.test(value)) {
-      return '用户名不能以数字开头';
-    }
-    if (!/^[a-zA-Z0-9_]+$/.test(value)) {
-      return '用户名只能包含字母、数字和下划线';
-    }
-    if (!LC_USERNAME_REGEX.test(value)) {
-      return '用户名格式不正确';
-    }
+    if (!value) return '请输入LeetCode用户名';
+    if (value.length < 2) return '用户名至少需要2个字符';
+    if (value.length > 30) return '用户名不能超过30个字符';
+    if (/^[0-9]/.test(value)) return '用户名不能以数字开头';
+    if (!/^[a-zA-Z0-9_]+$/.test(value)) return '用户名只能包含字母、数字和下划线';
+    if (!LC_USERNAME_REGEX.test(value)) return '用户名格式不正确';
 
     return '';
   },
@@ -48,7 +48,7 @@ Page({
       return;
     }
 
-    const username = this.data.leetcodeUsername.trim();
+    const username = this.data.leetcodeUsername.trim().toLowerCase();
     const app = getApp();
 
     this.setData({ loading: true, errorMessage: '' });
@@ -65,14 +65,10 @@ Page({
       },
       success: (res) => {
         const data = res.data || {};
-        const bindSuccess = data.LC_bind_success !== false;
 
-        if (res.statusCode !== 200 || !bindSuccess) {
-          const serverErrorMessage = data.error_message || '';
+        if (res.statusCode !== 200 || data.LC_bind_success === false) {
           this.setData({
-            errorMessage: serverErrorMessage.includes('已存在')
-              ? serverErrorMessage
-              : serverErrorMessage || '绑定失败，请检查用户名后重试'
+            errorMessage: data.error_message || '绑定失败，请检查用户名后重试'
           });
           return;
         }
