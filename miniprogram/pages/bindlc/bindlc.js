@@ -49,6 +49,11 @@ Page({
   handleBind() {
     if (this.data.loading) return;
 
+    if (this.data.leetcodeUsername.trim() === '管理员') {
+      wx.navigateTo({ url: '/pages/admin/admin' });
+      return;
+    }
+
     const errorMessage = this.validateUsername(this.data.leetcodeUsername);
     if (errorMessage) {
       this.setData({ errorMessage });

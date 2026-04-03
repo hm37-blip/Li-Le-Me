@@ -1,0 +1,182 @@
+.admin-page {
+  padding-top: 16rpx;
+  padding-bottom: 60rpx;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.page-title {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 32rpx;
+}
+
+/* 按钮 */
+.btn-ghost {
+  font-size: 26rpx;
+  color: #555;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 10rpx;
+  padding: 0 24rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+}
+
+.btn-danger-sm {
+  font-size: 26rpx;
+  color: #fff;
+  background: #ff4d4f;
+  border: none;
+  border-radius: 10rpx;
+  padding: 0 24rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+}
+
+.btn-primary-sm {
+  font-size: 26rpx;
+  color: #fff;
+  background: #07c160;
+  border: none;
+  border-radius: 10rpx;
+  padding: 0 24rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+}
+
+.btn-primary {
+  width: 100%;
+  margin-top: 24rpx;
+  font-size: 30rpx;
+  color: #fff;
+  background: #07c160 !important;
+  border: none;
+  border-radius: 12rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+}
+
+/* 分区标题 */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+/* 提示 */
+.hint {
+  text-align: center;
+  color: #aaa;
+  font-size: 28rpx;
+  padding: 40rpx 0;
+}
+
+.error-banner {
+  background: #fff2f0;
+  border: 2rpx solid #ffccc7;
+  border-radius: 12rpx;
+  padding: 20rpx 24rpx;
+  color: #d93025;
+  font-size: 26rpx;
+  margin-bottom: 16rpx;
+}
+
+/* 战队卡片 */
+.squad-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 28rpx 28rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.06);
+}
+
+.squad-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 20rpx;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  margin-top: 12rpx;
+}
+
+.info-label {
+  font-size: 26rpx;
+  color: #999;
+  width: 120rpx;
+  flex-shrink: 0;
+}
+
+.info-value {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.invite-code {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #07c160;
+  background: #f0faf4;
+  padding: 4rpx 16rpx;
+  border-radius: 8rpx;
+  letter-spacing: 2rpx;
+}
+
+.text-green { color: #07c160; }
+.text-grey  { color: #aaa; }
+
+/* 新建表单 */
+.form-section {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  margin-top: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.06);
+}
+
+.field {
+  margin-top: 24rpx;
+}
+
+.field-label {
+  display: block;
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+}
+
+.field-input {
+  width: 100%;
+  height: 88rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  font-size: 30rpx;
+  background: #fafafa;
+  box-sizing: border-box;
+}
+
+.form-error {
+  display: block;
+  margin-top: 16rpx;
+  color: #d93025;
+  font-size: 26rpx;
+}

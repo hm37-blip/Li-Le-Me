@@ -2,6 +2,7 @@ Page({
   data: {
     squads: [],
     loadingSquads: false,
+    fetchError: '',
     showForm: false,
     newSquadName: '',
     newInviteCode: '',
@@ -20,20 +21,38 @@ Page({
 
   fetchSquads(callback) {
     const app = getApp();
-    this.setData({ loadingSquads: true });
+    this.setData({ loadingSquads: true, fetchError: '' });
     wx.request({
       url: `${app.globalData.baseUrl}/api/admin/squads`,
       method: 'GET',
       success: (res) => {
         if (res.statusCode === 200 && Array.isArray(res.data)) {
           this.setData({ squads: res.data });
+        } else {
+          this.setData({ fetchError: `加载失败（${res.statusCode}）：${res.data && res.data.error || '未知错误'}` });
         }
+      },
+      fail: () => {
+        this.setData({ fetchError: '网络异常，请检查后端服务是否启动' });
       },
       complete: () => {
         this.setData({ loadingSquads: false });
         if (callback) callback();
       }
     });
+  },
+
+  handleBack() {
+    wx.navigateBack();
+  },
+
+  handleLogout() {
+    wx.clearStorageSync();
+    const app = getApp();
+    app.globalData.openid = '';
+    app.globalData.token = '';
+    app.globalData.userInfo = null;
+    wx.reLaunch({ url: '/pages/login/login' });
   },
 
   toggleForm() {
@@ -79,7 +98,7 @@ Page({
       success: (res) => {
         const data = res.data || {};
         if (res.statusCode !== 200 || !data.success) {
-          this.setData({ formError: data.error_message || '创建失败' });
+          this.setData({ formError: data.error_message || data.error || '创建失败' });
           return;
         }
         this.setData({ showForm: false });

@@ -4,7 +4,8 @@
     "pages/bindlc/bindlc",
     "pages/invite/invite",
     "pages/profile/profile",
-    "pages/home/home"
+    "pages/home/home",
+    "pages/admin/admin"
   ],
   "window": {
     "navigationBarBackgroundColor": "#07c160",

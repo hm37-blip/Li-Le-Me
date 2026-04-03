@@ -20,3 +20,11 @@
   border-radius: 12rpx;
   padding: 20rpx;
 }
+
+.logout-btn {
+  background: #ff4d4f !important;
+  color: #fff;
+  border: none;
+  border-radius: 12rpx;
+  font-size: 30rpx;
+}

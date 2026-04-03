@@ -1,40 +1,62 @@
 <view class="container admin-page">
 
-  <view class="header-row">
-    <text class="page-title">管理员控制台</text>
-    <button class="add-btn" bindtap="toggleForm">{{showForm ? '取消' : '+ 新建战队'}}</button>
+  <!-- 顶部栏 -->
+  <view class="top-bar">
+    <button class="btn-ghost" bindtap="handleBack">← 返回</button>
+    <button class="btn-danger-sm" bindtap="handleLogout">退出</button>
   </view>
 
-  <!-- 新建战队表单 -->
-  <view class="card form-card" wx:if="{{showForm}}">
-    <view class="form-title">新建战队</view>
-    <input class="input mt-16" placeholder="战队名称" value="{{newSquadName}}" bindinput="onSquadNameInput" />
-    <input class="input mt-16" placeholder="邀请码（唯一）" value="{{newInviteCode}}" bindinput="onInviteCodeInput" />
-    <input class="input mt-16" placeholder="人数上限（默认50）" type="number" value="{{newMaxMembers}}" bindinput="onMaxMembersInput" />
-    <text class="error-text" wx:if="{{formError}}">{{formError}}</text>
-    <button class="submit-btn mt-16" type="primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="handleCreateSquad">
-      {{submitting ? '创建中...' : '确认创建'}}
+  <text class="page-title">管理员控制台</text>
+
+  <!-- 战队列表 -->
+  <view class="section-header">
+    <text class="section-title">战队列表</text>
+    <button class="btn-primary-sm" bindtap="toggleForm">
+      {{showForm ? '收起' : '+ 新建'}}
     </button>
   </view>
 
-  <!-- 战队列表 -->
-  <view wx:if="{{loadingSquads && squads.length === 0}}" class="hint">加载中...</view>
+  <view wx:if="{{fetchError}}" class="error-banner">{{fetchError}}</view>
+  <view wx:elif="{{loadingSquads}}" class="hint">加载中...</view>
   <view wx:elif="{{squads.length === 0}}" class="hint">暂无战队</view>
 
-  <view class="card squad-card" wx:for="{{squads}}" wx:key="id">
+  <view class="squad-card" wx:for="{{squads}}" wx:key="id">
     <view class="squad-name">{{item.squad_name}}</view>
-    <view class="squad-row">
-      <text class="label">邀请码</text>
-      <text class="value code">{{item.invite_code}}</text>
+    <view class="info-row">
+      <text class="info-label">邀请码</text>
+      <text class="invite-code">{{item.invite_code}}</text>
     </view>
-    <view class="squad-row">
-      <text class="label">成员</text>
-      <text class="value">{{item.member_count}} / {{item.max_members}}</text>
+    <view class="info-row">
+      <text class="info-label">成员人数</text>
+      <text class="info-value">{{item.member_count}} / {{item.max_members}}</text>
     </view>
-    <view class="squad-row">
-      <text class="label">状态</text>
-      <text class="value {{item.is_active ? 'active' : 'inactive'}}">{{item.is_active ? '开放' : '已关闭'}}</text>
+    <view class="info-row">
+      <text class="info-label">状态</text>
+      <text class="info-value {{item.is_active ? 'text-green' : 'text-grey'}}">
+        {{item.is_active ? '开放' : '已关闭'}}
+      </text>
     </view>
+  </view>
+
+  <!-- 新建战队表单 -->
+  <view class="form-section" wx:if="{{showForm}}">
+    <text class="section-title">新建战队</text>
+    <view class="field">
+      <text class="field-label">战队名称</text>
+      <input class="field-input" placeholder="例如：CESA战队" value="{{newSquadName}}" bindinput="onSquadNameInput" />
+    </view>
+    <view class="field">
+      <text class="field-label">邀请码</text>
+      <input class="field-input" placeholder="唯一，区分大小写" value="{{newInviteCode}}" bindinput="onInviteCodeInput" />
+    </view>
+    <view class="field">
+      <text class="field-label">人数上限</text>
+      <input class="field-input" type="number" placeholder="默认 50" value="{{newMaxMembers}}" bindinput="onMaxMembersInput" />
+    </view>
+    <text class="form-error" wx:if="{{formError}}">{{formError}}</text>
+    <button class="btn-primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="handleCreateSquad">
+      {{submitting ? '创建中...' : '确认创建'}}
+    </button>
   </view>
 
 </view>

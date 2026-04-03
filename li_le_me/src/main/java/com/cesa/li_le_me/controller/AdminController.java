@@ -3,6 +3,7 @@ package com.cesa.li_le_me.controller;
 import com.cesa.li_le_me.entity.Squad;
 import com.cesa.li_le_me.repository.SquadRepository;
 import com.cesa.li_le_me.repository.UserRepository;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
@@ -68,19 +69,22 @@ public class AdminController {
     }
 
     public static class CreateSquadRequest {
+        @JsonProperty("squad_name")
         @NotBlank(message = "战队名称不能为空")
-        private String squad_name;
+        private String squadName;
 
+        @JsonProperty("invite_code")
         @NotBlank(message = "邀请码不能为空")
-        private String invite_code;
+        private String inviteCode;
 
-        private Integer max_members;
+        @JsonProperty("max_members")
+        private Integer maxMembers;
 
-        public String getSquadName() { return squad_name; }
-        public void setSquadName(String v) { this.squad_name = v; }
-        public String getInviteCode() { return invite_code; }
-        public void setInviteCode(String v) { this.invite_code = v; }
-        public Integer getMaxMembers() { return max_members; }
-        public void setMaxMembers(Integer v) { this.max_members = v; }
+        public String getSquadName() { return squadName; }
+        public void setSquadName(String v) { this.squadName = v; }
+        public String getInviteCode() { return inviteCode; }
+        public void setInviteCode(String v) { this.inviteCode = v; }
+        public Integer getMaxMembers() { return maxMembers; }
+        public void setMaxMembers(Integer v) { this.maxMembers = v; }
     }
 }
