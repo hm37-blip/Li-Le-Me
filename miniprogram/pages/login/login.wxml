@@ -1,10 +1,23 @@
 <view class="login-page container">
-  <view class="login-content card">
+
+  <!-- 未授权：不在内测名单 -->
+  <view class="login-content card" wx:if="{{notAuthorized}}">
+    <text class="logo">力了么</text>
+    <text class="subtitle mt-16">你还不在内测名单中</text>
+    <text class="hint-text mt-16">请将以下 ID 发给管理员，由管理员为你开通账号：</text>
+    <view class="openid-box mt-16">
+      <text class="openid-text" selectable>{{myOpenid}}</text>
+    </view>
+    <button class="wechat-btn mt-32" type="default" bindtap="handleWechatLogin">重新检测</button>
+  </view>
+
+  <!-- 正常登录 -->
+  <view class="login-content card" wx:else>
     <text class="logo">力了么</text>
     <text class="subtitle">开启你的刷题成长之旅</text>
-
     <button class="wechat-btn mt-32" type="primary" loading="{{loading}}" disabled="{{loading}}" bindtap="handleWechatLogin">
       {{loading ? '登录中...' : '微信登录'}}
     </button>
   </view>
+
 </view>

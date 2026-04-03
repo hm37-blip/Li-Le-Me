@@ -42,22 +42,20 @@ public class WechatLoginController {
         }
 
         Optional<User> existing = userRepository.findByOpenid(openid);
-        boolean isNewUser = existing.isEmpty();
 
-        User user;
-        if (isNewUser) {
-            user = new User();
-            user.setOpenid(openid);
-            user.setRegistrationStatus(0);
-            user.setToken(UUID.randomUUID().toString());
-            user = userRepository.save(user);
-        } else {
-            user = existing.get();
+        if (existing.isEmpty()) {
+            Map<String, Object> notFound = new HashMap<>();
+            notFound.put("openid", openid);
+            notFound.put("registration_status", -1);
+            notFound.put("is_new_user", true);
+            notFound.put("token", "");
+            return ResponseEntity.ok(notFound);
         }
 
+        User user = existing.get();
         Map<String, Object> response = new HashMap<>();
         response.put("openid", user.getOpenid());
-        response.put("is_new_user", isNewUser);
+        response.put("is_new_user", false);
         response.put("token", user.getToken());
         response.put("registration_status", user.getRegistrationStatus());
 

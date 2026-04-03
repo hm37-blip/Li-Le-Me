@@ -1,14 +1,19 @@
 package com.cesa.li_le_me.controller;
 
 import com.cesa.li_le_me.entity.Squad;
+import com.cesa.li_le_me.entity.User;
 import com.cesa.li_le_me.repository.SquadRepository;
 import com.cesa.li_le_me.repository.UserRepository;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.UUID;
 
 import java.util.HashMap;
 import java.util.List;
@@ -66,6 +71,92 @@ public class AdminController {
         ok.put("squad_name", squad.getSquadName());
         ok.put("invite_code", squad.getInviteCode());
         return ResponseEntity.ok(ok);
+    }
+
+    @GetMapping("/squads/{id}/members")
+    public ResponseEntity<List<Map<String, Object>>> getSquadMembers(@PathVariable Long id) {
+        List<User> members = userRepository.findBySquadId(id);
+        List<Map<String, Object>> result = members.stream().map(u -> {
+            Map<String, Object> m = new HashMap<>();
+            m.put("id", u.getId());
+            m.put("nickname", u.getNickname());
+            m.put("leetcode_username", u.getLeetcodeUsername());
+            m.put("openid", u.getOpenid());
+            return m;
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("/squads/{id}")
+    public ResponseEntity<Map<String, Object>> deleteSquad(@PathVariable Long id) {
+        if (!squadRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "战队不存在");
+        }
+        // demote members: clear squad, reset status to 1 (has LC, no squad)
+        userRepository.findBySquadId(id).forEach(u -> {
+            u.setSquadId(null);
+            u.setRegistrationStatus(1);
+            userRepository.save(u);
+        });
+        squadRepository.deleteById(id);
+        Map<String, Object> ok = new HashMap<>();
+        ok.put("success", true);
+        return ResponseEntity.ok(ok);
+    }
+
+    @PostMapping("/users")
+    public ResponseEntity<Map<String, Object>> createPlayer(@Valid @RequestBody CreatePlayerRequest request) {
+        if (userRepository.findByOpenid(request.getOpenid()).isPresent()) {
+            Map<String, Object> fail = new HashMap<>();
+            fail.put("success", false);
+            fail.put("error_message", "该 openid 已存在");
+            return ResponseEntity.ok(fail);
+        }
+        if (userRepository.findByLeetcodeUsernameIgnoreCase(request.getLeetcodeUsername()).isPresent()) {
+            Map<String, Object> fail = new HashMap<>();
+            fail.put("success", false);
+            fail.put("error_message", "该 LeetCode 账号已被绑定");
+            return ResponseEntity.ok(fail);
+        }
+
+        User user = new User();
+        user.setOpenid(request.getOpenid());
+        user.setNickname(request.getNickname());
+        user.setLeetcodeUsername(request.getLeetcodeUsername());
+        user.setRegistrationStatus(1); // has LC, no squad yet — will join via invite code
+        user.setToken(UUID.randomUUID().toString());
+        userRepository.save(user);
+
+        Map<String, Object> ok = new HashMap<>();
+        ok.put("success", true);
+        ok.put("nickname", user.getNickname());
+        return ResponseEntity.ok(ok);
+    }
+
+    public static class CreatePlayerRequest {
+        @JsonProperty("openid")
+        @NotBlank(message = "openid 不能为空")
+        private String openid;
+
+        @JsonProperty("nickname")
+        @NotBlank(message = "昵称不能为空")
+        private String nickname;
+
+        @JsonProperty("leetcode_username")
+        @NotBlank(message = "LeetCode 用户名不能为空")
+        private String leetcodeUsername;
+
+        @JsonProperty("squad_id")
+        private Long squadId;
+
+        public String getOpenid() { return openid; }
+        public void setOpenid(String v) { this.openid = v; }
+        public String getNickname() { return nickname; }
+        public void setNickname(String v) { this.nickname = v; }
+        public String getLeetcodeUsername() { return leetcodeUsername; }
+        public void setLeetcodeUsername(String v) { this.leetcodeUsername = v; }
+        public Long getSquadId() { return squadId; }
+        public void setSquadId(Long v) { this.squadId = v; }
     }
 
     public static class CreateSquadRequest {

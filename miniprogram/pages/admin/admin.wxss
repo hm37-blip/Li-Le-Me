@@ -180,3 +180,87 @@
   color: #d93025;
   font-size: 26rpx;
 }
+
+/* 战队卡片操作按钮 */
+.card-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 24rpx;
+}
+
+.btn-outline {
+  flex: 1;
+  font-size: 26rpx;
+  color: #07c160;
+  background: #fff;
+  border: 2rpx solid #07c160;
+  border-radius: 10rpx;
+  height: 64rpx;
+  line-height: 64rpx;
+}
+
+.btn-danger-outline {
+  flex: 1;
+  font-size: 26rpx;
+  color: #ff4d4f;
+  background: #fff;
+  border: 2rpx solid #ff4d4f;
+  border-radius: 10rpx;
+  height: 64rpx;
+  line-height: 64rpx;
+}
+
+/* 成员列表 */
+.members-section {
+  margin-top: 20rpx;
+  border-top: 2rpx solid #f0f0f0;
+  padding-top: 16rpx;
+}
+
+.members-empty {
+  font-size: 26rpx;
+  color: #bbb;
+  text-align: center;
+  padding: 16rpx 0;
+}
+
+.member-row {
+  padding: 14rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.member-main {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.member-nickname {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #222;
+}
+
+.member-lc {
+  font-size: 24rpx;
+  color: #07c160;
+  background: #f0faf4;
+  padding: 2rpx 12rpx;
+  border-radius: 6rpx;
+}
+
+.member-openid {
+  display: block;
+  font-size: 22rpx;
+  color: #bbb;
+  margin-top: 6rpx;
+  font-family: monospace;
+  word-break: break-all;
+}
+
+/* 选择器 */
+.picker-display {
+  color: #333;
+  display: flex;
+  align-items: center;
+}

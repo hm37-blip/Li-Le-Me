@@ -1,6 +1,8 @@
 Page({
   data: {
-    loading: false
+    loading: false,
+    notAuthorized: false,
+    myOpenid: ''
   },
 
   onLoad() {
@@ -53,7 +55,10 @@ Page({
             wx.setStorageSync('registration_status', data.registration_status ?? '');
 
             const status = Number(data.registration_status);
-            if (status === 0) {
+            if (status === -1) {
+              this.setData({ notAuthorized: true, myOpenid: data.openid || '' });
+              return;
+            } else if (status === 0) {
               wx.redirectTo({ url: '/pages/bindlc/bindlc' });
             } else if (status === 1) {
               wx.redirectTo({ url: '/pages/invite/invite' });
