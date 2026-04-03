@@ -1,0 +1,36 @@
+<view class="container bind-page">
+  <view class="card">
+    <view class="title">绑定你的 LeetCode 账号</view>
+    <view class="subtitle mt-16">输入你在 leetcode.com 的用户名</view>
+
+    <view class="mt-32">
+      <input
+        class="input {{errorMessage ? 'input-error' : ''}}"
+        placeholder="例如：lee_code"
+        value="{{leetcodeUsername}}"
+        bindinput="onInputChange"
+        maxlength="30"
+      />
+      <text class="error-text" wx:if="{{errorMessage}}">{{errorMessage}}</text>
+    </view>
+
+    <view class="rules-box mt-16">
+      <view class="rule {{ruleStatus.length}}">
+        <text class="rule-icon">{{leetcodeUsername.length >= 2 && leetcodeUsername.length <= 30 ? '✓' : '·'}}</text>
+        <text class="rule-text">2 - 30 个字符</text>
+      </view>
+      <view class="rule {{ruleStatus.start}}">
+        <text class="rule-icon">{{ruleStatus.start === 'pass' ? '✓' : '·'}}</text>
+        <text class="rule-text">以字母或下划线开头</text>
+      </view>
+      <view class="rule {{ruleStatus.chars}}">
+        <text class="rule-icon">{{ruleStatus.chars === 'pass' ? '✓' : '·'}}</text>
+        <text class="rule-text">只含字母、数字、下划线</text>
+      </view>
+    </view>
+
+    <button class="submit-btn mt-32" type="primary" loading="{{loading}}" disabled="{{loading}}" bindtap="handleBind">
+      {{loading ? '验证中...' : '验证'}}
+    </button>
+  </view>
+</view>

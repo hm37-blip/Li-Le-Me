@@ -1,0 +1,8 @@
+<view class="container home-page">
+  <view class="card">
+    <view class="title">🎉 注册完成！</view>
+    <view class="desc mt-24">欢迎回来，{{nickname || '同学'}}</view>
+    <view class="desc mt-16">LeetCode 用户名：{{leetcodeUsername || '未绑定'}}</view>
+    <view class="placeholder mt-32">刷题功能开发中...</view>
+  </view>
+</view>

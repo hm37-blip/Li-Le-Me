@@ -1,0 +1,10 @@
+<view class="login-page container">
+  <view class="login-content card">
+    <text class="logo">力了么</text>
+    <text class="subtitle">开启你的刷题成长之旅</text>
+
+    <button class="wechat-btn mt-32" type="primary" loading="{{loading}}" disabled="{{loading}}" bindtap="handleWechatLogin">
+      {{loading ? '登录中...' : '微信登录'}}
+    </button>
+  </view>
+</view>
