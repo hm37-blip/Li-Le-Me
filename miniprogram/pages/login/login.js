@@ -3,6 +3,10 @@ Page({
     loading: false
   },
 
+  onLoad() {
+    this.handleWechatLogin();
+  },
+
   handleWechatLogin() {
     if (this.data.loading) return;
 
@@ -32,6 +36,10 @@ Page({
             app.globalData.openid = data.openid || '';
             app.globalData.token = data.token || '';
             app.globalData.userInfo = data.user_info || null;
+
+            wx.setStorageSync('openid', data.openid || '');
+            wx.setStorageSync('token', data.token || '');
+            wx.setStorageSync('registration_status', data.registration_status ?? '');
 
             const status = Number(data.registration_status);
             if (status === 0) {

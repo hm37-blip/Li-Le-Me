@@ -17,6 +17,13 @@ Page({
     ruleStatus: { length: '', start: '', chars: '' }
   },
 
+  onLoad() {
+    const app = getApp();
+    if (!app.globalData.openid) {
+      wx.redirectTo({ url: '/pages/login/login' });
+    }
+  },
+
   onInputChange(e) {
     const value = e.detail.value || '';
     this.setData({
@@ -68,7 +75,7 @@ Page({
 
         if (res.statusCode !== 200 || data.LC_bind_success === false) {
           this.setData({
-            errorMessage: data.error_message || '绑定失败，请检查用户名后重试'
+            errorMessage: data.error_message || data.error || '绑定失败，请检查用户名后重试'
           });
           return;
         }
@@ -78,6 +85,7 @@ Page({
           leetcode_username: username
         };
 
+        wx.setStorageSync('registration_status', 1);
         wx.redirectTo({ url: '/pages/invite/invite' });
       },
       fail: () => {

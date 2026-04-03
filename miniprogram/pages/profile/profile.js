@@ -96,6 +96,7 @@ Page({
           squad_name: data.squad_name || ''
         };
 
+        wx.setStorageSync('registration_status', 2);
         wx.redirectTo({ url: '/pages/home/home' });
       },
       fail: () => {
