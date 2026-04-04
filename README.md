@@ -23,4 +23,4 @@
 3. **合并流程**：
    - 提交代码前，请先 `git pull origin dev` 解决本地冲突。
    - 发起 Pull Request (PR) 后，由 Wendy (@hm37-blip) 进行 Review 后合并。
-4. **命名一致性**：接口名必须严格遵守[管理后台接口矩阵]中的定义。
+4. **命名一致性**：接口名必须严格遵守[API_Contract.md]中的定义。
