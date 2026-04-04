@@ -225,8 +225,29 @@
 }
 
 .member-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 14rpx 0;
   border-bottom: 1rpx solid #f5f5f5;
+}
+
+.member-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.btn-remove {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: #ff4d4f;
+  background: #fff;
+  border: 2rpx solid #ff4d4f;
+  border-radius: 8rpx;
+  padding: 0 20rpx;
+  height: 52rpx;
+  line-height: 52rpx;
+  margin-left: 16rpx;
 }
 
 .member-main {

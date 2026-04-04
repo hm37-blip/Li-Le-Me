@@ -11,6 +11,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByLeetcodeUsernameIgnoreCase(String leetcodeUsername);
 
+    Optional<User> findByToken(String token);
+
     long countBySquadId(Long squadId);
 
     java.util.List<User> findBySquadId(Long squadId);

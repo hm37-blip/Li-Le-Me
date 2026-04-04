@@ -1,5 +1,6 @@
 .home-page {
   padding-top: 48rpx;
+  padding-bottom: 60rpx;
 }
 
 .title {
@@ -13,12 +14,44 @@
   color: #333333;
 }
 
-.placeholder {
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.hint {
+  text-align: center;
+  color: #aaa;
   font-size: 28rpx;
-  color: #888888;
-  background: #f7f7f7;
-  border-radius: 12rpx;
-  padding: 20rpx;
+  padding: 24rpx 0;
+}
+
+.member-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.member-row:last-child {
+  border-bottom: none;
+}
+
+.member-nickname {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #222;
+}
+
+.member-lc {
+  font-size: 24rpx;
+  color: #07c160;
+  background: #f0faf4;
+  padding: 4rpx 16rpx;
+  border-radius: 6rpx;
 }
 
 .logout-btn {

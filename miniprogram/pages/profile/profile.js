@@ -91,6 +91,7 @@ Page({
         }
 
         app.globalData.userInfo = {
+          ...(app.globalData.userInfo || {}),
           user_nickname: nickname,
           avatar_file_id: avatarFileId,
           squad_name: data.squad_name || ''

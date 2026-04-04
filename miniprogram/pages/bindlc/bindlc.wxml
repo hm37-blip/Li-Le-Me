@@ -34,3 +34,34 @@
     </button>
   </view>
 </view>
+
+<!-- 右下角管理员入口 -->
+<view class="admin-float-btn" bindtap="openAdminModal">我是管理员</view>
+
+<!-- 管理员验证弹窗 -->
+<view class="modal-overlay" wx:if="{{showAdminModal}}">
+  <view class="modal-box">
+    <view class="modal-title">管理员验证</view>
+
+    <!-- 验证失败状态 -->
+    <view wx:if="{{adminVerifyFailed}}">
+      <view class="modal-fail-text">管理员验证失败</view>
+      <view class="modal-footer-right">
+        <button class="modal-btn-ghost" bindtap="closeAdminModal">关闭</button>
+      </view>
+    </view>
+
+    <!-- 输入验证码状态 -->
+    <view wx:else>
+      <input
+        class="modal-input"
+        placeholder="请输入验证码"
+        value="{{adminCode}}"
+        bindinput="onAdminCodeInput"
+      />
+      <view class="modal-footer-right">
+        <button class="modal-btn-primary" bindtap="handleAdminVerify">验证</button>
+      </view>
+    </view>
+  </view>
+</view>

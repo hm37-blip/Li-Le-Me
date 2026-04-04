@@ -14,12 +14,7 @@ Page({
     squadFormError: '',
     submittingSquad: false,
 
-    showAddPlayerForm: false,
-    playerOpenid: '',
-    playerNickname: '',
-    playerLC: '',
-    playerFormError: '',
-    submittingPlayer: false
+
   },
 
   onLoad() {
@@ -141,42 +136,32 @@ Page({
     });
   },
 
-  // ── 添加玩家表单 ──────────────────────────────
-  toggleAddPlayerForm() {
-    this.setData({ showAddPlayerForm: !this.data.showAddPlayerForm, playerFormError: '' });
-  },
-
-  onPlayerOpenidInput(e) { this.setData({ playerOpenid: e.detail.value, playerFormError: '' }); },
-  onPlayerNicknameInput(e) { this.setData({ playerNickname: e.detail.value, playerFormError: '' }); },
-  onPlayerLCInput(e) { this.setData({ playerLC: e.detail.value, playerFormError: '' }); },
-
-  handleAddPlayer() {
-    if (this.data.submittingPlayer) return;
-    const openid = this.data.playerOpenid.trim();
-    const nickname = this.data.playerNickname.trim();
-    const lc = this.data.playerLC.trim();
-    if (!openid) { this.setData({ playerFormError: '请输入玩家 openid' }); return; }
-    if (!nickname) { this.setData({ playerFormError: '请输入昵称' }); return; }
-    if (!lc) { this.setData({ playerFormError: '请输入 LeetCode 用户名' }); return; }
-
-    const app = getApp();
-    this.setData({ submittingPlayer: true, playerFormError: '' });
-    wx.request({
-      url: `${app.globalData.baseUrl}/api/admin/users`,
-      method: 'POST',
-      data: { openid, nickname, leetcode_username: lc },
+  removeMember(e) {
+    const squadId = e.currentTarget.dataset.squadId;
+    const userId = e.currentTarget.dataset.userId;
+    const name = e.currentTarget.dataset.name || '该成员';
+    wx.showModal({
+      title: '确认移除',
+      content: `确定将「${name}」从战队中移除？`,
+      confirmColor: '#ff4d4f',
       success: (res) => {
-        const data = res.data || {};
-        if (res.statusCode !== 200 || !data.success) {
-          this.setData({ playerFormError: data.error_message || data.error || '添加失败' });
-          return;
-        }
-        wx.showToast({ title: '添加成功', icon: 'success' });
-        this.setData({ showAddPlayerForm: false, playerOpenid: '', playerNickname: '', playerLC: '' });
-        this.fetchSquads();
-      },
-      fail: () => { this.setData({ playerFormError: '网络异常' }); },
-      complete: () => { this.setData({ submittingPlayer: false }); }
+        if (!res.confirm) return;
+        const app = getApp();
+        wx.request({
+          url: `${app.globalData.baseUrl}/api/admin/squads/${squadId}/members/${userId}`,
+          method: 'DELETE',
+          success: (r) => {
+            if (r.statusCode === 200) {
+              wx.showToast({ title: '已移除', icon: 'success' });
+              this.toggleMembers({ currentTarget: { dataset: { id: squadId } } });
+              this.fetchSquads();
+            } else {
+              wx.showToast({ title: `移除失败（${r.statusCode}）`, icon: 'none' });
+            }
+          },
+          fail: () => { wx.showToast({ title: '网络异常', icon: 'none' }); }
+        });
+      }
     });
   },
 

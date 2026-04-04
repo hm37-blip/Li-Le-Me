@@ -1,4 +1,5 @@
 const LC_USERNAME_REGEX = /^[a-zA-Z_][a-zA-Z0-9_]{1,29}$/;
+const ADMIN_CODE = 'CESA技术部';
 
 function computeRuleStatus(raw) {
   const v = (raw || '').trim();
@@ -14,7 +15,11 @@ Page({
     leetcodeUsername: '',
     errorMessage: '',
     loading: false,
-    ruleStatus: { length: '', start: '', chars: '' }
+    ruleStatus: { length: '', start: '', chars: '' },
+
+    showAdminModal: false,
+    adminCode: '',
+    adminVerifyFailed: false
   },
 
   onLoad() {
@@ -46,13 +51,31 @@ Page({
     return '';
   },
 
+  // ── 管理员验证弹窗 ──────────────────────────────
+  openAdminModal() {
+    this.setData({ showAdminModal: true, adminCode: '', adminVerifyFailed: false });
+  },
+
+  onAdminCodeInput(e) {
+    this.setData({ adminCode: e.detail.value });
+  },
+
+  handleAdminVerify() {
+    if (this.data.adminCode === ADMIN_CODE) {
+      this.setData({ showAdminModal: false });
+      wx.navigateTo({ url: '/pages/admin/admin' });
+    } else {
+      this.setData({ adminVerifyFailed: true });
+    }
+  },
+
+  closeAdminModal() {
+    this.setData({ showAdminModal: false, adminCode: '', adminVerifyFailed: false });
+  },
+
+  // ── 绑定 LC ──────────────────────────────────────
   handleBind() {
     if (this.data.loading) return;
-
-    if (this.data.leetcodeUsername.trim() === '管理员') {
-      wx.navigateTo({ url: '/pages/admin/admin' });
-      return;
-    }
 
     const errorMessage = this.validateUsername(this.data.leetcodeUsername);
     if (errorMessage) {

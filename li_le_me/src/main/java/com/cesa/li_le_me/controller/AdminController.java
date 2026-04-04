@@ -104,6 +104,24 @@ public class AdminController {
         return ResponseEntity.ok(ok);
     }
 
+    @DeleteMapping("/squads/{squadId}/members/{userId}")
+    public ResponseEntity<Map<String, Object>> removeMember(@PathVariable Long squadId, @PathVariable Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "用户不存在"));
+
+        if (!squadId.equals(user.getSquadId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "该用户不属于此战队");
+        }
+
+        user.setSquadId(null);
+        user.setRegistrationStatus(1);
+        userRepository.save(user);
+
+        Map<String, Object> ok = new HashMap<>();
+        ok.put("success", true);
+        return ResponseEntity.ok(ok);
+    }
+
     @PostMapping("/users")
     public ResponseEntity<Map<String, Object>> createPlayer(@Valid @RequestBody CreatePlayerRequest request) {
         if (userRepository.findByOpenid(request.getOpenid()).isPresent()) {

@@ -36,28 +36,45 @@ public class WechatLoginController {
     public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest request) {
         String openid;
         if (mockMode) {
-            openid = "mock_" + request.getJsCode().hashCode();
+            String deviceId = request.getDeviceId();
+            if (deviceId != null && !deviceId.isBlank()) {
+                openid = "mock_" + deviceId;
+            } else {
+                openid = "mock_" + request.getJsCode().hashCode();
+            }
         } else {
+            // TODO: 调用微信 jscode2session API 获取真实 openid
             openid = "mock_" + request.getJsCode().hashCode();
         }
 
         Optional<User> existing = userRepository.findByOpenid(openid);
 
-        if (existing.isEmpty()) {
-            Map<String, Object> notFound = new HashMap<>();
-            notFound.put("openid", openid);
-            notFound.put("registration_status", -1);
-            notFound.put("is_new_user", true);
-            notFound.put("token", "");
-            return ResponseEntity.ok(notFound);
+        User user;
+        boolean isNew = existing.isEmpty();
+        if (isNew) {
+            user = new User();
+            user.setOpenid(openid);
+            user.setRegistrationStatus(0);
+            user.setToken(UUID.randomUUID().toString());
+            userRepository.save(user);
+        } else {
+            user = existing.get();
         }
 
-        User user = existing.get();
         Map<String, Object> response = new HashMap<>();
         response.put("openid", user.getOpenid());
-        response.put("is_new_user", false);
+        response.put("is_new_user", isNew);
         response.put("token", user.getToken());
         response.put("registration_status", user.getRegistrationStatus());
+
+        if (!isNew) {
+            Map<String, Object> userInfo = new HashMap<>();
+            userInfo.put("nickname", user.getNickname());
+            userInfo.put("leetcode_username", user.getLeetcodeUsername());
+            userInfo.put("avatar_file_id", user.getAvatarFileId());
+            userInfo.put("squad_id", user.getSquadId());
+            response.put("user_info", userInfo);
+        }
 
         return ResponseEntity.ok(response);
     }
@@ -67,12 +84,23 @@ public class WechatLoginController {
         @NotBlank(message = "js_code不能为空")
         private String js_code;
 
+        @JsonProperty("device_id")
+        private String device_id;
+
         public String getJsCode() {
             return js_code;
         }
 
         public void setJsCode(String jsCode) {
             this.js_code = jsCode;
+        }
+
+        public String getDeviceId() {
+            return device_id;
+        }
+
+        public void setDeviceId(String deviceId) {
+            this.device_id = deviceId;
         }
     }
 }

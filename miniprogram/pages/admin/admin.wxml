@@ -45,11 +45,14 @@
     <view class="members-section" wx:if="{{expandedSquadId === item.id}}">
       <view wx:if="{{!squadMembers[item.id] || squadMembers[item.id].length === 0}}" class="members-empty">暂无成员</view>
       <view class="member-row" wx:for="{{squadMembers[item.id]}}" wx:key="id" wx:for-item="member">
-        <view class="member-main">
-          <text class="member-nickname">{{member.nickname || '未设置昵称'}}</text>
-          <text class="member-lc">{{member.leetcode_username || '未绑定LC'}}</text>
+        <view class="member-info">
+          <view class="member-main">
+            <text class="member-nickname">{{member.nickname || '未设置昵称'}}</text>
+            <text class="member-lc">{{member.leetcode_username || '未绑定LC'}}</text>
+          </view>
+          <text class="member-openid">{{member.openid}}</text>
         </view>
-        <text class="member-openid">{{member.openid}}</text>
+        <button class="btn-remove" data-squad-id="{{item.id}}" data-user-id="{{member.id}}" data-name="{{member.nickname}}" bindtap="removeMember">移除</button>
       </view>
     </view>
   </view>
@@ -75,29 +78,6 @@
     </button>
   </view>
 
-  <!-- ── 添加玩家 ── -->
-  <view class="section-header mt-32">
-    <text class="section-title">玩家管理</text>
-    <button class="btn-primary-sm" bindtap="toggleAddPlayerForm">{{showAddPlayerForm ? '收起' : '+ 添加玩家'}}</button>
-  </view>
 
-  <view class="form-section" wx:if="{{showAddPlayerForm}}">
-    <view class="field">
-      <text class="field-label">玩家 openid</text>
-      <input class="field-input" placeholder="玩家登录后看到的 ID" value="{{playerOpenid}}" bindinput="onPlayerOpenidInput" />
-    </view>
-    <view class="field">
-      <text class="field-label">昵称</text>
-      <input class="field-input" placeholder="显示名称" value="{{playerNickname}}" bindinput="onPlayerNicknameInput" />
-    </view>
-    <view class="field">
-      <text class="field-label">LeetCode 用户名</text>
-      <input class="field-input" placeholder="leetcode.com 的用户名" value="{{playerLC}}" bindinput="onPlayerLCInput" />
-    </view>
-    <text class="form-error" wx:if="{{playerFormError}}">{{playerFormError}}</text>
-    <button class="btn-primary mt-16" loading="{{submittingPlayer}}" disabled="{{submittingPlayer}}" bindtap="handleAddPlayer">
-      {{submittingPlayer ? '添加中...' : '确认添加'}}
-    </button>
-  </view>
 
 </view>

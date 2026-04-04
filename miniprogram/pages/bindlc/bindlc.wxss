@@ -74,3 +74,89 @@
   border: none;
   border-radius: 12rpx;
 }
+
+/* ── 管理员浮动按钮 ── */
+.admin-float-btn {
+  position: fixed;
+  right: 32rpx;
+  bottom: 48rpx;
+  font-size: 22rpx;
+  color: #aaaaaa;
+  padding: 12rpx 20rpx;
+  border: 1rpx solid #dddddd;
+  border-radius: 32rpx;
+  background: #ffffff;
+}
+
+/* ── 管理员验证弹窗 ── */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-box {
+  width: 560rpx;
+  background: #ffffff;
+  border-radius: 20rpx;
+  padding: 48rpx 40rpx 36rpx;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #222222;
+  margin-bottom: 32rpx;
+}
+
+.modal-input {
+  height: 80rpx;
+  border: 2rpx solid #d9d9d9;
+  border-radius: 12rpx;
+  padding: 0 20rpx;
+  font-size: 28rpx;
+  background: #f7f7f7;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modal-fail-text {
+  font-size: 28rpx;
+  color: #d93025;
+  margin-bottom: 40rpx;
+}
+
+.modal-footer-right {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 32rpx;
+}
+
+.modal-btn-primary {
+  background: #07c160 !important;
+  color: #ffffff;
+  font-size: 28rpx;
+  border-radius: 12rpx;
+  padding: 0 40rpx;
+  height: 72rpx;
+  line-height: 72rpx;
+  border: none;
+}
+
+.modal-btn-ghost {
+  background: transparent !important;
+  color: #666666;
+  font-size: 28rpx;
+  border-radius: 12rpx;
+  padding: 0 40rpx;
+  height: 72rpx;
+  line-height: 72rpx;
+  border: 1rpx solid #dddddd !important;
+}
