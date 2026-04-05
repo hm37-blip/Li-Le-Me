@@ -34,7 +34,7 @@
       <view class="weui-panel__bd">
         <view class="chart-desc">最近7天每日积分获取情况</view>
         <view class="chart-container">
-          <ec-canvas id="weekChart" canvas-id="weekChart" ec="{{ ecWeek }}"></ec-canvas>
+          <ec-canvas id="weekChart" canvas-id="weekChart" chart-class="week-chart" ec="{{ ecWeek }}"></ec-canvas>
         </view>
       </view>
     </view>
@@ -45,7 +45,7 @@
       <view class="weui-panel__bd">
         <view class="chart-desc">最近30天每日积分获取情况</view>
         <view class="chart-container">
-          <ec-canvas id="monthChart" canvas-id="monthChart" ec="{{ ecMonth }}"></ec-canvas>
+          <ec-canvas id="monthChart" canvas-id="monthChart" chart-class="month-chart" ec="{{ ecMonth }}"></ec-canvas>
         </view>
       </view>
     </view>
@@ -56,7 +56,7 @@
       <view class="weui-panel__bd">
         <view class="chart-desc">过去一年每月累计积分</view>
         <view class="chart-container">
-          <ec-canvas id="yearChart" canvas-id="yearChart" ec="{{ ecYear }}"></ec-canvas>
+          <ec-canvas id="yearChart" canvas-id="yearChart" chart-class="year-chart" ec="{{ ecYear }}"></ec-canvas>
         </view>
       </view>
     </view>
@@ -67,7 +67,7 @@
       <view class="weui-panel__bd">
         <view class="chart-desc">本月新增题目难度占比</view>
         <view class="chart-container">
-          <ec-canvas id="monthPieChart" canvas-id="monthPieChart" ec="{{ ecMonthPie }}"></ec-canvas>
+          <ec-canvas id="monthPieChart" canvas-id="monthPieChart" chart-class="month-pie-chart" ec="{{ ecMonthPie }}"></ec-canvas>
         </view>
       </view>
     </view>
@@ -78,7 +78,7 @@
       <view class="weui-panel__bd">
         <view class="chart-desc">当年总计题目难度占比</view>
         <view class="chart-container">
-          <ec-canvas id="yearPieChart" canvas-id="yearPieChart" ec="{{ ecYearPie }}"></ec-canvas>
+          <ec-canvas id="yearPieChart" canvas-id="yearPieChart" chart-class="year-pie-chart" ec="{{ ecYearPie }}"></ec-canvas>
         </view>
       </view>
     </view>
@@ -105,3 +105,5 @@
     </view>
   </view>
 </view>
+
+<custom-tabbar current="{{1}}"></custom-tabbar>

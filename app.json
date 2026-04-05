@@ -1,11 +1,13 @@
 {
   "pages": [
-    "pages/report/report"
+    "pages/home/home",
+    "pages/report/report",
+    "pages/profile/profile"
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#282828",
-    "navigationBarTitleText": "LeetCode 个人战报",
+    "navigationBarTitleText": "力了吗",
     "navigationBarTextStyle": "white",
     "backgroundColor": "#282828",
     "enablePullDownRefresh": false

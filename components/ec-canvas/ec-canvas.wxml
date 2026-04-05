@@ -1,8 +1,6 @@
 <canvas
   type="2d"
-  class="ec-canvas"
-  id="{{canvasId}}"
-  bindtouchstart="touchStart"
-  bindtouchmove="touchMove"
-  bindtouchend="touchEnd">
+  class="ec-canvas chart-class"
+  canvas-id="{{canvasId}}"
+  id="{{canvasId}}">
 </canvas>

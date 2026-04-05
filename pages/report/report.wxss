@@ -2,6 +2,9 @@
 
 /* LeetCode 配色变量 - 纯橙灰配色 */
 page {
+  padding-bottom: calc(100rpx + env(safe-area-inset-bottom));
+  position: relative;
+  z-index: 0;
   /* 主色调 */
   --leetcode-orange: #FFA116;
   --leetcode-dark: #282828;
@@ -26,17 +29,23 @@ page {
   background-color: var(--weui-BG-0);
   min-height: 100vh;
   padding-bottom: 40rpx;
+  position: relative;
+  z-index: 0;
 }
 
 .page__bd {
   padding: 0;
+  position: relative;
+  z-index: 0;
 }
 
 /* ==================== WeUI Panel 样式 ==================== */
 .weui-panel {
   background-color: var(--weui-BG-1);
-  margin-top: 20rpx;
+  margin-top: 30rpx;
   overflow: hidden;
+  position: relative;
+  z-index: 0;
 }
 
 .weui-panel:first-child {
@@ -215,24 +224,19 @@ page {
 .chart-desc {
   font-size: var(--font-size-caption);
   color: #999;
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
   padding: 0 4rpx;
 }
 
 .chart-container {
   width: 100%;
-  height: 300rpx;
+  height: 360rpx;
   background-color: #f8f8f8;
   border-radius: 12rpx;
   overflow: hidden;
   position: relative;
   display: block;
-}
-
-.chart-container ec-canvas {
-  width: 100% !important;
-  height: 100% !important;
-  display: block;
+  z-index: 0;
 }
 
 /* ==================== WeUI Grids (统计数据) ==================== */
@@ -246,7 +250,6 @@ page {
 
 .weui-grid {
   position: relative;
-  float: left;
   padding: 40rpx 20rpx;
   width: 33.33333333%;
   box-sizing: border-box;

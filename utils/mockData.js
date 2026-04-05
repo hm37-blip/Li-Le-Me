@@ -6,11 +6,11 @@
 /**
  * 生成趋势数据（折线图用）
  * @param {Number} days - 天数
- * @returns {Object} { dates: [], daily_points_change: [] }
+ * @returns {Object} { dates: [], daily_points: [], average_line: Number }
  */
 function generateTrendData(days = 7) {
   const dates = []
-  const daily_points_change = []
+  const daily_points = []
 
   const today = new Date()
 
@@ -18,19 +18,24 @@ function generateTrendData(days = 7) {
     const date = new Date(today)
     date.setDate(date.getDate() - i)
 
-    // 格式化日期为 "M/D"
-    const month = date.getMonth() + 1
-    const day = date.getDate()
-    dates.push(`${month}/${day}`)
+    // 格式化日期为 "MM-DD"（符合 Module 4 规范）
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    dates.push(`${month}-${day}`)
 
     // 生成随机积分 (1-10)
     const points = Math.floor(Math.random() * 10) + 1
-    daily_points_change.push(points)
+    daily_points.push(points)
   }
+
+  // 计算平均线（符合 Module 4 规范）
+  const totalPoints = daily_points.reduce((sum, val) => sum + val, 0)
+  const average_line = parseFloat((totalPoints / days).toFixed(2))
 
   return {
     dates,
-    daily_points_change
+    daily_points,
+    average_line
   }
 }
 
@@ -49,16 +54,21 @@ function generateMonthTrendData() {
 
   // 采样：每2天取一个点
   const dates = []
-  const daily_points_change = []
+  const daily_points = []
 
   for (let i = 0; i < allData.dates.length; i += 2) {
     dates.push(allData.dates[i])
-    daily_points_change.push(allData.daily_points_change[i])
+    daily_points.push(allData.daily_points[i])
   }
+
+  // 重新计算平均线
+  const totalPoints = daily_points.reduce((sum, val) => sum + val, 0)
+  const average_line = parseFloat((totalPoints / daily_points.length).toFixed(2))
 
   return {
     dates,
-    daily_points_change
+    daily_points,
+    average_line
   }
 }
 
@@ -67,7 +77,7 @@ function generateMonthTrendData() {
  */
 function generateYearTrendData() {
   const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
-  const daily_points_change = []
+  const daily_points = []
 
   // 生成递增趋势的月积分数据 (40-150)
   let basePoints = 40
@@ -75,21 +85,26 @@ function generateYearTrendData() {
     const randomIncrease = Math.floor(Math.random() * 20) - 5 // -5 到 15 的随机增长
     basePoints += randomIncrease
     basePoints = Math.max(40, basePoints) // 最小40分
-    daily_points_change.push(basePoints)
+    daily_points.push(basePoints)
   }
+
+  // 计算平均线
+  const totalPoints = daily_points.reduce((sum, val) => sum + val, 0)
+  const average_line = parseFloat((totalPoints / 12).toFixed(2))
 
   return {
     dates: months,
-    daily_points_change
+    daily_points,
+    average_line
   }
 }
 
 /**
  * 生成难度分布数据（饼图用）
- * @param {String} type - 'MONTHLY' 或 'YEARLY'
- * @returns {Object} { type, easy, medium, hard, total }
+ * @param {String} type - 'MONTHLY' 或 'TOTAL'
+ * @returns {Object} { easy, medium, hard } （符合 Module 4 规范）
  */
-function generateDifficultyDistribution(type = 'YEARLY') {
+function generateDifficultyDistribution(type = 'TOTAL') {
   let easy, medium, hard
 
   if (type === 'MONTHLY') {
@@ -98,20 +113,16 @@ function generateDifficultyDistribution(type = 'YEARLY') {
     medium = Math.floor(Math.random() * 15) + 5   // 5-20
     hard = Math.floor(Math.random() * 10) + 2     // 2-12
   } else {
-    // 年数据：较大的数量
+    // TOTAL数据：较大的数量
     easy = Math.floor(Math.random() * 100) + 80    // 80-180
     medium = Math.floor(Math.random() * 80) + 60   // 60-140
     hard = Math.floor(Math.random() * 50) + 20     // 20-70
   }
 
-  const total = easy + medium + hard
-
   return {
-    type,
     easy,
     medium,
-    hard,
-    total
+    hard
   }
 }
 
@@ -126,7 +137,7 @@ function generateMonthDifficultyDistribution() {
  * 生成年难度分布数据
  */
 function generateYearDifficultyDistribution() {
-  return generateDifficultyDistribution('YEARLY')
+  return generateDifficultyDistribution('TOTAL')
 }
 
 /**

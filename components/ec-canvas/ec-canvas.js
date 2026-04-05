@@ -21,6 +21,11 @@ Component({
     isUseNewCanvas: false
   },
 
+  // 用于判断是否是滚动操作
+  _startX: 0,
+  _startY: 0,
+  _isScrolling: false,
+
   ready() {
     if (!this.data.ec) {
       console.warn('组件需要传入 ec 参数进行初始化')
@@ -104,8 +109,6 @@ Component({
           const canvasWidth = res[0].width
           const canvasHeight = res[0].height
 
-          console.log(`Canvas 尺寸: ${canvasWidth} x ${canvasHeight}, dpr: ${canvasDpr}`)
-
           // 设置 canvas 节点的实际像素尺寸
           canvasNode.width = canvasWidth * canvasDpr
           canvasNode.height = canvasHeight * canvasDpr
@@ -160,47 +163,71 @@ Component({
     },
 
     touchStart(e) {
-      if (this.chart && e.touches.length > 0) {
-        const touch = e.touches[0]
-        const handler = this.chart.getZr().handler
-        handler.dispatch('mousedown', {
-          zrX: touch.x,
-          zrY: touch.y
-        })
-        handler.dispatch('mousemove', {
-          zrX: touch.x,
-          zrY: touch.y
-        })
-        handler.processGesture(wrapTouch(e), 'start')
-      }
+      if (!this.chart || !e.touches.length) return
+
+      const touch = e.touches[0]
+      this._startX = touch.x
+      this._startY = touch.y
+      this._isScrolling = false
+
+      const handler = this.chart.getZr().handler
+      handler.dispatch('mousedown', {
+        zrX: touch.x,
+        zrY: touch.y
+      })
+      handler.dispatch('mousemove', {
+        zrX: touch.x,
+        zrY: touch.y
+      })
+      handler.processGesture(wrapTouch(e), 'start')
     },
 
     touchMove(e) {
-      if (this.chart && e.touches.length > 0) {
-        const touch = e.touches[0]
-        const handler = this.chart.getZr().handler
-        handler.dispatch('mousemove', {
-          zrX: touch.x,
-          zrY: touch.y
-        })
-        handler.processGesture(wrapTouch(e), 'change')
+      if (!this.chart || !e.touches.length) return
+
+      const touch = e.touches[0]
+
+      // 判断是否是滚动操作（垂直移动距离 > 水平移动距离）
+      if (!this._isScrolling) {
+        const deltaX = Math.abs(touch.x - this._startX)
+        const deltaY = Math.abs(touch.y - this._startY)
+
+        // 如果移动距离超过阈值，判断滚动方向
+        if (deltaX > 5 || deltaY > 5) {
+          this._isScrolling = deltaY > deltaX
+        }
       }
+
+      // 如果是垂直滚动，不处理图表交互，让页面正常滚动
+      if (this._isScrolling) {
+        return
+      }
+
+      // 水平滑动或点击时才处理图表交互
+      const handler = this.chart.getZr().handler
+      handler.dispatch('mousemove', {
+        zrX: touch.x,
+        zrY: touch.y
+      })
+      handler.processGesture(wrapTouch(e), 'change')
     },
 
     touchEnd(e) {
-      if (this.chart) {
-        const touch = e.changedTouches ? e.changedTouches[0] : {}
-        const handler = this.chart.getZr().handler
-        handler.dispatch('mouseup', {
-          zrX: touch.x,
-          zrY: touch.y
-        })
-        handler.dispatch('click', {
-          zrX: touch.x,
-          zrY: touch.y
-        })
-        handler.processGesture(wrapTouch(e), 'end')
-      }
+      if (!this.chart) return
+
+      this._isScrolling = false
+
+      const touch = e.changedTouches ? e.changedTouches[0] : {}
+      const handler = this.chart.getZr().handler
+      handler.dispatch('mouseup', {
+        zrX: touch.x,
+        zrY: touch.y
+      })
+      handler.dispatch('click', {
+        zrX: touch.x,
+        zrY: touch.y
+      })
+      handler.processGesture(wrapTouch(e), 'end')
     }
   }
 })
