@@ -440,6 +440,8 @@ Page({
    * 加载图表数据
    */
   loadChartData(openid) {
+    // 加载用户基本信息（总题数、连续天数）
+    this.loadUserBasicInfo()
     // 加载周趋势数据
     this.loadWeekTrend(openid)
     // 加载月趋势数据
@@ -450,6 +452,41 @@ Page({
     this.loadMonthDifficultyDistribution(openid)
     // 加载年难度分布数据
     this.loadYearDifficultyDistribution(openid)
+  },
+
+  /**
+   * 加载用户基本信息
+   * 从 /api/user/report 获取 totalSolved 和 consecutiveDays
+   */
+  loadUserBasicInfo() {
+    // 注意：getUserReport 接口使用 lcId，不是 openid
+    const lcId = this.data.lcId
+
+    // 使用模拟数据或真实API
+    if (USE_MOCK_DATA) {
+      // Mock模式：使用当前页面数据即可
+      console.log('使用Mock数据，跳过用户基本信息API调用')
+      return
+    }
+
+    // 调用真实API
+    api.getUserReport(lcId, 'week')
+      .then(res => {
+        // 更新用户基本信息
+        this.setData({
+          totalSolved: res.totalSolved || 0,
+          consecutiveDays: res.consecutiveDays || 0
+        })
+        console.log('用户基本信息加载成功:', res)
+      })
+      .catch(err => {
+        console.error('加载用户基本信息失败:', err)
+        // 使用默认值
+        this.setData({
+          totalSolved: 0,
+          consecutiveDays: 0
+        })
+      })
   },
 
   /**
@@ -582,6 +619,16 @@ Page({
       : api.getDifficultyDistribution(openid, 'MONTHLY')
 
     dataPromise.then(res => {
+      // 计算总数（API不返回total字段，需要前端计算）
+      const total = res.easy + res.medium + res.hard
+
+      // 更新页面数据（本月新增题数）
+      this.setData({
+        monthEasyCount: res.easy,
+        monthMediumCount: res.medium,
+        monthHardCount: res.hard
+      })
+
       // 更新月饼图
       if (monthPieChart) {
         monthPieChart.setOption({
@@ -593,7 +640,7 @@ Page({
                 '困难': res.hard
               }
               const value = values[name]
-              const percent = res.total > 0 ? ((value / res.total) * 100).toFixed(1) : 0
+              const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0
               return `${name} ${percent}%`
             }
           },
@@ -621,12 +668,15 @@ Page({
       : api.getDifficultyDistribution(openid, 'TOTAL')
 
     dataPromise.then(res => {
-      // 更新页面数据
+      // 计算总数（API不返回total字段，需要前端计算）
+      const total = res.easy + res.medium + res.hard
+
+      // 更新页面数据（累计总数）
       this.setData({
         easyCount: res.easy,
         mediumCount: res.medium,
         hardCount: res.hard,
-        totalSolved: res.total
+        totalSolved: total  // 使用计算得到的总数
       })
 
       // 更新年饼图
@@ -640,7 +690,7 @@ Page({
                 '困难': res.hard
               }
               const value = values[name]
-              const percent = res.total > 0 ? ((value / res.total) * 100).toFixed(1) : 0
+              const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0
               return `${name} ${percent}%`
             }
           },

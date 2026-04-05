@@ -12,121 +12,158 @@
 
 ---
 
-## 二、核心数据结构
+## 二、后端数据库结构
 
+### users 表
 ```json
 {
-  "openid": "...",
-  "lc_id": "...",
-  "total_solved": 150,
-  "daily_steps": 5,
-  "history_logs": [...],
-  "last_update": "2026-03-28"
+  "id": "BIGINT (PK, AUTO_INCREMENT)",
+  "openid": "VARCHAR(128) UNIQUE - 微信用户唯一标识",
+  "lc_id": "VARCHAR(64) - LeetCode 账号名",
+  "total_solved": "INT - 截止目前的总刷题数",
+  "daily_steps": "INT - 今日新增题数",
+  "last_update": "DATETIME - 上次抓取数据的时间"
 }
 ```
 
----
-
-## 三、history_logs设计
-
-```json
-[
-  {
-    "date": "2026-03-25",
-    "total": 100,
-    "daily_steps": 5
-  }
-]
-```
-
----
-
-## 四、接口设计
-
-### 1. GetTrendData
-
-请求：
+### daily_logs 表
 ```json
 {
-  "openid": "user_001",
-  "range_days": 7
+  "id": "BIGINT (PK, AUTO_INCREMENT)",
+  "openid": "VARCHAR(128) - 关联用户",
+  "log_date": "DATE - 记录日期",
+  "total_solved": "INT - 当日截止总题数",
+  "daily_steps": "INT - 当日新增题数",
+  "easy_count": "INT - 简单题累计数",
+  "medium_count": "INT - 中等题累计数",
+  "hard_count": "INT - 困难题累计数",
+  "daily_points": "INT - 当日加权积分 (easy×1 + medium×2 + hard×3)",
+  "created_at": "DATETIME - 记录创建时间",
+  "rank_tier": "VARCHAR(16) - 等级标签"
 }
 ```
 
-返回：
+**注意**: 后端**不会**在用户接口中返回 history_logs 数组。历史数据通过独立的趋势数据接口获取。
+
+---
+
+## 三、接口设计
+
+### 主要接口
+
+| 接口 | 路径 | 用途 |
+|------|------|------|
+| 用户报告 | `/api/user/report` | 获取用户基本统计（总题数、连续天数、难度分布） |
+| 趋势数据 | `/api/v1/stats/trend` | 获取历史刷题趋势（日期 + 积分数组） |
+| 难度分布 | `/api/v1/stats/distribution` | 获取难度分布数据 |
+
+### 1. 趋势数据接口
+
+**请求**: `GET /api/v1/stats/trend?openid=xxx&range_days=7`
+
+**返回**:
 ```json
 {
-  "code": 200,
+  "code": 0,
+  "message": "success",
   "data": {
-    "dates": ["03-22","03-23"],
-    "daily_steps": [2,5]
+    "dates": ["03-22", "03-23", "03-24", "03-25", "03-26", "03-27", "03-28"],
+    "daily_points": [2, 5, 1, 4, 3, 6, 2],
+    "average_line": 3.29
   }
 }
 ```
 
-用途：
-1. 用于EChart
-2. X轴：日期
-3. y轴：每日刷题数
+**用途**:
+- X轴：dates 日期数组
+- Y轴：daily_points 每日加权积分
+- 平均线：average_line
 
-### 2. GetDifficultyDistribution
+### 2. 难度分布接口
 
-请求：
+**请求**: `GET /api/v1/stats/distribution?openid=xxx&type=TOTAL`
+
+**返回**:
 ```json
 {
-  "openid": "user_001",
-  "type": "MONTHLY"
-}
-```
-
-返回：
-```json
-{
-  "code": 200,
+  "code": 0,
+  "message": "success",
   "data": {
-    "easy": 20,
-    "medium": 35,
-    "hard": 10
+    "easy": 120,
+    "medium": 100,
+    "hard": 36
   }
 }
 ```
-| 功能 | 函数名 | 输入 (Input) | 输出 (Output) |
-|------|--------|-------------|--------------|
-| 趋势图表数据 | GetTrendData | openid (String), range_days (Int，默认7) | JSON（包含 dates[] + daily_points_change[]，用于折线图） |
-| 难度分布数据 | GetDifficultyDistribution | openid (String) | JSON（包含 type：YEARLY（当年总计）或 MONTHLY（本月新增），以及难度分布数据） |
+
+**type 参数**:
+- `TOTAL`: 累计总题数
+- `MONTHLY`: 本月新增题数
+
+### 3. 用户报告接口
+
+**请求**: `GET /api/user/report?lcId=xxx&range=week`
+
+**返回**:
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "totalSolved": 256,
+    "consecutiveDays": 12,
+    "difficulty": {
+      "easy": 120,
+      "medium": 100,
+      "hard": 36
+    }
+  }
+}
+```
+
+**注意**: 此接口**不包含** history_logs 数组
 
 ---
 
-## 五、后端逻辑
+## 四、后端逻辑
 
-趋势：
-1. 查dates[]和daily_points_change[]
-2. 截取N天
-3. 查dates[]缺失天数，再daily_points_change[]中填入0防止折线图数据出错
-4. 拆成数组
+### 趋势数据处理流程
+1. 从 `daily_logs` 表查询过去 N 天的记录
+2. 生成完整日期范围（过去 N 天）
+3. 填充缺失日期，将 `daily_points` 设为 0
+4. 格式化日期为 MM-DD 格式
+5. 计算平均积分 `average_line`
+6. 返回 dates、daily_points、average_line 三个数组
 
-难度：
-1. 调LeetCode
-2. 统计easy/medium/hard
+### 难度分布处理流程
+- **TOTAL 模式**: 从 `daily_logs` 表最新记录获取 easy_count、medium_count、hard_count
+- **MONTHLY 模式**: 计算本月第一天和最新一天的 count 差值
+
+### 用户报告处理流程
+1. 从 `users` 表获取 total_solved
+2. 从 `daily_logs` 表最新记录获取难度分布
+3. 计算连续打卡天数（基于 daily_logs）
+4. **不返回** history_logs 数组
 
 ---
 
-## 六、前端实现
+## 五、前端实现
 
 使用 ECharts：
 
-- 折线图：daily_steps
-- 饼图：难度分布
+- 折线图：使用 `/api/v1/stats/trend` 返回的 dates 和 daily_points
+- 饼图：使用 `/api/v1/stats/distribution` 返回的 easy/medium/hard
+- 连续天数：前端基于 trend 数据计算，或使用 `/api/user/report` 返回的 consecutiveDays
 
 ---
 
-## 七、总结
+## 六、总结
 
-统计模块 = 数据 → 可视化
+统计模块 = 后端数据库 (users + daily_logs) → API 接口 → 前端可视化
 
 ---
 
-## 八、项目文档索引
+## 七、项目文档索引
 
 ### 📚 开发文档
 
@@ -185,7 +222,7 @@
 
 ---
 
-## 九、当前开发状态
+## 八、当前开发状态
 
 ### API 调用情况检查 (截至最新)
 
@@ -220,7 +257,7 @@
 
 ---
 
-## 十、下一步工作
+## 九、下一步工作
 
 ### 短期任务
 1. [ ] 配置后端 API 地址（`utils/api.js` BASE_URL）
@@ -237,7 +274,7 @@
 
 ---
 
-## 十一、快速参考
+## 十、快速参考
 
 ### 启动项目
 ```bash

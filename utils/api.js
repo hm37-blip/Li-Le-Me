@@ -163,18 +163,16 @@ function refreshToken() {
  *
  * Response格式:
  * {
- *   totalSolved: Number,         // 总刷题数
- *   consecutiveDays: Number,     // 连续打卡天数
+ *   totalSolved: Number,         // 总刷题数 (来自 users 表)
+ *   consecutiveDays: Number,     // 连续打卡天数 (后端计算或前端自行计算)
  *   difficulty: {
- *     easy: Number,
- *     medium: Number,
- *     hard: Number
- *   },
- *   historyLogs: [
- *     { date: String, count: Number },
- *     ...
- *   ]
+ *     easy: Number,              // 简单题累计数 (来自 daily_logs 表最新记录)
+ *     medium: Number,            // 中等题累计数
+ *     hard: Number               // 困难题累计数
+ *   }
  * }
+ *
+ * 注意: 此接口不返回 historyLogs 数组。历史趋势数据请使用 getTrendData() 接口获取。
  */
 function getUserReport(lcId, range = 'week') {
   return request('/api/user/report', { lcId, range }, 'GET')
