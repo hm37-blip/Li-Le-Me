@@ -1,0 +1,16 @@
+{
+  "name": "leetcode-steps-miniprogram",
+  "version": "1.0.0",
+  "description": "LeetCode刷题步数微信小程序 - F4个人报告功能",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["leetcode", "miniprogram", "wechat", "charts"],
+  "author": "Andy (姜灵晔)",
+  "license": "MIT",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "miniprogram-api-typings": "^2.8.3-1"
+  }
+}

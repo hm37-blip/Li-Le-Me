@@ -1,0 +1,34 @@
+<!--pages/profile/profile.wxml-->
+<view class="container">
+  <!-- 头像区域 -->
+  <view class="avatar-section">
+    <image
+      class="avatar"
+      src="{{userAvatar}}"
+      mode="aspectFill"
+    ></image>
+  </view>
+
+  <!-- 上传头像按钮 -->
+  <view class="upload-btn" bindtap="uploadAvatar">
+    <text class="upload-text">上传头像</text>
+  </view>
+
+  <!-- ID 显示和修改区域 -->
+  <view class="id-section">
+    <text class="id-label">LeetCode ID</text>
+    <view class="id-row">
+      <text class="id-value">{{lcId}}</text>
+      <view class="edit-btn" bindtap="editLcId">
+        <text class="edit-text">修改</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 注销账号按钮 -->
+  <view class="logout-section">
+    <button class="logout-btn" bindtap="handleLogout">注销账号</button>
+  </view>
+</view>
+
+<custom-tabbar current="{{2}}"></custom-tabbar>
