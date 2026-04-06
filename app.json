@@ -1,8 +1,8 @@
 {
   "pages": [
-    "pages/home/home",
-    "pages/report/report",
-    "pages/profile/profile"
+    "frontend/pages/index/home/home",
+    "frontend/pages/index/report/report",
+    "frontend/pages/index/profile/profile"
   ],
   "window": {
     "backgroundTextStyle": "light",

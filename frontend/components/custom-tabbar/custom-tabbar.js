@@ -10,15 +10,15 @@ Component({
   data: {
     list: [
       {
-        pagePath: '/pages/home/home',
+        pagePath: '/frontend/pages/index/home/home',
         text: '主页'
       },
       {
-        pagePath: '/pages/report/report',
+        pagePath: '/frontend/pages/index/report/report',
         text: '趋势'
       },
       {
-        pagePath: '/pages/profile/profile',
+        pagePath: '/frontend/pages/index/profile/profile',
         text: '我的'
       }
     ]
