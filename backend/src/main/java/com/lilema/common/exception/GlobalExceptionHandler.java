@@ -1,4 +1,4 @@
-package com.cesa.li_le_me.config;
+package com.lilema.common.exception;
 
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;

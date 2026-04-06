@@ -1,7 +1,7 @@
-package com.cesa.li_le_me.controller;
+package com.lilema.controller.user;
 
-import com.cesa.li_le_me.entity.User;
-import com.cesa.li_le_me.repository.UserRepository;
+import com.lilema.entity.po.User;
+import com.lilema.mapper.UserRepository;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;

@@ -1,4 +1,4 @@
-package com.cesa.li_le_me.entity;
+package com.lilema.entity.po;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

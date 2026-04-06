@@ -45,9 +45,9 @@ Page({
 
             const status = Number(data.registration_status);
             if (status === 0) {
-              wx.redirectTo({ url: '/pages/bindlc/bindlc' });
+              wx.redirectTo({ url: '/pages/registration/registration' });
             } else if (status === 1) {
-              wx.redirectTo({ url: '/pages/invite/invite' });
+              wx.redirectTo({ url: '/pages/squad/squad' });
             } else {
               wx.redirectTo({ url: '/pages/home/home' });
             }

@@ -1,6 +1,6 @@
-package com.cesa.li_le_me.repository;
+package com.lilema.mapper;
 
-import com.cesa.li_le_me.entity.Squad;
+import com.lilema.entity.po.Squad;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -8,10 +8,10 @@
 		<version>3.5.13</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.example</groupId>
-	<artifactId>li_le_me</artifactId>
+	<groupId>com.lilema</groupId>
+	<artifactId>li-le-me</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>li_le_me</name>
+	<name>li-le-me</name>
 	<description/>
 	<url/>
 	<licenses>

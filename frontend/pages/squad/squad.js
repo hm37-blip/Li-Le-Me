@@ -38,7 +38,7 @@ Page({
         app.globalData.inviteCode = code;
         app.globalData.squadName = data.squad_name || '';
 
-        wx.redirectTo({ url: '/pages/profile/profile' });
+        wx.redirectTo({ url: '/pages/user/user' });
       },
       fail: () => {
         this.setData({ errorMessage: '网络异常，请检查后端服务' });

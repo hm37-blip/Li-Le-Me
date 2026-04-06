@@ -27,9 +27,9 @@ App({
             wx.setStorageSync('registration_status', status);
 
             if (status === 0) {
-              wx.redirectTo({ url: '/pages/bindlc/bindlc' });
+              wx.redirectTo({ url: '/pages/registration/registration' });
             } else if (status === 1) {
-              wx.redirectTo({ url: '/pages/invite/invite' });
+              wx.redirectTo({ url: '/pages/squad/squad' });
             } else if (status >= 2) {
               wx.redirectTo({ url: '/pages/home/home' });
             }

@@ -1,4 +1,4 @@
-package com.cesa.li_le_me;
+package com.lilema;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

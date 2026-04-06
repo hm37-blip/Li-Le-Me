@@ -1,9 +1,9 @@
 {
   "pages": [
     "pages/login/login",
-    "pages/bindlc/bindlc",
-    "pages/invite/invite",
-    "pages/profile/profile",
+    "pages/registration/registration",
+    "pages/squad/squad",
+    "pages/user/user",
     "pages/home/home",
     "pages/admin/admin"
   ],

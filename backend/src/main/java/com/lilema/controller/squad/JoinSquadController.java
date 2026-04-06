@@ -1,9 +1,9 @@
-package com.cesa.li_le_me.controller;
+package com.lilema.controller.squad;
 
-import com.cesa.li_le_me.entity.Squad;
-import com.cesa.li_le_me.entity.User;
-import com.cesa.li_le_me.repository.SquadRepository;
-import com.cesa.li_le_me.repository.UserRepository;
+import com.lilema.entity.po.Squad;
+import com.lilema.entity.po.User;
+import com.lilema.mapper.SquadRepository;
+import com.lilema.mapper.UserRepository;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;

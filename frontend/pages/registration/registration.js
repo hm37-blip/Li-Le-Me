@@ -113,7 +113,7 @@ Page({
         };
 
         wx.setStorageSync('registration_status', 1);
-        wx.redirectTo({ url: '/pages/invite/invite' });
+        wx.redirectTo({ url: '/pages/squad/squad' });
       },
       fail: () => {
         this.setData({ errorMessage: '网络异常，请检查后端服务' });
