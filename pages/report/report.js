@@ -3,7 +3,7 @@ const api = require('../../utils/api.js')
 const mockData = require('../../utils/mockData.js')
 
 // 测试模式开关：true 使用模拟数据，false 使用真实API
-const USE_MOCK_DATA = true
+const USE_MOCK_DATA = false
 
 let weekChart = null
 let monthChart = null
@@ -13,27 +13,27 @@ let yearPieChart = null
 
 Page({
   data: {
-    // 用户信息
-    lcId: 'user_e',
-    openid: 'wx_test_001',
+    // 用户信息（动态加载）
+    lcId: '',
+    openid: '',
     userAvatar: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23FFA116"/%3E%3Ccircle cx="50" cy="35" r="18" fill="white"/%3E%3Cpath d="M20 85 Q20 55 50 55 Q80 55 80 85 Z" fill="white"/%3E%3C/svg%3E',
-    totalSolved: 256,
-    consecutiveDays: 12,
-    weekPoints: 35,
-    monthPoints: 124,
+    totalSolved: 0,
+    consecutiveDays: 0,
+    weekPoints: 0,
+    monthPoints: 0,
 
-    // 难度统计（总计）
-    easyCount: 120,
-    mediumCount: 100,
-    hardCount: 36,
-    // 本周难度统计
-    weekEasyCount: 5,
-    weekMediumCount: 3,
-    weekHardCount: 2,
-    // 本月难度统计
-    monthEasyCount: 15,
-    monthMediumCount: 18,
-    monthHardCount: 8,
+    // 难度统计（总计）- 从 API 加载
+    easyCount: 0,
+    mediumCount: 0,
+    hardCount: 0,
+    // 本周难度统计 - 暂未实现
+    weekEasyCount: 0,
+    weekMediumCount: 0,
+    weekHardCount: 0,
+    // 本月难度统计 - 从 API 加载
+    monthEasyCount: 0,
+    monthMediumCount: 0,
+    monthHardCount: 0,
 
     // ECharts配置 - 周积分趋势
     ecWeek: {
@@ -48,8 +48,8 @@ Page({
         canvas.setChart(chart)
         weekChart = chart
 
-        // 使用 mockData 生成初始数据
-        const mockWeekData = mockData.generateWeekTrendData()
+        // 根据 USE_MOCK_DATA 决定初始数据
+        const mockWeekData = USE_MOCK_DATA ? mockData.generateWeekTrendData() : { dates: [], daily_points: [] }
 
         chart.setOption({
           animation: false,
@@ -112,8 +112,8 @@ Page({
         canvas.setChart(chart)
         monthChart = chart
 
-        // 使用 mockData 生成初始数据
-        const mockMonthData = mockData.generateMonthTrendData()
+        // 根据 USE_MOCK_DATA 决定初始数据
+        const mockMonthData = USE_MOCK_DATA ? mockData.generateMonthTrendData() : { dates: [], daily_points: [] }
 
         chart.setOption({
           animation: false,
@@ -179,8 +179,8 @@ Page({
         canvas.setChart(chart)
         yearChart = chart
 
-        // 使用 mockData 生成初始数据
-        const mockYearData = mockData.generateYearTrendData()
+        // 根据 USE_MOCK_DATA 决定初始数据
+        const mockYearData = USE_MOCK_DATA ? mockData.generateYearTrendData() : { dates: [], daily_points: [] }
 
         chart.setOption({
           animation: false,
@@ -246,8 +246,8 @@ Page({
         canvas.setChart(chart)
         monthPieChart = chart
 
-        // 使用 mockData 生成初始数据
-        const mockMonthDiff = mockData.generateMonthDifficultyDistribution()
+        // 根据 USE_MOCK_DATA 决定初始数据
+        const mockMonthDiff = USE_MOCK_DATA ? mockData.generateMonthDifficultyDistribution() : { easy: 0, medium: 0, hard: 0 }
 
         chart.setOption({
           animation: false,
@@ -263,7 +263,7 @@ Page({
               const values = { '简单': mockMonthDiff.easy, '中等': mockMonthDiff.medium, '困难': mockMonthDiff.hard }
               const total = mockMonthDiff.easy + mockMonthDiff.medium + mockMonthDiff.hard
               const value = values[name]
-              const percent = ((value / total) * 100).toFixed(1)
+              const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0
               return `${name} ${percent}%`
             }
           },
@@ -301,8 +301,8 @@ Page({
         canvas.setChart(chart)
         yearPieChart = chart
 
-        // 使用 mockData 生成初始数据
-        const mockYearDiff = mockData.generateYearDifficultyDistribution()
+        // 根据 USE_MOCK_DATA 决定初始数据
+        const mockYearDiff = USE_MOCK_DATA ? mockData.generateYearDifficultyDistribution() : { easy: 0, medium: 0, hard: 0 }
 
         chart.setOption({
           animation: false,
@@ -318,7 +318,7 @@ Page({
               const values = { '简单': mockYearDiff.easy, '中等': mockYearDiff.medium, '困难': mockYearDiff.hard }
               const total = mockYearDiff.easy + mockYearDiff.medium + mockYearDiff.hard
               const value = values[name]
-              const percent = ((value / total) * 100).toFixed(1)
+              const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0
               return `${name} ${percent}%`
             }
           },
@@ -456,37 +456,95 @@ Page({
 
   /**
    * 加载用户基本信息
-   * 从 /api/user/report 获取 totalSolved 和 consecutiveDays
+   * 注意：totalSolved 会在 loadYearDifficultyDistribution 中计算
+   * consecutiveDays 需要基于 trend 数据计算（暂未实现）
    */
   loadUserBasicInfo() {
-    // 注意：getUserReport 接口使用 lcId，不是 openid
-    const lcId = this.data.lcId
-
     // 使用模拟数据或真实API
     if (USE_MOCK_DATA) {
       // Mock模式：使用当前页面数据即可
-      console.log('使用Mock数据，跳过用户基本信息API调用')
+      console.log('使用Mock数据，用户基本信息已在data中初始化')
       return
     }
 
-    // 调用真实API
-    api.getUserReport(lcId, 'week')
+    // 真实API模式：totalSolved 会在 loadYearDifficultyDistribution 中从 TOTAL 数据计算得出
+    // consecutiveDays 需要基于 getTrendData 返回的历史数据计算连续天数
+    // 这里可以调用 getTrendData 来计算连续天数
+    const openid = this.data.openid
+
+    api.getTrendData(openid, 365)
       .then(res => {
-        // 更新用户基本信息
-        this.setData({
-          totalSolved: res.totalSolved || 0,
-          consecutiveDays: res.consecutiveDays || 0
-        })
-        console.log('用户基本信息加载成功:', res)
+        // 计算连续打卡天数
+        const consecutiveDays = this.calculateConsecutiveDays(res.daily_points)
+        this.setData({ consecutiveDays })
+        console.log('连续打卡天数:', consecutiveDays)
       })
       .catch(err => {
-        console.error('加载用户基本信息失败:', err)
-        // 使用默认值
-        this.setData({
-          totalSolved: 0,
-          consecutiveDays: 0
-        })
+        console.error('计算连续天数失败:', err)
+        this.setData({ consecutiveDays: 0 })
       })
+  },
+
+  /**
+   * 计算连续打卡天数
+   * @param {Array} dailyPoints - 每日积分数组
+   * @returns {Number} 连续天数
+   */
+  calculateConsecutiveDays(dailyPoints) {
+    if (!dailyPoints || dailyPoints.length === 0) return 0
+
+    let consecutive = 0
+    // 从最新的一天（数组末尾）往前计算
+    for (let i = dailyPoints.length - 1; i >= 0; i--) {
+      if (dailyPoints[i] > 0) {
+        consecutive++
+      } else {
+        break
+      }
+    }
+    return consecutive
+  },
+
+  /**
+   * 填充缺失日期（Zero-Filling Logic）
+   * 如果后端没有返回完整的日期范围，前端需要填充0
+   * @param {Array} dates - 后端返回的日期数组
+   * @param {Array} dailyPoints - 后端返回的积分数组
+   * @param {Number} expectedDays - 期望的天数
+   * @returns {Object} { dates: Array, daily_points: Array }
+   */
+  fillMissingDates(dates, dailyPoints, expectedDays) {
+    // 如果后端已经返回了完整的天数，直接返回
+    if (dates && dates.length === expectedDays) {
+      return { dates, daily_points: dailyPoints }
+    }
+
+    // 生成完整的日期范围
+    const today = new Date()
+    const fullDates = []
+    for (let i = expectedDays - 1; i >= 0; i--) {
+      const date = new Date(today)
+      date.setDate(date.getDate() - i)
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      fullDates.push(`${month}-${day}`)
+    }
+
+    // 创建日期到积分的映射
+    const pointsMap = new Map()
+    if (dates && dailyPoints) {
+      dates.forEach((date, index) => {
+        pointsMap.set(date, dailyPoints[index])
+      })
+    }
+
+    // 填充完整数据，缺失的日期填充0
+    const fullPoints = fullDates.map(date => pointsMap.get(date) || 0)
+
+    return {
+      dates: fullDates,
+      daily_points: fullPoints
+    }
   },
 
   /**
@@ -499,8 +557,11 @@ Page({
       : api.getTrendData(openid, 7)
 
     dataPromise.then(res => {
+      // Zero-Filling: 填充缺失日期
+      const filledData = this.fillMissingDates(res.dates, res.daily_points, 7)
+
       // 计算本周积分
-      const weekPoints = res.daily_points.reduce((sum, val) => sum + val, 0)
+      const weekPoints = filledData.daily_points.reduce((sum, val) => sum + val, 0)
       this.setData({ weekPoints })
 
       // 更新图表
@@ -514,20 +575,20 @@ Page({
             containLabel: true
           },
           xAxis: {
-            data: res.dates,
+            data: filledData.dates,
             axisLabel: { fontSize: 9, color: '#666', rotate: 0 }
           },
           yAxis: {
             axisLabel: { fontSize: 9, color: '#666' },
             nameTextStyle: { fontSize: 9, color: '#666' }
           },
-          series: [{ data: res.daily_points }]
+          series: [{ data: filledData.daily_points }]
         })
       }
     }).catch(err => {
       console.error('加载周趋势失败:', err)
       // 使用默认数据
-      this.setData({ weekPoints: 17 })
+      this.setData({ weekPoints: 0 })
     })
   },
 
@@ -541,8 +602,11 @@ Page({
       : api.getTrendData(openid, 30)
 
     dataPromise.then(res => {
+      // Zero-Filling: 填充缺失日期
+      const filledData = this.fillMissingDates(res.dates, res.daily_points, 30)
+
       // 计算本月积分
-      const monthPoints = res.daily_points.reduce((sum, val) => sum + val, 0)
+      const monthPoints = filledData.daily_points.reduce((sum, val) => sum + val, 0)
       this.setData({ monthPoints })
 
       // 更新图表
@@ -556,20 +620,20 @@ Page({
             containLabel: true
           },
           xAxis: {
-            data: res.dates,
+            data: filledData.dates,
             axisLabel: { fontSize: 8, color: '#666', rotate: 45 }
           },
           yAxis: {
             axisLabel: { fontSize: 9, color: '#666' },
             nameTextStyle: { fontSize: 9, color: '#666' }
           },
-          series: [{ data: res.daily_points }]
+          series: [{ data: filledData.daily_points }]
         })
       }
     }).catch(err => {
       console.error('加载月趋势失败:', err)
       // 使用默认数据
-      this.setData({ monthPoints: 74 })
+      this.setData({ monthPoints: 0 })
     })
   },
 
@@ -583,6 +647,9 @@ Page({
       : api.getTrendData(openid, 365)
 
     dataPromise.then(res => {
+      // Zero-Filling: 填充缺失日期
+      const filledData = this.fillMissingDates(res.dates, res.daily_points, 365)
+
       // 更新图表
       if (yearChart) {
         yearChart.setOption({
@@ -594,14 +661,14 @@ Page({
             containLabel: true
           },
           xAxis: {
-            data: res.dates,
+            data: filledData.dates,
             axisLabel: { fontSize: 9, color: '#666', rotate: 0 }
           },
           yAxis: {
             axisLabel: { fontSize: 9, color: '#666' },
             nameTextStyle: { fontSize: 9, color: '#666' }
           },
-          series: [{ data: res.daily_points }]
+          series: [{ data: filledData.daily_points }]
         })
       }
     }).catch(err => {

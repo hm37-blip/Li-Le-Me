@@ -156,127 +156,6 @@ function refreshToken() {
 }
 
 /**
- * 获取用户报告数据
- * @param {String} lcId - LeetCode账号ID
- * @param {String} range - 时间范围: 'week' | 'month' | 'year'
- * @returns {Promise}
- *
- * Response格式:
- * {
- *   totalSolved: Number,         // 总刷题数 (来自 users 表)
- *   consecutiveDays: Number,     // 连续打卡天数 (后端计算或前端自行计算)
- *   difficulty: {
- *     easy: Number,              // 简单题累计数 (来自 daily_logs 表最新记录)
- *     medium: Number,            // 中等题累计数
- *     hard: Number               // 困难题累计数
- *   }
- * }
- *
- * 注意: 此接口不返回 historyLogs 数组。历史趋势数据请使用 getTrendData() 接口获取。
- */
-function getUserReport(lcId, range = 'week') {
-  return request('/api/user/report', { lcId, range }, 'GET')
-}
-
-/**
- * 验证LeetCode ID是否存在
- * @param {String} lcId - LeetCode账号ID
- * @returns {Promise<Boolean>}
- */
-function validateLeetCodeId(lcId) {
-  return new Promise((resolve, reject) => {
-    wx.request({
-      url: 'https://leetcode.com/graphql',
-      method: 'POST',
-      data: {
-        query: `query getUserProfile($username: String!) {
-          matchedUser(username: $username) {
-            username
-            submitStats {
-              acSubmissionNum {
-                difficulty
-                count
-              }
-            }
-          }
-        }`,
-        variables: { username: lcId }
-      },
-      header: {
-        'content-type': 'application/json'
-      },
-      success(res) {
-        if (res.statusCode === 200 && res.data.data.matchedUser) {
-          resolve(true)
-        } else {
-          resolve(false)
-        }
-      },
-      fail(err) {
-        reject(err)
-      }
-    })
-  })
-}
-
-/**
- * 获取用户基本信息
- * @param {String} lcId - LeetCode账号ID
- * @returns {Promise}
- *
- * Response格式:
- * {
- *   username: String,
- *   avatar: String,
- *   totalSolved: Number,
- *   ranking: Number
- * }
- */
-function getUserInfo(lcId) {
-  return request('/api/user/info', { lcId }, 'GET')
-}
-
-/**
- * 绑定LeetCode账号
- * @param {String} openid - 微信用户唯一标识
- * @param {String} lcId - LeetCode账号ID
- * @returns {Promise}
- */
-function bindLeetCodeAccount(openid, lcId) {
-  return request('/api/user/bind', { openid, lcId }, 'POST')
-}
-
-/**
- * 解绑LeetCode账号
- * @param {String} openid - 微信用户唯一标识
- * @returns {Promise}
- */
-function unbindLeetCodeAccount(openid) {
-  return request('/api/user/unbind', { openid }, 'POST')
-}
-
-/**
- * 获取排行榜数据
- * @param {String} sortBy - 排序方式: 'total' | 'weekly'
- * @returns {Promise}
- *
- * Response格式:
- * [
- *   {
- *     rank: Number,
- *     lcId: String,
- *     avatar: String,
- *     totalSolved: Number,
- *     dailySteps: Number
- *   },
- *   ...
- * ]
- */
-function getRankingList(sortBy = 'total') {
-  return request('/api/ranking/list', { sortBy }, 'GET')
-}
-
-/**
  * 获取趋势图表数据
  * @param {String} openid - 微信用户唯一标识
  * @param {Number} rangeDays - 时间范围天数，默认7天
@@ -290,7 +169,10 @@ function getRankingList(sortBy = 'total') {
  * }
  */
 function getTrendData(openid, rangeDays = 7) {
-  return request('/api/v1/stats/trend', { openid, range_days: rangeDays }, 'GET')
+  return request('/api/v1/stats/trend', { openid, range_days: rangeDays }, 'GET').then(res => {
+    // 适配后端返回格式，确保返回 data 字段内容
+    return res.data || res
+  })
 }
 
 /**
@@ -307,7 +189,10 @@ function getTrendData(openid, rangeDays = 7) {
  * }
  */
 function getDifficultyDistribution(openid, type = 'TOTAL') {
-  return request('/api/v1/stats/distribution', { openid, type }, 'GET')
+  return request('/api/v1/stats/distribution', { openid, type }, 'GET').then(res => {
+    // 适配后端返回格式，确保返回 data 字段内容
+    return res.data || res
+  })
 }
 
 /**
@@ -321,17 +206,14 @@ function getDifficultyDistribution(openid, type = 'TOTAL') {
  *   motto: String         // 随机励志语录，如 "Stay hungry, Stay foolish"
  * }
  */
-function getSharePoster() {
-  return request('/api/v1/stats/poster', {}, 'GET')
+function getSharePoster(openid) {
+  return request('/api/v1/stats/poster', { openid }, 'GET').then(res => {
+    // 适配后端返回格式，确保返回 data 字段内容
+    return res.data || res
+  })
 }
 
 module.exports = {
-  getUserReport,
-  validateLeetCodeId,
-  getUserInfo,
-  bindLeetCodeAccount,
-  unbindLeetCodeAccount,
-  getRankingList,
   getTrendData,
   getDifficultyDistribution,
   getSharePoster,

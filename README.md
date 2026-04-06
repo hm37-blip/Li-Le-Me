@@ -53,15 +53,23 @@
 
 | 接口 | 路径 | 用途 |
 |------|------|------|
-| 用户报告 | `/api/user/report` | 获取用户基本统计（总题数、连续天数、难度分布） |
-| 趋势数据 | `/api/v1/stats/trend` | 获取历史刷题趋势（日期 + 积分数组） |
-| 难度分布 | `/api/v1/stats/distribution` | 获取难度分布数据 |
+| 趋势数据 | `/api/v1/stats/trend` | 获取7天或30天累计积分增长趋势（折线图数据） |
+| 难度分布 | `/api/v1/stats/distribution` | 获取难度分布（饼图数据，TOTAL=累计/MONTHLY=本月） |
+| 分享海报 | `/api/v1/stats/poster` | 获取分享海报完整JSON数据 |
 
-### 1. 趋势数据接口
+### 1. 趋势数据接口 (GetTrendData)
 
-**请求**: `GET /api/v1/stats/trend?openid=xxx&range_days=7`
+**路径**: `/api/v1/stats/trend`
+**方法**: `GET`
+**描述**: 检索 7 天或 30 天的累计点数增长趋势
 
-**返回**:
+**请求参数**:
+- `openid` (String): 微信用户唯一标识
+- `range_days` (Int): 时间范围天数，默认 7
+
+**请求示例**: `GET /api/v1/stats/trend?openid=xxx&range_days=7`
+
+**返回格式**:
 ```json
 {
   "code": 0,
@@ -74,16 +82,24 @@
 }
 ```
 
-**用途**:
-- X轴：dates 日期数组
-- Y轴：daily_points 每日加权积分
-- 平均线：average_line
+**字段说明**:
+- `dates`: X轴日期数组，格式 "MM-DD"
+- `daily_points`: Y轴每日加权积分（必须应用 1:2:3 权重）
+- `average_line`: 期间每日平均分数（用于绘制基线）
 
-### 2. 难度分布接口
+### 2. 难度分布接口 (GetDifficultyDistribution)
 
-**请求**: `GET /api/v1/stats/distribution?openid=xxx&type=TOTAL`
+**路径**: `/api/v1/stats/distribution`
+**方法**: `GET`
+**描述**: 检索练习题的难度分布（饼图数据）
 
-**返回**:
+**请求参数**:
+- `openid` (String): 微信用户唯一标识
+- `type` (String): `TOTAL`(累计总题数) 或 `MONTHLY`(本月新增题数)
+
+**请求示例**: `GET /api/v1/stats/distribution?openid=xxx&type=TOTAL`
+
+**返回格式**:
 ```json
 {
   "code": 0,
@@ -96,64 +112,52 @@
 }
 ```
 
-**type 参数**:
-- `TOTAL`: 累计总题数
-- `MONTHLY`: 本月新增题数
+**字段说明**:
+- `easy`: 简单题数量
+- `medium`: 中等题数量
+- `hard`: 困难题数量
 
-### 3. 用户报告接口
+### 3. 分享海报接口 (GetSharePoster)
 
-**请求**: `GET /api/user/report?lcId=xxx&range=week`
+**路径**: `/api/v1/stats/poster`
+**方法**: `GET`
+**描述**: 返回生成海报所需的完整 JSON 数据
 
-**返回**:
+**请求参数**:
+- `openid` (String): 微信用户唯一标识
+
+**请求示例**: `GET /api/v1/stats/poster?openid=xxx`
+
+**返回格式**:
 ```json
 {
   "code": 0,
   "message": "success",
   "data": {
-    "totalSolved": 256,
-    "consecutiveDays": 12,
-    "difficulty": {
-      "easy": 120,
-      "medium": 100,
-      "hard": 36
-    }
+    "poster_url": "cloud://xxx.png",
+    "rank_tier": "Top Tier",
+    "motto": "Stay hungry, Stay foolish"
   }
 }
 ```
 
-**注意**: 此接口**不包含** history_logs 数组
+**字段说明**:
+- `poster_url`: 预生成海报图像的云端路径
+- `rank_tier`: 等级标签 (Hardcore/Top Tier/Elite/NPC/Completed)
+- `motto`: 随机励志名言
 
 ---
 
-## 四、后端逻辑
+## 四、前端实现
 
-### 趋势数据处理流程
-1. 从 `daily_logs` 表查询过去 N 天的记录
-2. 生成完整日期范围（过去 N 天）
-3. 填充缺失日期，将 `daily_points` 设为 0
-4. 格式化日期为 MM-DD 格式
-5. 计算平均积分 `average_line`
-6. 返回 dates、daily_points、average_line 三个数组
+### ECharts 图表
+- **折线图**: 使用 `/api/v1/stats/trend` 返回的 dates 和 daily_points
+- **饼图**: 使用 `/api/v1/stats/distribution` 返回的 easy/medium/hard
 
-### 难度分布处理流程
-- **TOTAL 模式**: 从 `daily_logs` 表最新记录获取 easy_count、medium_count、hard_count
-- **MONTHLY 模式**: 计算本月第一天和最新一天的 count 差值
-
-### 用户报告处理流程
-1. 从 `users` 表获取 total_solved
-2. 从 `daily_logs` 表最新记录获取难度分布
-3. 计算连续打卡天数（基于 daily_logs）
-4. **不返回** history_logs 数组
-
----
-
-## 五、前端实现
-
-使用 ECharts：
-
-- 折线图：使用 `/api/v1/stats/trend` 返回的 dates 和 daily_points
-- 饼图：使用 `/api/v1/stats/distribution` 返回的 easy/medium/hard
-- 连续天数：前端基于 trend 数据计算，或使用 `/api/user/report` 返回的 consecutiveDays
+### 数据计算
+- **总题数**: 从 `/api/v1/stats/distribution?type=TOTAL` 计算 easy + medium + hard
+- **连续天数**: 前端基于 `/api/v1/stats/trend?range_days=365` 返回的 daily_points 计算连续天数
+- **本周/本月积分**: 对 daily_points 数组求和
 
 ---
 

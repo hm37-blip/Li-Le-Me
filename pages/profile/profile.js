@@ -3,7 +3,7 @@ const api = require('../../utils/api.js')
 
 Page({
   data: {
-    lcId: 'example_user',
+    lcId: '',
     userAvatar: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23FFA116"/%3E%3Ccircle cx="50" cy="35" r="18" fill="white"/%3E%3Cpath d="M20 85 Q20 55 50 55 Q80 55 80 85 Z" fill="white"/%3E%3C/svg%3E',
     openid: ''
   },
@@ -11,8 +11,8 @@ Page({
   onLoad(options) {
     // 从全局数据获取用户信息
     const app = getApp()
-    const lcId = app.globalData.lcId || 'example_user'
-    const openid = app.globalData.openid || ''
+    const lcId = app.globalData.lcId || wx.getStorageSync('lcId') || ''
+    const openid = app.globalData.openid || wx.getStorageSync('openid') || ''
 
     // 从本地存储获取头像
     const defaultAvatar = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23FFA116"/%3E%3Ccircle cx="50" cy="35" r="18" fill="white"/%3E%3Cpath d="M20 85 Q20 55 50 55 Q80 55 80 85 Z" fill="white"/%3E%3C/svg%3E'
@@ -112,26 +112,15 @@ Page({
 
           // 显示加载提示
           wx.showLoading({
-            title: '验证中...',
+            title: '保存中...',
             mask: true
           })
 
           try {
-            // 验证 LeetCode ID 是否存在
-            const isValid = await api.validateLeetCodeId(newLcId)
-
-            if (!isValid) {
-              wx.hideLoading()
-              wx.showToast({
-                title: 'LeetCode ID 不存在',
-                icon: 'none',
-                duration: 2000
-              })
-              return
-            }
-
-            // 绑定账号
-            await api.bindLeetCodeAccount(this.data.openid, newLcId)
+            // TODO: 后端实现后，调用验证和绑定接口
+            // const isValid = await api.validateLeetCodeId(newLcId)
+            // if (!isValid) { ... }
+            // await api.bindLeetCodeAccount(this.data.openid, newLcId)
 
             // 更新本地数据
             this.setData({
@@ -183,8 +172,8 @@ Page({
           })
 
           try {
-            // 调用 API 解绑账号
-            await api.unbindLeetCodeAccount(this.data.openid)
+            // TODO: 后端实现后，调用解绑接口
+            // await api.unbindLeetCodeAccount(this.data.openid)
 
             // 清除本地存储
             wx.clearStorageSync()

@@ -1,8 +1,5 @@
 # API接口文档 - F4个人报告功能
 
-## 概述
-本文档定义F4个人报告功能需要的API接口。由后端B（杜雨泽Dennis）负责实现。
-
 ## 基础信息
 - **接口协议**: HTTPS
 - **数据格式**: JSON
@@ -26,10 +23,7 @@
 | lcId | String | 是 | LeetCode账号ID |
 | range | String | 否 | 时间范围，可选值：`week`(默认)、`month`、`year` |
 
-**请求示例**:
-```http
-GET /api/user/report?lcId=example_user&range=week
-```
+
 
 **成功响应** (200):
 ```json
@@ -403,12 +397,3 @@ GET /api/v1/stats/distribution?openid=oABC123&type=TOTAL
 ### Q7: daily_points 如何计算？
 **A**: daily_points = (当日新增简单题 × 1) + (当日新增中等题 × 2) + (当日新增困难题 × 3)
 
----
-
-## 联系方式
-
-- **前端负责人**: 姜灵晔 Andy (C)
-- **后端负责人**: 杜雨泽 Dennis (B)
-- **项目经理**: Wendy (Product Lead), KJ (Tech Lead)
-
-**每周日晚7点**: 微信群同步进度
