@@ -1,235 +1,237 @@
+/* ══════════════════════════════════════
+   全局页面
+══════════════════════════════════════ */
 .admin-page {
-  padding-top: 16rpx;
-  padding-bottom: 60rpx;
+  padding-top: 24rpx;
 }
 
+.page-bottom {
+  height: 80rpx;
+}
+
+/* ══════════════════════════════════════
+   顶部栏
+══════════════════════════════════════ */
 .top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24rpx;
+  margin-bottom: 40rpx;
 }
 
-.page-title {
-  display: block;
-  font-size: 40rpx;
-  font-weight: 700;
-  color: #111;
-  margin-bottom: 32rpx;
-}
-
-/* 按钮 */
-.btn-ghost {
-  font-size: 26rpx;
-  color: #555;
-  background: #f0f0f0;
-  border: none;
-  border-radius: 10rpx;
-  padding: 0 24rpx;
-  height: 60rpx;
-  line-height: 60rpx;
-}
-
-.btn-danger-sm {
-  font-size: 26rpx;
-  color: #fff;
-  background: #ff4d4f;
-  border: none;
-  border-radius: 10rpx;
-  padding: 0 24rpx;
-  height: 60rpx;
-  line-height: 60rpx;
-}
-
-.btn-primary-sm {
-  font-size: 26rpx;
-  color: #fff;
-  background: #07c160;
-  border: none;
-  border-radius: 10rpx;
-  padding: 0 24rpx;
-  height: 60rpx;
-  line-height: 60rpx;
-}
-
-.btn-primary {
-  width: 100%;
-  margin-top: 24rpx;
-  font-size: 30rpx;
+.btn-create {
+  font-size: 28rpx;
+  font-weight: 600;
   color: #fff;
   background: #07c160 !important;
   border: none;
-  border-radius: 12rpx;
-  height: 88rpx;
-  line-height: 88rpx;
+  border-radius: 14rpx;
+  padding: 0 36rpx;
+  height: 72rpx;
+  line-height: 72rpx;
 }
 
-/* 分区标题 */
-.section-header {
+.btn-logout {
+  font-size: 26rpx;
+  color: #999;
+  background: #f0f0f0 !important;
+  border: none;
+  border-radius: 14rpx;
+  padding: 0 28rpx;
+  height: 64rpx;
+  line-height: 64rpx;
+}
+
+/* ══════════════════════════════════════
+   看板标题行
+══════════════════════════════════════ */
+.board-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20rpx;
+  align-items: baseline;
+  gap: 16rpx;
+  margin-bottom: 28rpx;
 }
 
-.section-title {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #333;
+.board-title {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #111;
 }
 
-/* 提示 */
+.board-count {
+  font-size: 24rpx;
+  color: #aaa;
+}
+
+/* ══════════════════════════════════════
+   状态提示
+══════════════════════════════════════ */
 .hint {
   text-align: center;
-  color: #aaa;
+  color: #bbb;
   font-size: 28rpx;
-  padding: 40rpx 0;
+  padding: 60rpx 0;
 }
 
 .error-banner {
   background: #fff2f0;
   border: 2rpx solid #ffccc7;
-  border-radius: 12rpx;
-  padding: 20rpx 24rpx;
+  border-radius: 14rpx;
+  padding: 24rpx 28rpx;
   color: #d93025;
   font-size: 26rpx;
-  margin-bottom: 16rpx;
+  margin-bottom: 24rpx;
 }
 
-/* 战队卡片 */
+/* ══════════════════════════════════════
+   战队卡片
+══════════════════════════════════════ */
 .squad-card {
   background: #fff;
-  border-radius: 16rpx;
-  padding: 28rpx 28rpx;
-  margin-bottom: 20rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.06);
+  border-radius: 20rpx;
+  padding: 36rpx 32rpx;
+  margin-bottom: 28rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.07);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
 }
 
 .squad-name {
-  font-size: 32rpx;
-  font-weight: 600;
+  font-size: 34rpx;
+  font-weight: 700;
   color: #111;
-  margin-bottom: 20rpx;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-actions {
+  display: flex;
+  flex-shrink: 0;
+  flex-grow: 0;
+  margin-left: 16rpx;
+  gap: 8rpx;
+}
+
+.btn-edit {
+  width: 64rpx;
+  height: 36rpx;
+  font-size: 20rpx;
+  line-height: 36rpx;
+  text-align: center;
+  color: #07c160;
+  background: #f0faf4;
+  border-radius: 4rpx;
+}
+
+.btn-del {
+  width: 64rpx;
+  height: 36rpx;
+  font-size: 20rpx;
+  line-height: 36rpx;
+  text-align: center;
+  color: #ff4d4f;
+  background: #fff5f5;
+  border-radius: 4rpx;
+}
+
+/* 基本信息区 */
+.info-block {
+  background: #f9f9f9;
+  border-radius: 14rpx;
+  padding: 20rpx 24rpx;
+  margin-bottom: 28rpx;
 }
 
 .info-row {
   display: flex;
   align-items: center;
-  margin-top: 12rpx;
+  padding: 10rpx 0;
+}
+
+.info-row + .info-row {
+  border-top: 1rpx solid #efefef;
 }
 
 .info-label {
   font-size: 26rpx;
   color: #999;
-  width: 120rpx;
+  width: 100rpx;
   flex-shrink: 0;
-}
-
-.info-value {
-  font-size: 28rpx;
-  color: #333;
 }
 
 .invite-code {
   font-size: 30rpx;
   font-weight: 700;
   color: #07c160;
-  background: #f0faf4;
-  padding: 4rpx 16rpx;
-  border-radius: 8rpx;
-  letter-spacing: 2rpx;
+  letter-spacing: 3rpx;
+  font-family: monospace;
 }
 
-.text-green { color: #07c160; }
-.text-grey  { color: #aaa; }
-
-/* 新建表单 */
-.form-section {
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 28rpx;
-  margin-top: 32rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.06);
+.count-text {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
 }
 
-.field {
-  margin-top: 24rpx;
-}
-
-.field-label {
-  display: block;
-  font-size: 26rpx;
-  color: #666;
-  margin-bottom: 10rpx;
-}
-
-.field-input {
-  width: 100%;
-  height: 88rpx;
-  border: 2rpx solid #e0e0e0;
-  border-radius: 12rpx;
-  padding: 0 24rpx;
-  font-size: 30rpx;
-  background: #fafafa;
-  box-sizing: border-box;
-}
-
-.form-error {
-  display: block;
-  margin-top: 16rpx;
-  color: #d93025;
-  font-size: 26rpx;
-}
-
-/* 战队卡片操作按钮 */
-.card-actions {
-  display: flex;
-  gap: 16rpx;
-  margin-top: 24rpx;
-}
-
-.btn-outline {
-  flex: 1;
-  font-size: 26rpx;
-  color: #07c160;
-  background: #fff;
-  border: 2rpx solid #07c160;
-  border-radius: 10rpx;
-  height: 64rpx;
-  line-height: 64rpx;
-}
-
-.btn-danger-outline {
-  flex: 1;
-  font-size: 26rpx;
-  color: #ff4d4f;
-  background: #fff;
-  border: 2rpx solid #ff4d4f;
-  border-radius: 10rpx;
-  height: 64rpx;
-  line-height: 64rpx;
-}
-
-/* 成员列表 */
-.members-section {
-  margin-top: 20rpx;
+/* 成员区 */
+.members-block {
   border-top: 2rpx solid #f0f0f0;
-  padding-top: 16rpx;
+  padding-top: 24rpx;
+}
+
+.members-title {
+  display: block;
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #999;
+  letter-spacing: 2rpx;
+  text-transform: uppercase;
+  margin-bottom: 16rpx;
 }
 
 .members-empty {
   font-size: 26rpx;
-  color: #bbb;
+  color: #ccc;
   text-align: center;
-  padding: 16rpx 0;
+  padding: 24rpx 0;
 }
 
+/* 成员行 */
 .member-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 14rpx 0;
+  padding: 18rpx 0;
   border-bottom: 1rpx solid #f5f5f5;
+}
+
+.member-row:last-of-type {
+  border-bottom: none;
+}
+
+.member-avatar {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  background: #e8f7ef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 20rpx;
+}
+
+.avatar-char {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #07c160;
 }
 
 .member-info {
@@ -237,51 +239,157 @@
   min-width: 0;
 }
 
-.btn-remove {
-  flex-shrink: 0;
-  font-size: 22rpx;
-  color: #ff4d4f;
-  background: #fff;
-  border: 2rpx solid #ff4d4f;
-  border-radius: 8rpx;
-  padding: 0 20rpx;
-  height: 52rpx;
-  line-height: 52rpx;
-  margin-left: 16rpx;
-}
-
-.member-main {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-}
-
 .member-nickname {
+  display: block;
   font-size: 28rpx;
   font-weight: 600;
   color: #222;
+  margin-bottom: 6rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .member-lc {
+  display: block;
   font-size: 24rpx;
   color: #07c160;
-  background: #f0faf4;
-  padding: 2rpx 12rpx;
-  border-radius: 6rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.member-openid {
-  display: block;
+.btn-kick {
+  flex-shrink: 0;
   font-size: 22rpx;
-  color: #bbb;
-  margin-top: 6rpx;
-  font-family: monospace;
-  word-break: break-all;
+  color: #ff4d4f;
+  background: #fff5f5 !important;
+  border: none !important;
+  border-radius: 10rpx;
+  padding: 0 22rpx;
+  height: 56rpx;
+  line-height: 56rpx;
+  margin-left: 16rpx;
 }
 
-/* 选择器 */
-.picker-display {
-  color: #333;
+.btn-more {
+  display: block;
+  width: 100%;
+  margin-top: 20rpx;
+  font-size: 26rpx;
+  color: #07c160;
+  background: #f0faf4 !important;
+  border: none;
+  border-radius: 12rpx;
+  height: 72rpx;
+  line-height: 72rpx;
+  text-align: center;
+}
+
+/* ══════════════════════════════════════
+   弹窗
+══════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-box {
+  width: 620rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 52rpx 44rpx 40rpx;
+  box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.18);
+}
+
+.modal-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 40rpx;
+}
+
+.modal-field {
+  margin-top: 32rpx;
+}
+
+.modal-label {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 12rpx;
+}
+
+.required {
+  color: #ff4d4f;
+  font-weight: 400;
+  font-size: 24rpx;
+  margin-left: 4rpx;
+}
+
+.modal-input {
+  width: 100%;
+  height: 88rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 14rpx;
+  padding: 0 24rpx;
+  font-size: 30rpx;
+  background: #fafafa;
+  box-sizing: border-box;
+}
+
+.field-hint {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #bbb;
+}
+
+.form-error {
+  display: block;
+  margin-top: 20rpx;
+  color: #d93025;
+  font-size: 26rpx;
+  background: #fff2f0;
+  border-radius: 10rpx;
+  padding: 14rpx 20rpx;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16rpx;
+  margin-top: 44rpx;
+}
+
+.btn-modal-cancel {
+  font-size: 28rpx;
+  color: #888;
+  background: #f5f5f5 !important;
+  border: none !important;
+  border-radius: 14rpx;
+  padding: 0 36rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+}
+
+.btn-modal-confirm {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #fff;
+  background: #07c160 !important;
+  border: none;
+  border-radius: 14rpx;
+  padding: 0 48rpx;
+  height: 80rpx;
+  line-height: 80rpx;
 }

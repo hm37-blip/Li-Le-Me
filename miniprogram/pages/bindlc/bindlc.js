@@ -1,5 +1,5 @@
 const LC_USERNAME_REGEX = /^[a-zA-Z_][a-zA-Z0-9_]{1,29}$/;
-const ADMIN_CODE = 'CESA技术部';
+const ADMIN_CODE = 'xyz123';
 
 function computeRuleStatus(raw) {
   const v = (raw || '').trim();
@@ -23,10 +23,9 @@ Page({
   },
 
   onLoad() {
-    const app = getApp();
-    if (!app.globalData.openid) {
-      wx.redirectTo({ url: '/pages/login/login' });
-    }
+    // DEV: 正式上线前取消注释下面两行
+    // const app = getApp();
+    // if (!app.globalData.openid) wx.redirectTo({ url: '/pages/login/login' });
   },
 
   onInputChange(e) {

@@ -47,7 +47,7 @@
     <view wx:if="{{adminVerifyFailed}}">
       <view class="modal-fail-text">管理员验证失败</view>
       <view class="modal-footer-right">
-        <button class="modal-btn-ghost" bindtap="closeAdminModal">关闭</button>
+        <button class="modal-btn-ghost" bindtap="closeAdminModal">确定</button>
       </view>
     </view>
 

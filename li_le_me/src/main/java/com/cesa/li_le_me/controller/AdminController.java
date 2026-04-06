@@ -73,6 +73,40 @@ public class AdminController {
         return ResponseEntity.ok(ok);
     }
 
+    @PutMapping("/squads/{id}")
+    public ResponseEntity<Map<String, Object>> updateSquad(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateSquadRequest request) {
+
+        Squad squad = squadRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "战队不存在"));
+
+        // 检查名称唯一性（排除自身）
+        squadRepository.findBySquadName(request.getSquadName()).ifPresent(existing -> {
+            if (!existing.getId().equals(id)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "战队名称已存在");
+            }
+        });
+
+        // 检查邀请码唯一性（排除自身）
+        squadRepository.findByInviteCode(request.getInviteCode()).ifPresent(existing -> {
+            if (!existing.getId().equals(id)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "邀请码已存在");
+            }
+        });
+
+        squad.setSquadName(request.getSquadName());
+        squad.setInviteCode(request.getInviteCode());
+        squad.setMaxMembers(request.getMaxMembers());
+        squadRepository.save(squad);
+
+        Map<String, Object> ok = new HashMap<>();
+        ok.put("success", true);
+        ok.put("squad_name", squad.getSquadName());
+        ok.put("invite_code", squad.getInviteCode());
+        return ResponseEntity.ok(ok);
+    }
+
     @GetMapping("/squads/{id}/members")
     public ResponseEntity<List<Map<String, Object>>> getSquadMembers(@PathVariable Long id) {
         List<User> members = userRepository.findBySquadId(id);
@@ -178,6 +212,26 @@ public class AdminController {
     }
 
     public static class CreateSquadRequest {
+        @JsonProperty("squad_name")
+        @NotBlank(message = "战队名称不能为空")
+        private String squadName;
+
+        @JsonProperty("invite_code")
+        @NotBlank(message = "邀请码不能为空")
+        private String inviteCode;
+
+        @JsonProperty("max_members")
+        private Integer maxMembers;
+
+        public String getSquadName() { return squadName; }
+        public void setSquadName(String v) { this.squadName = v; }
+        public String getInviteCode() { return inviteCode; }
+        public void setInviteCode(String v) { this.inviteCode = v; }
+        public Integer getMaxMembers() { return maxMembers; }
+        public void setMaxMembers(Integer v) { this.maxMembers = v; }
+    }
+
+    public static class UpdateSquadRequest {
         @JsonProperty("squad_name")
         @NotBlank(message = "战队名称不能为空")
         private String squadName;
