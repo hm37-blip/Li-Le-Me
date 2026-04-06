@@ -1,0 +1,109 @@
+<!--pages/report/report.wxml-->
+<view class="page">
+  <view class="page__bd">
+    <!-- 用户信息面板 -->
+    <view class="weui-panel weui-panel_access">
+      <view class="weui-panel__bd">
+        <view class="weui-media-box weui-media-box_appmsg user-info-box">
+          <view class="weui-media-box__hd">
+            <image class="user-avatar" src="{{userAvatar}}" mode="aspectFill"></image>
+          </view>
+          <view class="weui-media-box__bd">
+            <view class="weui-media-box__title user-name">{{lcId}}</view>
+            <view class="weui-media-box__desc">
+              <text class="openid-text">OpenID: {{openid}}</text>
+            </view>
+            <view class="points-container">
+              <view class="points-item">
+                <text class="points-label">本周积分 </text>
+                <text class="points-value">{{weekPoints}}</text>
+              </view>
+              <view class="points-item">
+                <text class="points-label">本月积分 </text>
+                <text class="points-value">{{monthPoints}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 周积分趋势图表 -->
+    <view class="weui-panel">
+      <view class="weui-panel__hd">周积分趋势</view>
+      <view class="weui-panel__bd">
+        <view class="chart-desc">最近7天每日积分获取情况</view>
+        <view class="chart-container">
+          <ec-canvas id="weekChart" canvas-id="weekChart" chart-class="week-chart" ec="{{ ecWeek }}"></ec-canvas>
+        </view>
+      </view>
+    </view>
+
+    <!-- 月积分趋势图表 -->
+    <view class="weui-panel">
+      <view class="weui-panel__hd">月积分趋势</view>
+      <view class="weui-panel__bd">
+        <view class="chart-desc">最近30天每日积分获取情况</view>
+        <view class="chart-container">
+          <ec-canvas id="monthChart" canvas-id="monthChart" chart-class="month-chart" ec="{{ ecMonth }}"></ec-canvas>
+        </view>
+      </view>
+    </view>
+
+    <!-- 年积分趋势图表 -->
+    <view class="weui-panel">
+      <view class="weui-panel__hd">年积分趋势</view>
+      <view class="weui-panel__bd">
+        <view class="chart-desc">过去一年每月累计积分</view>
+        <view class="chart-container">
+          <ec-canvas id="yearChart" canvas-id="yearChart" chart-class="year-chart" ec="{{ ecYear }}"></ec-canvas>
+        </view>
+      </view>
+    </view>
+
+    <!-- 月难度分布图表 -->
+    <view class="weui-panel">
+      <view class="weui-panel__hd">本月难度分布</view>
+      <view class="weui-panel__bd">
+        <view class="chart-desc">本月新增题目难度占比</view>
+        <view class="chart-container">
+          <ec-canvas id="monthPieChart" canvas-id="monthPieChart" chart-class="month-pie-chart" ec="{{ ecMonthPie }}"></ec-canvas>
+        </view>
+      </view>
+    </view>
+
+    <!-- 年难度分布图表 -->
+    <view class="weui-panel">
+      <view class="weui-panel__hd">年度难度分布</view>
+      <view class="weui-panel__bd">
+        <view class="chart-desc">当年总计题目难度占比</view>
+        <view class="chart-container">
+          <ec-canvas id="yearPieChart" canvas-id="yearPieChart" chart-class="year-pie-chart" ec="{{ ecYearPie }}"></ec-canvas>
+        </view>
+      </view>
+    </view>
+
+    <!-- 数据统计 -->
+    <view class="weui-panel">
+      <view class="weui-panel__hd">题目统计</view>
+      <view class="weui-panel__bd">
+        <view class="weui-grids">
+          <view class="weui-grid stat-grid-item">
+            <view class="stat-value stat-easy">{{easyCount}}</view>
+            <view class="weui-grid__label">简单</view>
+          </view>
+          <view class="weui-grid stat-grid-item">
+            <view class="stat-value stat-medium">{{mediumCount}}</view>
+            <view class="weui-grid__label">中等</view>
+          </view>
+          <view class="weui-grid stat-grid-item">
+            <view class="stat-value stat-hard">{{hardCount}}</view>
+            <view class="weui-grid__label">困难</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<custom-tabbar current="{{1}}"></custom-tabbar>

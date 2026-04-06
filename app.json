@@ -1,0 +1,18 @@
+{
+  "pages": [
+    "frontend/pages/index/home/home",
+    "frontend/pages/index/report/report",
+    "frontend/pages/index/profile/profile"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#282828",
+    "navigationBarTitleText": "力了吗",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#282828",
+    "enablePullDownRefresh": false
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "usingComponents": {}
+}
