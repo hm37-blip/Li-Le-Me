@@ -193,7 +193,7 @@ Page({
             // 延迟返回首页
             setTimeout(() => {
               wx.reLaunch({
-                url: '/frontend/pages/index/home/home'
+                url: '/pages/index/home/home'
               })
             }, 2000)
 

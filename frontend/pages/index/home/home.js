@@ -228,8 +228,8 @@ Page({
 
     return {
       title: `我在「力了吗」已刷题 ${totalSolved} 道！排名第 ${rank}，段位 ${rankTier}`,
-      path: '/frontend/pages/index/home/home',
-      imageUrl: '/frontend/static/images/share-cover.png' // 需要准备一张分享封面图
+      path: '/pages/index/home/home',
+      imageUrl: '/static/images/share-cover.png' // 需要准备一张分享封面图
     }
   },
 
@@ -242,7 +242,7 @@ Page({
     return {
       title: `我在「力了吗」已刷题 ${totalSolved} 道！段位 ${rankTier}，一起来卷吧！`,
       query: '',
-      imageUrl: '/frontend/static/images/share-cover.png'
+      imageUrl: '/static/images/share-cover.png'
     }
   }
 })
