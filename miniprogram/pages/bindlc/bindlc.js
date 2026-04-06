@@ -1,10 +1,10 @@
-const LC_USERNAME_REGEX = /^[a-zA-Z_][a-zA-Z0-9_]{1,29}$/;
-const ADMIN_CODE = 'xyz123';
+const LC_USERNAME_REGEX = /^[a-zA-Z_][a-zA-Z0-9_]{2,29}$/;
+const ADMIN_CODE = 'xyz123'; // TODO: [Security] Move to backend before Product launch
 
 function computeRuleStatus(raw) {
   const v = (raw || '').trim();
   return {
-    length: v.length >= 2 && v.length <= 30 ? 'pass' : '',
+    length: v.length >= 3 && v.length <= 30 ? 'pass' : '',
     start:  v.length > 0 && /^[a-zA-Z_]/.test(v) ? 'pass' : '',
     chars:  v.length > 0 && /^[a-zA-Z0-9_]+$/.test(v) ? 'pass' : ''
   };
@@ -41,7 +41,7 @@ Page({
     const value = (rawValue || '').trim();
 
     if (!value) return '请输入LeetCode用户名';
-    if (value.length < 2) return '用户名至少需要2个字符';
+    if (value.length < 3) return '用户名至少需要3个字符';
     if (value.length > 30) return '用户名不能超过30个字符';
     if (/^[0-9]/.test(value)) return '用户名不能以数字开头';
     if (!/^[a-zA-Z0-9_]+$/.test(value)) return '用户名只能包含字母、数字和下划线';

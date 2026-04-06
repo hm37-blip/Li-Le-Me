@@ -1,0 +1,16 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# WeChat DevTools private config (local settings, no secrets but not shared)
+miniprogram/project.private.config.json
+
+# Temp / test export files
+*.xlsx
+*.xls
+*.csv
+*.txt.bak

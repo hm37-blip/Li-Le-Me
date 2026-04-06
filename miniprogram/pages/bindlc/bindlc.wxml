@@ -16,8 +16,8 @@
 
     <view class="rules-box mt-16">
       <view class="rule {{ruleStatus.length}}">
-        <text class="rule-icon">{{leetcodeUsername.length >= 2 && leetcodeUsername.length <= 30 ? '✓' : '·'}}</text>
-        <text class="rule-text">2 - 30 个字符</text>
+        <text class="rule-icon">{{leetcodeUsername.length >= 3 && leetcodeUsername.length <= 30 ? '✓' : '·'}}</text>
+        <text class="rule-text">3 - 30 个字符</text>
       </view>
       <view class="rule {{ruleStatus.start}}">
         <text class="rule-icon">{{ruleStatus.start === 'pass' ? '✓' : '·'}}</text>

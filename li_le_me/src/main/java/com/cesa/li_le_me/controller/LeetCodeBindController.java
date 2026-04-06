@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/user")
 public class LeetCodeBindController {
 
-    private static final Pattern LC_USERNAME_PATTERN = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]{1,29}$");
+    private static final Pattern LC_USERNAME_PATTERN = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]{2,29}$");
 
     private final UserRepository userRepository;
     private final SquadRepository squadRepository;
@@ -104,7 +104,7 @@ public class LeetCodeBindController {
         if (!LC_USERNAME_PATTERN.matcher(request.getLeetcodeUsername()).matches()) {
             Map<String, Object> fail = new HashMap<>();
             fail.put("LC_bind_success", false);
-            fail.put("error_message", "LeetCode用户名格式不正确：需要2-30位，以字母或下划线开头，只能包含字母、数字和下划线");
+            fail.put("error_message", "LeetCode用户名格式不正确：需要3-30位，以字母或下划线开头，只能包含字母、数字和下划线");
             return ResponseEntity.ok(fail);
         }
 
