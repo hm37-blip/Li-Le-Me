@@ -1,18 +1,21 @@
 {
   "pages": [
-    "frontend/pages/index/home/home",
-    "frontend/pages/index/report/report",
-    "frontend/pages/index/profile/profile"
+    "pages/login/login",
+    "pages/registration/registration",
+    "pages/squad/squad",
+    "pages/home/home",
+    "pages/user/user",
+    "pages/admin/admin",
+    "pages/report/report",
+    "pages/profile/profile"
   ],
   "window": {
-    "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#282828",
-    "navigationBarTitleText": "力了吗",
+    "navigationBarBackgroundColor": "#07c160",
+    "navigationBarTitleText": "力了么",
     "navigationBarTextStyle": "white",
-    "backgroundColor": "#282828",
-    "enablePullDownRefresh": false
+    "backgroundColor": "#f5f5f5",
+    "backgroundTextStyle": "light"
   },
   "style": "v2",
-  "sitemapLocation": "sitemap.json",
-  "usingComponents": {}
+  "sitemapLocation": "sitemap.json"
 }

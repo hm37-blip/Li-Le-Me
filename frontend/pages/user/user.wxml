@@ -1,0 +1,31 @@
+<view class="container profile-page">
+  <view class="card">
+    <view class="title">设置你的资料</view>
+    <view class="subtitle mt-16">即将加入：{{squadName}}</view>
+
+    <view class="form-item mt-32">
+      <text class="label">头像</text>
+      <button class="avatar-picker" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+        <image class="avatar" src="{{avatarUrl}}" mode="aspectFill" />
+      </button>
+    </view>
+
+    <view class="form-item mt-24">
+      <text class="label">昵称</text>
+      <input
+        class="input {{nicknameError ? 'input-error' : ''}}"
+        placeholder="请输入昵称"
+        value="{{nickname}}"
+        bindinput="onNicknameInput"
+        maxlength="20"
+      />
+      <text wx:if="{{nicknameError}}" class="error-text">{{nicknameError}}</text>
+    </view>
+
+    <view class="btn-wrap mt-32">
+      <button class="join-btn" type="primary" loading="{{loading}}" disabled="{{loading}}" bindtap="handleJoin">
+        {{loading ? '加入中...' : '加入'}}
+      </button>
+    </view>
+  </view>
+</view>
