@@ -5,9 +5,11 @@
     "pages/squad/squad",
     "pages/home/home",
     "pages/user/user",
+    "pages/home/home",
     "pages/admin/admin",
-    "pages/report/report",
-    "pages/profile/profile"
+    "pages/index/home/home",
+    "pages/index/profile/profile",
+    "pages/index/report/report"
   ],
   "window": {
     "navigationBarBackgroundColor": "#07c160",
@@ -16,6 +18,25 @@
     "backgroundColor": "#f5f5f5",
     "backgroundTextStyle": "light"
   },
-  "style": "v2",
-  "sitemapLocation": "sitemap.json"
+  "tabBar": {
+    "custom": true,
+    "color": "#7A7E83",
+    "selectedColor": "#07c160",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/index/home/home",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/index/report/report",
+        "text": "战报"
+      },
+      {
+        "pagePath": "pages/index/profile/profile",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2"
 }

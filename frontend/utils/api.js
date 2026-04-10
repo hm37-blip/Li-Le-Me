@@ -5,8 +5,9 @@
 
 const auth = require('./auth.js')
 
-// API基础URL - 需要根据后端B提供的实际地址修改
-const BASE_URL = 'https://your-cloud-function-url.com'
+// API基础URL - 从全局配置获取
+const app = getApp()
+const BASE_URL = app && app.globalData ? app.globalData.baseUrl : 'http://localhost:8080'
 
 // Token 刷新标记（防止并发刷新）
 let isRefreshing = false
@@ -213,9 +214,61 @@ function getSharePoster(openid) {
   })
 }
 
+/**
+ * 获取排行榜数据
+ * @param {String} type - 排行榜类型: 'total'(总排行) | 'daily'(今日排行)
+ * @returns {Promise}
+ *
+ * Response格式:
+ * [
+ *   {
+ *     openid: String,        // 用户唯一标识
+ *     nickname: String,      // 用户昵称
+ *     lcId: String,          // LeetCode ID
+ *     rank: Number,          // 排名
+ *     totalSolved: Number,   // 总题数
+ *     dailySteps: Number,    // 今日加权积分 (1:2:3权重: Easy:Medium:Hard)
+ *     rankTier: String,      // 段位等级
+ *     avatarUrl: String      // 头像URL
+ *   },
+ *   ...
+ * ]
+ */
+function getRankingList(type = 'total') {
+  return new Promise((resolve, reject) => {
+    const app = getApp()
+    const baseUrl = app.globalData.baseUrl || 'http://localhost:8080'
+
+    wx.request({
+      url: `${baseUrl}/api/ranking`,
+      method: 'GET',
+      data: { type },
+      header: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${app.globalData.token || ''}`
+      },
+      success(res) {
+        if (res.statusCode === 200) {
+          // 适配后端返回格式，确保返回数组
+          const data = Array.isArray(res.data) ? res.data : (res.data.data || [])
+          resolve(data)
+        } else {
+          console.error('获取排行榜失败:', res.statusCode, res.data)
+          reject(new Error(`请求失败: ${res.statusCode}`))
+        }
+      },
+      fail(err) {
+        console.error('请求排行榜接口失败:', err)
+        reject(err)
+      }
+    })
+  })
+}
+
 module.exports = {
   getTrendData,
   getDifficultyDistribution,
   getSharePoster,
+  getRankingList,
   auth // 导出 auth 模块，方便其他文件使用
 }

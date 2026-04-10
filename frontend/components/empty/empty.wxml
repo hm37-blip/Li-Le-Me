@@ -1,0 +1,29 @@
+<!-- 通用空状态组件 -->
+<view class="empty-container" wx:if="{{show}}">
+  <!-- 图标/图片 -->
+  <view class="empty-icon-wrapper">
+    <image
+      wx:if="{{image}}"
+      class="empty-image"
+      src="{{image}}"
+      mode="aspectFit"
+    ></image>
+    <text wx:else class="empty-icon">{{icon}}</text>
+  </view>
+
+  <!-- 主文案 -->
+  <text class="empty-text">{{text}}</text>
+
+  <!-- 描述文案（可选） -->
+  <text class="empty-description" wx:if="{{description}}">{{description}}</text>
+
+  <!-- 操作按钮（可选） -->
+  <view class="empty-action" wx:if="{{showButton}}">
+    <button
+      class="btn {{buttonType === 'primary' ? 'btn-primary' : 'btn-secondary'}}"
+      bindtap="handleAction"
+    >
+      {{buttonText}}
+    </button>
+  </view>
+</view>

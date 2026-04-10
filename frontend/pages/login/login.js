@@ -49,7 +49,7 @@ Page({
             } else if (status === 1) {
               wx.redirectTo({ url: '/pages/squad/squad' });
             } else {
-              wx.redirectTo({ url: '/pages/home/home' });
+              wx.switchTab({ url: '/pages/index/home/home' });
             }
           },
           fail: () => { wx.showToast({ title: '网络异常，请检查后端服务是否启动', icon: 'none' }); },
@@ -61,5 +61,5 @@ Page({
         this.setData({ loading: false });
       }
     });
-  }
+  },
 })

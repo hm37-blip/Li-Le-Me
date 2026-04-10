@@ -37,21 +37,14 @@ Component({
         return
       }
 
-      // 使用 redirectTo 跳转（不保留当前页面）
-      wx.redirectTo({
+      // 使用 switchTab 跳转 tabBar 页面
+      wx.switchTab({
         url: url,
         success: () => {
           console.warn('[TabBar] 跳转成功:', url)
         },
         fail: (err) => {
           console.error('[TabBar] 页面跳转失败:', err)
-          // 如果 redirectTo 失败，尝试使用 navigateTo
-          wx.navigateTo({
-            url: url,
-            fail: (err2) => {
-              console.error('[TabBar] navigateTo 也失败:', err2)
-            }
-          })
         }
       })
     }

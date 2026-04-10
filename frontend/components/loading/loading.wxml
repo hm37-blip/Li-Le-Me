@@ -1,0 +1,13 @@
+<!-- 通用加载组件 -->
+<view class="loading-container" wx:if="{{show}}">
+  <!-- 加载动画 -->
+  <view class="loading-spinner">
+    <view class="spinner-circle"></view>
+  </view>
+
+  <!-- 加载文案 -->
+  <text class="loading-text">{{text}}</text>
+
+  <!-- 提示文案（可选） -->
+  <text class="loading-hint" wx:if="{{hint}}">{{hint}}</text>
+</view>

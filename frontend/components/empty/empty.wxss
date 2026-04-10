@@ -1,0 +1,57 @@
+/* 通用空状态组件样式 - 橙灰色调 */
+
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 32rpx;
+  min-height: 400rpx;
+  text-align: center;
+}
+
+/* 图标/图片容器 */
+.empty-icon-wrapper {
+  margin-bottom: 32rpx;
+}
+
+/* 空状态图标（文本） */
+.empty-icon {
+  font-size: 120rpx;
+  line-height: 1;
+  display: block;
+}
+
+/* 空状态图片 */
+.empty-image {
+  width: 240rpx;
+  height: 240rpx;
+}
+
+/* 主文案 */
+.empty-text {
+  font-size: 32rpx;
+  color: #262626;
+  font-weight: 500;
+  margin-bottom: 16rpx;
+  line-height: 1.5;
+}
+
+/* 描述文案 */
+.empty-description {
+  font-size: 26rpx;
+  color: #8c8c8c;
+  line-height: 1.6;
+  max-width: 500rpx;
+  margin-bottom: 40rpx;
+}
+
+/* 操作按钮区域 */
+.empty-action {
+  margin-top: 16rpx;
+}
+
+/* 使用全局按钮样式 */
+.empty-action .btn {
+  min-width: 200rpx;
+}

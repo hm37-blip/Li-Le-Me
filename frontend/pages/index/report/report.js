@@ -3,7 +3,7 @@ const api = require('../../../utils/api.js')
 const mockData = require('../../../utils/mockData.js')
 
 // 测试模式开关：true 使用模拟数据，false 使用真实API
-const USE_MOCK_DATA = true
+const USE_MOCK_DATA = false
 
 let weekChart = null
 let monthChart = null
@@ -48,8 +48,8 @@ Page({
         canvas.setChart(chart)
         weekChart = chart
 
-        // 根据 USE_MOCK_DATA 决定初始数据
-        const mockWeekData = USE_MOCK_DATA ? mockData.generateWeekTrendData() : { dates: [], daily_points: [] }
+        // 初始化为空数据，等待 API 加载
+        const initialData = { dates: [], daily_points: [] }
 
         chart.setOption({
           animation: false,
@@ -64,7 +64,7 @@ Page({
           },
           xAxis: {
             type: 'category',
-            data: mockWeekData.dates,
+            data: initialData.dates,
             axisLine: { lineStyle: { color: '#999' } },
             axisLabel: { fontSize: 9, color: '#666', rotate: 0 }
           },
@@ -80,7 +80,7 @@ Page({
           series: [{
             type: 'line',
             name: '每日积分',
-            data: mockWeekData.daily_points,
+            data: initialData.daily_points,
             smooth: false,
             symbolSize: 5,
             lineStyle: { width: 2.5 },
@@ -112,8 +112,8 @@ Page({
         canvas.setChart(chart)
         monthChart = chart
 
-        // 根据 USE_MOCK_DATA 决定初始数据
-        const mockMonthData = USE_MOCK_DATA ? mockData.generateMonthTrendData() : { dates: [], daily_points: [] }
+        // 初始化为空数据，等待 API 加载
+        const initialData = { dates: [], daily_points: [] }
 
         chart.setOption({
           animation: false,
@@ -131,7 +131,7 @@ Page({
           },
           xAxis: {
             type: 'category',
-            data: mockMonthData.dates,
+            data: initialData.dates,
             axisLine: { lineStyle: { color: '#999' } },
             axisLabel: { fontSize: 8, color: '#666', rotate: 45 }
           },
@@ -147,7 +147,7 @@ Page({
           series: [{
             type: 'line',
             name: '每日积分',
-            data: mockMonthData.daily_points,
+            data: initialData.daily_points,
             smooth: false,
             symbolSize: 3,
             lineStyle: { width: 2 },
@@ -179,8 +179,8 @@ Page({
         canvas.setChart(chart)
         yearChart = chart
 
-        // 根据 USE_MOCK_DATA 决定初始数据
-        const mockYearData = USE_MOCK_DATA ? mockData.generateYearTrendData() : { dates: [], daily_points: [] }
+        // 初始化为空数据，等待 API 加载
+        const initialData = { dates: [], daily_points: [] }
 
         chart.setOption({
           animation: false,
@@ -198,7 +198,7 @@ Page({
           },
           xAxis: {
             type: 'category',
-            data: mockYearData.dates,
+            data: initialData.dates,
             axisLine: { lineStyle: { color: '#999' } },
             axisLabel: { fontSize: 9, color: '#666', rotate: 0 }
           },
@@ -214,7 +214,7 @@ Page({
           series: [{
             type: 'line',
             name: '月累计积分',
-            data: mockYearData.daily_points,
+            data: initialData.daily_points,
             smooth: true,
             symbolSize: 5,
             lineStyle: { width: 2.5 },
@@ -246,8 +246,8 @@ Page({
         canvas.setChart(chart)
         monthPieChart = chart
 
-        // 根据 USE_MOCK_DATA 决定初始数据
-        const mockMonthDiff = USE_MOCK_DATA ? mockData.generateMonthDifficultyDistribution() : { easy: 0, medium: 0, hard: 0 }
+        // 初始化为空数据，等待 API 加载
+        const initialDiff = { easy: 0, medium: 0, hard: 0 }
 
         chart.setOption({
           animation: false,
@@ -260,8 +260,8 @@ Page({
             textStyle: { fontSize: 12, color: '#666' },
             selectedMode: false,
             formatter: function(name) {
-              const values = { '简单': mockMonthDiff.easy, '中等': mockMonthDiff.medium, '困难': mockMonthDiff.hard }
-              const total = mockMonthDiff.easy + mockMonthDiff.medium + mockMonthDiff.hard
+              const values = { '简单': initialDiff.easy, '中等': initialDiff.medium, '困难': initialDiff.hard }
+              const total = initialDiff.easy + initialDiff.medium + initialDiff.hard
               const value = values[name]
               const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0
               return `${name} ${percent}%`
@@ -279,9 +279,9 @@ Page({
             },
             label: { show: false },
             data: [
-              { value: mockMonthDiff.easy, name: '简单' },
-              { value: mockMonthDiff.medium, name: '中等' },
-              { value: mockMonthDiff.hard, name: '困难' }
+              { value: initialDiff.easy, name: '简单' },
+              { value: initialDiff.medium, name: '中等' },
+              { value: initialDiff.hard, name: '困难' }
             ]
           }]
         })
@@ -301,8 +301,8 @@ Page({
         canvas.setChart(chart)
         yearPieChart = chart
 
-        // 根据 USE_MOCK_DATA 决定初始数据
-        const mockYearDiff = USE_MOCK_DATA ? mockData.generateYearDifficultyDistribution() : { easy: 0, medium: 0, hard: 0 }
+        // 初始化为空数据，等待 API 加载
+        const initialDiff = { easy: 0, medium: 0, hard: 0 }
 
         chart.setOption({
           animation: false,
@@ -315,8 +315,8 @@ Page({
             textStyle: { fontSize: 12, color: '#666' },
             selectedMode: false,
             formatter: function(name) {
-              const values = { '简单': mockYearDiff.easy, '中等': mockYearDiff.medium, '困难': mockYearDiff.hard }
-              const total = mockYearDiff.easy + mockYearDiff.medium + mockYearDiff.hard
+              const values = { '简单': initialDiff.easy, '中等': initialDiff.medium, '困难': initialDiff.hard }
+              const total = initialDiff.easy + initialDiff.medium + initialDiff.hard
               const value = values[name]
               const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0
               return `${name} ${percent}%`
@@ -334,9 +334,9 @@ Page({
             },
             label: { show: false },
             data: [
-              { value: mockYearDiff.easy, name: '简单' },
-              { value: mockYearDiff.medium, name: '中等' },
-              { value: mockYearDiff.hard, name: '困难' }
+              { value: initialDiff.easy, name: '简单' },
+              { value: initialDiff.medium, name: '中等' },
+              { value: initialDiff.hard, name: '困难' }
             ]
           }]
         })
@@ -384,11 +384,158 @@ Page({
     const lcId = app.globalData.lcId || wx.getStorageSync('lcId') || this.data.lcId
     const defaultAvatar = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23FFA116"/%3E%3Ctext x="50" y="65" text-anchor="middle" fill="white" font-size="40" font-weight="bold" font-family="Arial"%3ELC%3C/text%3E%3C/svg%3E'
     const userAvatar = wx.getStorageSync('userAvatar') || defaultAvatar
+    const openid = app.globalData.openid || wx.getStorageSync('openid') || ''
+    const baseUrl = app.globalData.baseUrl || 'http://localhost:8080'
 
     if (lcId !== this.data.lcId || userAvatar !== this.data.userAvatar) {
       this.setData({
         lcId: lcId,
-        userAvatar: userAvatar
+        userAvatar: userAvatar,
+        openid: openid
+      })
+    }
+
+    // 使用 wx.request 调用 Dennis 的接口获取图表数据
+    if (openid) {
+      // 获取周趋势数据
+      wx.request({
+        url: `${baseUrl}/api/v1/stats/trend`,
+        method: 'GET',
+        data: { openid, range_days: 7 },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data) {
+            const data = res.data.data || res.data
+            const filledData = this.fillMissingDates(data.dates, data.daily_points, 7)
+            const weekPoints = filledData.daily_points.reduce((sum, val) => sum + val, 0)
+            this.setData({ weekPoints })
+            if (weekChart) {
+              weekChart.setOption({
+                xAxis: { data: filledData.dates },
+                series: [{ data: filledData.daily_points }]
+              })
+            }
+          }
+        },
+        fail: (err) => console.error('获取周趋势失败:', err)
+      })
+
+      // 获取月趋势数据
+      wx.request({
+        url: `${baseUrl}/api/v1/stats/trend`,
+        method: 'GET',
+        data: { openid, range_days: 30 },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data) {
+            const data = res.data.data || res.data
+            const filledData = this.fillMissingDates(data.dates, data.daily_points, 30)
+            const monthPoints = filledData.daily_points.reduce((sum, val) => sum + val, 0)
+            this.setData({ monthPoints })
+            if (monthChart) {
+              monthChart.setOption({
+                xAxis: { data: filledData.dates },
+                series: [{ data: filledData.daily_points }]
+              })
+            }
+          }
+        },
+        fail: (err) => console.error('获取月趋势失败:', err)
+      })
+
+      // 获取年趋势数据
+      wx.request({
+        url: `${baseUrl}/api/v1/stats/trend`,
+        method: 'GET',
+        data: { openid, range_days: 365 },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data) {
+            const data = res.data.data || res.data
+            const filledData = this.fillMissingDates(data.dates, data.daily_points, 365)
+            if (yearChart) {
+              yearChart.setOption({
+                xAxis: { data: filledData.dates },
+                series: [{ data: filledData.daily_points }]
+              })
+            }
+          }
+        },
+        fail: (err) => console.error('获取年趋势失败:', err)
+      })
+
+      // 获取月难度分布数据
+      wx.request({
+        url: `${baseUrl}/api/v1/stats/distribution`,
+        method: 'GET',
+        data: { openid, type: 'MONTHLY' },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data) {
+            const data = res.data.data || res.data
+            const total = data.easy + data.medium + data.hard
+            this.setData({
+              monthEasyCount: data.easy,
+              monthMediumCount: data.medium,
+              monthHardCount: data.hard
+            })
+            if (monthPieChart) {
+              monthPieChart.setOption({
+                legend: {
+                  formatter: function(name) {
+                    const values = { '简单': data.easy, '中等': data.medium, '困难': data.hard }
+                    const value = values[name]
+                    const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0
+                    return `${name} ${percent}%`
+                  }
+                },
+                series: [{
+                  data: [
+                    { value: data.easy, name: '简单' },
+                    { value: data.medium, name: '中等' },
+                    { value: data.hard, name: '困难' }
+                  ]
+                }]
+              })
+            }
+          }
+        },
+        fail: (err) => console.error('获取月难度分布失败:', err)
+      })
+
+      // 获取年难度分布数据 (总计)
+      wx.request({
+        url: `${baseUrl}/api/v1/stats/distribution`,
+        method: 'GET',
+        data: { openid, type: 'TOTAL' },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data) {
+            const data = res.data.data || res.data
+            const total = data.easy + data.medium + data.hard
+            this.setData({
+              easyCount: data.easy,
+              mediumCount: data.medium,
+              hardCount: data.hard,
+              totalSolved: total
+            })
+            if (yearPieChart) {
+              yearPieChart.setOption({
+                legend: {
+                  formatter: function(name) {
+                    const values = { '简单': data.easy, '中等': data.medium, '困难': data.hard }
+                    const value = values[name]
+                    const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0
+                    return `${name} ${percent}%`
+                  }
+                },
+                series: [{
+                  data: [
+                    { value: data.easy, name: '简单' },
+                    { value: data.medium, name: '中等' },
+                    { value: data.hard, name: '困难' }
+                  ]
+                }]
+              })
+            }
+          }
+        },
+        fail: (err) => console.error('获取年难度分布失败:', err)
       })
     }
 

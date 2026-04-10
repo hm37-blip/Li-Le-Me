@@ -22,24 +22,13 @@ Page({
 
   onLoad() {
     this.loadUserInfo()
-    // TODO: 后端实现排行榜接口后启用
-    // this.fetchLeaderboard()
+    this.fetchLeaderboard()
   },
 
   onShow() {
     // 页面显示时刷新头像和用户信息
     this.loadUserInfo()
   },
-
-  // TODO: 后端实现排行榜接口后，删除此静态数据函数
-  // /**
-  //  * 加载静态测试数据（仅用于前端调试）
-  //  */
-  // loadStaticTestData() {
-  //   const defaultAvatar = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23FFA116"/%3E%3Ccircle cx="50" cy="35" r="18" fill="white"/%3E%3Cpath d="M20 85 Q20 55 50 55 Q80 55 80 85 Z" fill="white"/%3E%3C/svg%3E'
-  //   const testUsers = [ ... ]
-  //   this.setData({ rankList: testUsers, ... })
-  // },
 
   /**
    * 加载用户信息（从全局数据和本地存储）
@@ -64,71 +53,76 @@ Page({
 
 
   /**
-   * 获取排行榜数据
+   * 获取排行榜数据 - 直接使用 wx.request 调用 Dennis 的接口
    */
-  async fetchLeaderboard() {
-    // TODO: 后端实现排行榜接口后启用
-    // wx.showLoading({
-    //   title: '加载中...',
-    //   mask: true
-    // })
+  fetchLeaderboard() {
+    this.setData({ loading: true })
 
-    // try {
-    //   // 调用排行榜 API
-    //   const data = await api.getRankingList('total')
-    //
-    //   // 获取当前用户的 openid
-    //   const app = getApp()
-    //   const currentOpenid = app.globalData.openid || wx.getStorageSync('openid')
-    //
-    //   // 查找当前用户在排行榜中的位置
-    //   let myInfo = this.data.myInfo
-    //   const myRankData = data.find(item => item.openid === currentOpenid)
-    //
-    //   if (myRankData) {
-    //     myInfo = {
-    //       ...myInfo,
-    //       nickname: myRankData.nickname || myInfo.lcId,
-    //       rank: myRankData.rank,
-    //       dailySteps: myRankData.dailySteps,
-    //       totalSolved: myRankData.totalSolved || 0,
-    //       rankTier: myRankData.rankTier || '-',
-    //       avatarUrl: myRankData.avatarUrl || myInfo.avatarUrl
-    //     }
-    //   }
-    //
-    //   // 计算战队人数（最多显示50人）
-    //   const teamMemberCount = Math.min(data.length, 50)
-    //
-    //   this.setData({
-    //     rankList: data.slice(0, 50),
-    //     myInfo: myInfo,
-    //     teamMemberCount: teamMemberCount,
-    //     loading: false
-    //   })
-    //
-    //   wx.hideLoading()
-    //
-    // } catch (error) {
-    //   console.error('获取排行榜失败:', error)
-    //
-    //   wx.hideLoading()
-    //   wx.showToast({
-    //     title: '加载失败',
-    //     icon: 'none',
-    //     duration: 2000
-    //   })
-    //
-    //   // 加载失败时使用默认数据
-    //   this.setData({
-    //     loading: false
-    //   })
-    // }
+    const app = getApp()
+    const baseUrl = app.globalData.baseUrl || 'http://localhost:8080'
+    const currentOpenid = app.globalData.openid || wx.getStorageSync('openid')
 
-    // 暂时使用 data 中的模拟数据
-    console.log('使用模拟排行榜数据（等待后端接口）')
-    this.setData({
-      loading: false
+    wx.request({
+      url: `${baseUrl}/api/ranking`,
+      method: 'GET',
+      data: { type: 'total' },
+      header: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${app.globalData.token || ''}`
+      },
+      success: (res) => {
+        if (res.statusCode === 200) {
+          // 适配后端返回格式
+          const leaderboard = Array.isArray(res.data) ? res.data : (res.data.data || [])
+
+          let myInfo = this.data.myInfo
+          const myRankData = leaderboard.find(item => item.openid === currentOpenid)
+
+          if (myRankData) {
+            myInfo = {
+              ...myInfo,
+              nickname: myRankData.nickname || myInfo.lcId,
+              rank: myRankData.rank || 0,
+              dailySteps: myRankData.dailySteps || 0,
+              totalSolved: myRankData.totalSolved || 0,
+              rankTier: myRankData.rankTier || '-',
+              avatarUrl: myRankData.avatarUrl || myInfo.avatarUrl
+            }
+          }
+
+          this.setData({
+            rankList: leaderboard.slice(0, 50),
+            myInfo,
+            teamMemberCount: Math.min(leaderboard.length, 50),
+            loading: false
+          })
+        } else {
+          console.error('获取排行榜失败:', res.statusCode, res.data)
+          this.setData({
+            rankList: [],
+            teamMemberCount: 0,
+            loading: false
+          })
+          wx.showToast({
+            title: '加载失败',
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      },
+      fail: (err) => {
+        console.error('请求排行榜接口失败:', err)
+        this.setData({
+          rankList: [],
+          teamMemberCount: 0,
+          loading: false
+        })
+        wx.showToast({
+          title: '网络异常',
+          icon: 'none',
+          duration: 2000
+        })
+      }
     })
   },
 
