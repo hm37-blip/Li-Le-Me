@@ -41,7 +41,7 @@ App({
             } else if (status === 1) {
               wx.redirectTo({ url: '/pages/squad/squad' });
             } else if (status >= 2) {
-              wx.redirectTo({ url: '/pages/home/home' });
+              wx.switchTab({ url: '/pages/home/home' });
             }
           }
         }

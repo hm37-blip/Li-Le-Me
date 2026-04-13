@@ -26,6 +26,13 @@ Page({
   },
 
   onShow() {
+    // 设置底部 tabBar 高亮
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({
+        current: 2
+      });
+    }
+
     // 页面显示时刷新数据
     const app = getApp()
     if (app.globalData.lcId) {
@@ -190,10 +197,10 @@ Page({
               duration: 2000
             })
 
-            // 延迟返回首页
+            // 延迟返回登录页
             setTimeout(() => {
               wx.reLaunch({
-                url: '/pages/index/home/home'
+                url: '/pages/login/login'
               })
             }, 2000)
 

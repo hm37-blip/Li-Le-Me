@@ -5,9 +5,8 @@
     "pages/squad/squad",
     "pages/home/home",
     "pages/user/user",
-    "pages/home/home",
     "pages/admin/admin",
-    "pages/index/home/home",
+    "pages/home/home",
     "pages/index/profile/profile",
     "pages/index/report/report"
   ],
@@ -25,7 +24,7 @@
     "backgroundColor": "#ffffff",
     "list": [
       {
-        "pagePath": "pages/index/home/home",
+        "pagePath": "pages/home/home",
         "text": "首页"
       },
       {

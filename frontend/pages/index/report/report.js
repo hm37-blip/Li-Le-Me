@@ -379,6 +379,13 @@ Page({
   },
 
   onShow() {
+    // 设置底部 tabBar 高亮
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({
+        current: 1
+      });
+    }
+
     // 页面显示时刷新头像和用户信息
     const app = getApp()
     const lcId = app.globalData.lcId || wx.getStorageSync('lcId') || this.data.lcId

@@ -1,22 +1,66 @@
-<view class="container home-page">
-  <view class="card">
-    <view class="title">🎉 欢迎回来</view>
-    <view class="desc mt-24">{{nickname || '同学'}}</view>
-    <view class="desc mt-16">LeetCode 用户名：{{leetcodeUsername || '未绑定'}}</view>
-    <view class="desc mt-16" wx:if="{{squadName}}">战队：{{squadName}}</view>
+<scroll-view class="page" scroll-y="{{true}}" enable-back-to-top="{{true}}">
+  <view class="header">
+    <text class="header-title">首页</text>
+    <text class="header-subtitle">{{squadName}}</text>
   </view>
 
-  <view class="card mt-24">
-    <view class="section-title">战队成员</view>
-    <view wx:if="{{loadingMembers}}" class="hint">加载中...</view>
-    <view wx:elif="{{members.length === 0}}" class="hint">暂无成员</view>
-    <view wx:else>
-      <view class="member-row" wx:for="{{members}}" wx:key="id">
-        <text class="member-nickname">{{item.nickname || '未设置昵称'}}</text>
-        <text class="member-lc">{{item.leetcode_username || '未绑定LC'}}</text>
+  <view class="summary-card">
+    <view class="card-content">
+      <image class="my-avatar" src="{{myInfo.avatarUrl}}" mode="aspectFill"></image>
+      <view class="my-info">
+        <view class="info-row">
+          <text class="my-name">{{myInfo.nickname || myInfo.lcId}}</text>
+          <text class="my-tier">{{myInfo.rankTier}}</text>
+        </view>
+        <view class="info-row-stats">
+          <text class="stat-item">排名 {{myInfo.rank || '-'}}</text>
+          <text class="stat-divider">|</text>
+          <text class="stat-item">总题数 {{myInfo.totalSolved || 0}}</text>
+        </view>
+      </view>
+      <view class="share-btn" bindtap="shareAchievement">
+        <text class="share-text">分享</text>
       </view>
     </view>
   </view>
 
-  <button class="logout-btn mt-32" bindtap="handleLogout">退出登录</button>
-</view>
+  <view class="section-header">
+    <text class="section-title">战队成员</text>
+    <text class="section-desc">{{members.length}} / {{teamMemberLimit}}</text>
+  </view>
+
+  <view class="leaderboard">
+    <block wx:for="{{members}}" wx:key="id">
+      <view class="rank-item">
+        <view class="rank-left">
+          <view class="rank-badge {{index < 3 ? 'top-rank' : ''}}">
+            {{index + 1}}
+          </view>
+          <image class="avatar" src="{{item.avatar_url || myInfo.avatarUrl}}" mode="aspectFill"></image>
+          <view class="user-info">
+            <text class="nickname">{{item.user_nickname || item.nickname || '同学'}}</text>
+            <text class="lcid">LC: {{item.leetcode_username || '未绑定'}}</text>
+          </view>
+        </view>
+
+        <view class="rank-right">
+          <text class="total-count">{{item.total_solved || 0}}</text>
+          <text class="daily-add">Score: {{item.score || 0}}</text>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <view class="footer-action">
+    <button class="logout-btn" bindtap="handleLogout">退出登录</button>
+  </view>
+
+  <view class="loading-area" wx:if="{{loadingMembers}}">
+    <text class="loading-text">同步数据中...</text>
+  </view>
+  <view class="empty-area" wx:if="{{!loadingMembers && members.length === 0}}">
+    <text class="empty-text">暂无成员数据</text>
+  </view>
+</scroll-view>
+
+<custom-tabbar current="{{0}}"></custom-tabbar>

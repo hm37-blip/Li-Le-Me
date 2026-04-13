@@ -10,7 +10,7 @@ Component({
   data: {
     list: [
       {
-        pagePath: '/pages/index/home/home',
+        pagePath: '/pages/home/home',
         text: '主页'
       },
       {
