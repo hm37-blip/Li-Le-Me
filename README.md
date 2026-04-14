@@ -259,3 +259,50 @@ mvn spring-boot:run
 - 主色调：LeetCode 橙 `#FFA116`，深灰 `#282828`
 - 字体大小：标题 16px / 正文 14px / 标注 12px
 - 组件库：WeUI
+
+---
+
+## 📁 目录结构规范
+
+### 后端 (Backend - Dennis & Andy)
+
+请在 `backend/src/main/java/com/lilema/` 下按功能建包，严禁在根目录散落文件：
+
+- **`controller/`**: 仅存放接口定义，内部按业务分包：
+  - `admin/`: 管理员高级权限接口
+  - `user/`: 用户基础接口（登录、绑定 LC）
+  - `squad/`: 战队逻辑接口
+  - `rank/`: 排行榜与趋势图接口 (@Weixin Team)
+- **`service/`**: 核心业务逻辑。所有计算（如 1:2:3 权重算法）、数据库操作、爬虫引擎逻辑必须写在 Service 及其实现类中。
+- **`entity/`**: 数据库模型：
+  - `po/`: Persistent Object，直接对应数据库表字段
+  - `dto/`: Data Transfer Object，用于接收前端参数
+  - `vo/`: View Object，用于返回给前端展示（需过滤敏感信息如 OpenID）
+- **`common/`**: 全局通用 Result 返回类、自定义异常处理及 JWT 工具类
+- **`sql/`**: 数据库初始化脚本 `init.sql` (@Greg0n)
+
+### 前端 (Frontend - Andy & Cici)
+
+请在 `frontend/` 下按以下规范放置小程序代码，严禁在根目录散落文件：
+
+- `pages/`: 所有页面文件夹
+  - `pages/index/`: 首页排行榜
+  - `pages/admin/`: 管理员后台页面 (Wendy 专项)
+  - `pages/registration/`: 绑定 LeetCode 页面
+- `components/`: 可复用 UI 组件（排名卡片、ECharts 图表封装等）
+- `static/images/`: 本地图标、Logo 及背景图片
+- `utils/`: 全局工具类
+  - `utils/request.js`: 网络请求拦截器（负责带上 Token）
+  - `utils/validate.js`: LeetCode ID 3-30 位等正则校验逻辑
+- `app.json`: 小程序全局配置（页面路径、窗口表现、Tab 栏）
+
+---
+
+## 🛠️ 提交规范 (Git Rules)
+
+1. **禁止直推**：严禁直接 Push 到 `main` 分支
+2. **分支命名**：功能开发使用 `feat-xxx`，修复 Bug 使用 `fix-xxx`
+3. **合并流程**：
+   - 提交前先 `git pull origin dev` 解决本地冲突
+   - 发起 Pull Request 后，由 Wendy (@hm37-blip) Review 后合并
+4. **命名一致性**：接口名必须严格遵守 `API_Contract.md` 中的定义

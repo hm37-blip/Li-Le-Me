@@ -1,0 +1,145 @@
+/* pages/profile/profile.wxss */
+page {
+  position: relative;
+  z-index: 0;
+  background-color: #282828;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.container {
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #282828;
+  padding-bottom: calc(150rpx + env(safe-area-inset-bottom));
+  position: relative;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* 头像区域 */
+.avatar-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30rpx;
+}
+
+.avatar {
+  width: 400rpx;
+  height: 400rpx;
+  border-radius: 50%;
+  border: 8rpx solid #FFA116;
+  background-color: #f0f0f0;
+}
+
+/* 上传头像按钮 */
+.upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14rpx 40rpx;
+  background: #FFA116;
+  border-radius: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(255, 161, 22, 0.25);
+  transition: all 0.3s;
+  margin-bottom: 50rpx;
+}
+
+.upload-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 2rpx 8rpx rgba(255, 161, 22, 0.3);
+}
+
+.upload-text {
+  font-size: 28rpx;
+  color: white;
+  font-weight: 500;
+}
+
+/* ID 区域 */
+.id-section {
+  width: 85%;
+  max-width: 600rpx;
+  margin-bottom: 30rpx;
+}
+
+.id-label {
+  display: block;
+  font-size: 26rpx;
+  color: #999;
+  margin-bottom: 8rpx;
+  text-align: left;
+}
+
+.id-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 20rpx;
+  background: white;
+  border-radius: 20rpx;
+}
+
+.id-value {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+  flex: 1;
+}
+
+.edit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12rpx 28rpx;
+  background: #FFA116;
+  border-radius: 30rpx;
+  transition: all 0.3s;
+}
+
+.edit-btn:active {
+  background: #e89010;
+  transform: scale(0.96);
+}
+
+.edit-text {
+  font-size: 26rpx;
+  color: white;
+  font-weight: 500;
+}
+
+/* 注销账号区域 */
+.logout-section {
+  width: 85%;
+  max-width: 600rpx;
+  margin-top: 100rpx;
+}
+
+.logout-btn {
+  width: 100%;
+  height: 90rpx;
+
+  display: flex;
+  align-items: center;      /* 垂直居中 */
+  justify-content: center;  /* 水平居中 */
+
+  background: transparent;
+  border: 2rpx solid #ff4444;
+  border-radius: 20rpx;
+
+  font-size: 30rpx;
+  color: #ff4444;
+  font-weight: 500;
+}
+
+.logout-btn::after {
+  border: none;
+}
+
+.logout-btn:active {
+  background: rgba(255, 68, 68, 0.1);
+  transform: scale(0.98);
+}

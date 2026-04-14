@@ -1,0 +1,162 @@
+.bind-page {
+  padding-top: 40rpx;
+}
+
+.title {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #222222;
+}
+
+.subtitle {
+  font-size: 26rpx;
+  color: #666666;
+}
+
+.input {
+  height: 88rpx;
+  border: 2rpx solid #d9d9d9;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  font-size: 30rpx;
+  background: #ffffff;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  border-color: #07c160;
+}
+
+.input-error {
+  border-color: #e53935 !important;
+  box-shadow: 0 0 0 2rpx rgba(229, 57, 53, 0.12);
+}
+
+.error-text {
+  display: block;
+  margin-top: 12rpx;
+  color: #d93025;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.rules-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.rule {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.rule-icon {
+  font-size: 26rpx;
+  color: #bbbbbb;
+  width: 28rpx;
+  text-align: center;
+}
+
+.rule-text {
+  font-size: 24rpx;
+  color: #999999;
+}
+
+.rule.pass .rule-icon,
+.rule.pass .rule-text {
+  color: #07c160;
+}
+
+.submit-btn {
+  background-color: #07c160 !important;
+  border: none;
+  border-radius: 12rpx;
+}
+
+/* ── 管理员浮动按钮 ── */
+.admin-float-btn {
+  position: fixed;
+  right: 32rpx;
+  bottom: 48rpx;
+  font-size: 22rpx;
+  color: #aaaaaa;
+  padding: 12rpx 20rpx;
+  border: 1rpx solid #dddddd;
+  border-radius: 32rpx;
+  background: #ffffff;
+}
+
+/* ── 管理员验证弹窗 ── */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-box {
+  width: 560rpx;
+  background: #ffffff;
+  border-radius: 20rpx;
+  padding: 48rpx 40rpx 36rpx;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #222222;
+  margin-bottom: 32rpx;
+}
+
+.modal-input {
+  height: 80rpx;
+  border: 2rpx solid #d9d9d9;
+  border-radius: 12rpx;
+  padding: 0 20rpx;
+  font-size: 28rpx;
+  background: #f7f7f7;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modal-fail-text {
+  font-size: 28rpx;
+  color: #d93025;
+  margin-bottom: 40rpx;
+}
+
+.modal-footer-right {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 32rpx;
+}
+
+.modal-btn-primary {
+  background: #07c160 !important;
+  color: #ffffff;
+  font-size: 28rpx;
+  border-radius: 12rpx;
+  padding: 0 40rpx;
+  height: 72rpx;
+  line-height: 72rpx;
+  border: none;
+}
+
+.modal-btn-ghost {
+  background: transparent !important;
+  color: #666666;
+  font-size: 28rpx;
+  border-radius: 12rpx;
+  padding: 0 40rpx;
+  height: 72rpx;
+  line-height: 72rpx;
+  border: 1rpx solid #dddddd !important;
+}
