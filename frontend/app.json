@@ -3,38 +3,15 @@
     "pages/login/login",
     "pages/registration/registration",
     "pages/squad/squad",
-    "pages/home/home",
     "pages/user/user",
-    "pages/admin/admin",
-    "pages/index/profile/profile",
-    "pages/index/report/report"
+    "pages/home/home",
+    "pages/admin/admin"
   ],
   "window": {
     "navigationBarBackgroundColor": "#07c160",
     "navigationBarTitleText": "力了么",
     "navigationBarTextStyle": "white",
-    "backgroundColor": "#f5f5f5",
-    "backgroundTextStyle": "light"
-  },
-  "tabBar": {
-    "custom": true,
-    "color": "#7A7E83",
-    "selectedColor": "#07c160",
-    "backgroundColor": "#ffffff",
-    "list": [
-      {
-        "pagePath": "pages/home/home",
-        "text": "首页"
-      },
-      {
-        "pagePath": "pages/index/report/report",
-        "text": "战报"
-      },
-      {
-        "pagePath": "pages/index/profile/profile",
-        "text": "我的"
-      }
-    ]
+    "backgroundColor": "#f5f5f5"
   },
   "style": "v2"
 }
