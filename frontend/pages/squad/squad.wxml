@@ -1,0 +1,21 @@
+<view class="container invite-page">
+  <view class="card">
+    <view class="title">输入战队邀请码</view>
+    <view class="subtitle mt-16">请向战队管理员获取邀请码</view>
+
+    <view class="mt-32">
+      <input
+        class="input {{errorMessage ? 'input-error' : ''}}"
+        placeholder="请输入邀请码"
+        value="{{inviteCode}}"
+        bindinput="onInputChange"
+        maxlength="20"
+      />
+      <text class="error-text" wx:if="{{errorMessage}}">{{errorMessage}}</text>
+    </view>
+
+    <button class="submit-btn mt-32" type="primary" loading="{{loading}}" disabled="{{loading}}" bindtap="handleVerify">
+      {{loading ? '验证中...' : '验证邀请码'}}
+    </button>
+  </view>
+</view>
