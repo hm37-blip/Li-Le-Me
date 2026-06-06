@@ -1,0 +1,74 @@
+.profile-page {
+  padding-top: 40rpx;
+}
+
+.title {
+  font-size: 42rpx;
+  font-weight: 600;
+  color: #222222;
+}
+
+.subtitle {
+  font-size: 26rpx;
+  color: #07c160;
+  font-weight: 500;
+}
+
+.label {
+  display: block;
+  font-size: 28rpx;
+  color: #555555;
+  margin-bottom: 12rpx;
+}
+
+.avatar-picker {
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+}
+
+.avatar-picker::after {
+  border: none;
+}
+
+.avatar {
+  width: 132rpx;
+  height: 132rpx;
+  border-radius: 50%;
+  background: #f0f0f0;
+}
+
+.input {
+  height: 84rpx;
+  border: 2rpx solid #e5e5e5;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  font-size: 30rpx;
+  background-color: #ffffff;
+}
+
+.input-error {
+  border-color: #e53935 !important;
+}
+
+.error-text {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #d93025;
+}
+
+.btn-wrap {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.join-btn {
+  background-color: #07c160 !important;
+  border: none;
+  border-radius: 12rpx;
+  width: auto !important;
+  min-width: 200rpx;
+  padding: 0 48rpx;
+}
