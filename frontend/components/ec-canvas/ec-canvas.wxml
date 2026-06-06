@@ -1,0 +1,6 @@
+<canvas
+  type="2d"
+  class="ec-canvas chart-class"
+  canvas-id="{{canvasId}}"
+  id="{{canvasId}}">
+</canvas>

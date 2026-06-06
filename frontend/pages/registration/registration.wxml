@@ -1,0 +1,67 @@
+<view class="container bind-page">
+  <view class="card">
+    <view class="title">绑定你的 LeetCode 账号</view>
+    <view class="subtitle mt-16">输入你在 leetcode.com 的用户名</view>
+
+    <view class="mt-32">
+      <input
+        class="input {{errorMessage ? 'input-error' : ''}}"
+        placeholder="例如：lee_code"
+        value="{{leetcodeUsername}}"
+        bindinput="onInputChange"
+        maxlength="30"
+      />
+      <text class="error-text" wx:if="{{errorMessage}}">{{errorMessage}}</text>
+    </view>
+
+    <view class="rules-box mt-16">
+      <view class="rule {{ruleStatus.length}}">
+        <text class="rule-icon">{{leetcodeUsername.length >= 3 && leetcodeUsername.length <= 30 ? '✓' : '·'}}</text>
+        <text class="rule-text">3 - 30 个字符</text>
+      </view>
+      <view class="rule {{ruleStatus.start}}">
+        <text class="rule-icon">{{ruleStatus.start === 'pass' ? '✓' : '·'}}</text>
+        <text class="rule-text">以字母或下划线开头</text>
+      </view>
+      <view class="rule {{ruleStatus.chars}}">
+        <text class="rule-icon">{{ruleStatus.chars === 'pass' ? '✓' : '·'}}</text>
+        <text class="rule-text">只含字母、数字、下划线</text>
+      </view>
+    </view>
+
+    <button class="submit-btn mt-32" type="primary" loading="{{loading}}" disabled="{{loading}}" bindtap="handleBind">
+      {{loading ? '验证中...' : '验证'}}
+    </button>
+  </view>
+</view>
+
+<!-- 右下角管理员入口 -->
+<view class="admin-float-btn" bindtap="openAdminModal">我是管理员</view>
+
+<!-- 管理员验证弹窗 -->
+<view class="modal-overlay" wx:if="{{showAdminModal}}">
+  <view class="modal-box">
+    <view class="modal-title">管理员验证</view>
+
+    <!-- 验证失败状态 -->
+    <view wx:if="{{adminVerifyFailed}}">
+      <view class="modal-fail-text">管理员验证失败</view>
+      <view class="modal-footer-right">
+        <button class="modal-btn-ghost" bindtap="closeAdminModal">确定</button>
+      </view>
+    </view>
+
+    <!-- 输入验证码状态 -->
+    <view wx:else>
+      <input
+        class="modal-input"
+        placeholder="请输入验证码"
+        value="{{adminCode}}"
+        bindinput="onAdminCodeInput"
+      />
+      <view class="modal-footer-right">
+        <button class="modal-btn-primary" bindtap="handleAdminVerify">验证</button>
+      </view>
+    </view>
+  </view>
+</view>

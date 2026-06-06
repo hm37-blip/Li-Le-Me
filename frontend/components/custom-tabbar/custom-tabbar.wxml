@@ -1,0 +1,16 @@
+<!--components/custom-tabbar/custom-tabbar.wxml-->
+<view class="tabbar" catchtouchmove="{{true}}">
+  <view class="tabbar-divider"></view>
+  <view class="tabbar-container">
+    <view
+      wx:for="{{list}}"
+      wx:key="pagePath"
+      class="tabbar-item {{current === index ? 'active' : ''}}"
+      data-index="{{index}}"
+      catchtap="switchTab"
+      hover-class="tabbar-item-hover"
+      hover-stay-time="100">
+      <text class="tabbar-text">{{item.text}}</text>
+    </view>
+  </view>
+</view>

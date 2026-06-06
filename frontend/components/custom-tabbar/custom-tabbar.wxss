@@ -1,0 +1,72 @@
+/* components/custom-tabbar/custom-tabbar.wxss */
+.tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #FFFFFF;
+  z-index: 99999 !important;
+  pointer-events: auto;
+}
+
+.tabbar-divider {
+  height: 1px;
+  background: linear-gradient(to right,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.1) 20%,
+    rgba(0, 0, 0, 0.1) 80%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.tabbar-container {
+  display: flex;
+  height: 100rpx;
+  padding-bottom: env(safe-area-inset-bottom);
+  background-color: #FFFFFF;
+  position: relative;
+  z-index: 99999;
+}
+
+.tabbar-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 99999;
+}
+
+.tabbar-text {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #999999;
+  transition: all 0.3s ease;
+  letter-spacing: 1rpx;
+}
+
+.tabbar-item.active .tabbar-text {
+  color: #FFA116;
+  font-weight: 600;
+  font-size: 34rpx;
+  transform: scale(1.05);
+}
+
+/* 选中状态底部指示条 */
+.tabbar-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 8rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40rpx;
+  height: 6rpx;
+  background-color: #FFA116;
+  border-radius: 3rpx;
+}
+
+/* 点击反馈效果 */
+.tabbar-item-hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
