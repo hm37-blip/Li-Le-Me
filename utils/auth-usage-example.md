@@ -1,19 +1,19 @@
-# Token 鉴权使用指南
+# Token Authentication Guide
 
-## 📚 功能说明
+## Overview
 
-已实现完整的 Token 鉴权体系，包括：
-- ✅ Token 自动添加到请求头
-- ✅ Token 过期自动刷新
-- ✅ 并发请求时防止重复刷新
-- ✅ 刷新失败自动跳转登录页
-- ✅ 用户信息本地存储
+A complete token authentication system has been implemented, covering:
+- ✅ Automatic token injection into request headers
+- ✅ Automatic token refresh on expiry
+- ✅ Deduplication of concurrent refresh requests
+- ✅ Auto-redirect to login page on refresh failure
+- ✅ Local storage of user info
 
 ---
 
-## 🔐 使用方法
+## Usage
 
-### 1. 登录并保存 Token
+### 1. Login and save token
 
 ```javascript
 // pages/login/login.js
@@ -22,29 +22,29 @@ const api = require('../../utils/api.js')
 Page({
   async handleLogin() {
     try {
-      // 调用登录 API（示例）
+      // Call login API (example)
       const res = await api.bindLeetCodeAccount(openid, lcId)
 
-      // 假设后端返回：
+      // Expected backend response shape:
       // {
       //   token: 'eyJhbGciOiJIUzI1NiIs...',
       //   refreshToken: 'refresh_token_here',
-      //   expiresIn: 7200,  // 2小时
+      //   expiresIn: 7200,  // 2 hours
       //   userInfo: { lcId: 'xxx', ... }
       // }
 
-      // 保存 Token
+      // Save token
       api.auth.setToken(res.token, res.refreshToken, res.expiresIn)
 
-      // 保存用户信息
+      // Save user info
       api.auth.setUserInfo(res.userInfo)
 
-      // 跳转到主页
+      // Navigate to home
       wx.switchTab({ url: '/pages/index/index' })
 
     } catch (err) {
-      console.error('登录失败:', err)
-      wx.showToast({ title: '登录失败', icon: 'error' })
+      console.error('Login failed:', err)
+      wx.showToast({ title: 'Login failed', icon: 'error' })
     }
   }
 })
@@ -52,7 +52,7 @@ Page({
 
 ---
 
-### 2. 发送需要认证的请求
+### 2. Send authenticated requests
 
 ```javascript
 // pages/report/report.js
@@ -60,16 +60,16 @@ const api = require('../../utils/api.js')
 
 Page({
   onLoad() {
-    // 所有 API 请求都会自动添加 Token
-    // 如果 Token 过期，会自动刷新后重试
+    // All API calls automatically include the token.
+    // If the token is expired, it will be refreshed and the request retried.
 
     api.getTrendData(openid, 7)
       .then(res => {
-        console.log('数据加载成功:', res)
+        console.log('Data loaded:', res)
       })
       .catch(err => {
-        console.error('数据加载失败:', err)
-        // 如果是认证失败，会自动跳转登录页
+        console.error('Failed to load data:', err)
+        // On auth failure, the user is automatically redirected to the login page.
       })
   }
 })
@@ -77,21 +77,20 @@ Page({
 
 ---
 
-### 3. 检查登录状态
+### 3. Check login status
 
 ```javascript
-// app.js 或任何页面
+// app.js or any page
 const api = require('./utils/api.js')
 
 App({
   onLaunch() {
-    // 检查用户是否已登录
     if (api.auth.isLoggedIn()) {
-      console.log('用户已登录')
+      console.log('User is logged in')
       const userInfo = api.auth.getUserInfo()
-      console.log('用户信息:', userInfo)
+      console.log('User info:', userInfo)
     } else {
-      console.log('用户未登录')
+      console.log('User is not logged in')
       wx.navigateTo({ url: '/pages/login/login' })
     }
   }
@@ -100,7 +99,7 @@ App({
 
 ---
 
-### 4. 退出登录
+### 4. Logout
 
 ```javascript
 // pages/profile/profile.js
@@ -108,12 +107,12 @@ const api = require('../../utils/api.js')
 
 Page({
   handleLogout() {
-    // 清除所有认证信息
+    // Clear all auth state
     api.auth.clearAuth()
 
-    wx.showToast({ title: '已退出登录', icon: 'success' })
+    wx.showToast({ title: 'Logged out', icon: 'success' })
 
-    // 跳转到登录页
+    // Redirect to login page
     wx.reLaunch({ url: '/pages/login/login' })
   }
 })
@@ -121,74 +120,75 @@ Page({
 
 ---
 
-### 5. 发送不需要认证的请求（可选）
+### 5. Unauthenticated requests (optional)
 
 ```javascript
-// 如果某个接口不需要 Token（如公开的排行榜）
-api.getRankingList('total', false)  // 第4个参数设为 false
+// For public endpoints that don't require a token (e.g. public leaderboard)
+api.getRankingList('total', false)  // Pass false as the 4th argument
 ```
 
 ---
 
-## 🛠️ API 文档
+## API Reference
 
-### auth.js 模块
+### auth.js module
 
-| 方法 | 参数 | 返回值 | 说明 |
-|------|------|--------|------|
-| `setToken(token, refreshToken, expiresIn)` | token(String), refreshToken(String?), expiresIn(Number?) | void | 保存访问令牌 |
-| `getToken()` | - | String\|null | 获取访问令牌 |
-| `getRefreshToken()` | - | String\|null | 获取刷新令牌 |
-| `isTokenExpired()` | - | Boolean | 检查 Token 是否过期 |
-| `clearAuth()` | - | void | 清除所有认证信息 |
-| `setUserInfo(userInfo)` | userInfo(Object) | void | 保存用户信息 |
-| `getUserInfo()` | - | Object\|null | 获取用户信息 |
-| `isLoggedIn()` | - | Boolean | 检查用户是否已登录 |
+| Method | Parameters | Returns | Description |
+|--------|------------|---------|-------------|
+| `setToken(token, refreshToken, expiresIn)` | token(String), refreshToken(String?), expiresIn(Number?) | void | Persist the access token |
+| `getToken()` | — | String\|null | Retrieve the access token |
+| `getRefreshToken()` | — | String\|null | Retrieve the refresh token |
+| `isTokenExpired()` | — | Boolean | Check whether the token has expired |
+| `clearAuth()` | — | void | Clear all auth state |
+| `setUserInfo(userInfo)` | userInfo(Object) | void | Persist user info |
+| `getUserInfo()` | — | Object\|null | Retrieve user info |
+| `isLoggedIn()` | — | Boolean | Check whether the user is logged in |
 
 ---
 
-## 🔄 Token 刷新流程
+## Token Refresh Flow
 
 ```
 ┌─────────────┐
-│  发起请求    │
+│ Send request │
 └──────┬──────┘
        │
        ▼
 ┌─────────────────┐
-│ 自动添加 Token  │
+│ Inject token    │
 └──────┬──────────┘
        │
        ▼
    ┌───────┐
-   │ 401？ │─── No ──▶ 返回数据
+   │ 401?  │─── No ──▶ Return data
    └───┬───┘
        │ Yes
        ▼
 ┌──────────────────┐
-│ 调用刷新 Token   │
+│ Refresh token    │
 └──────┬───────────┘
        │
    ┌───▼────┐
-   │ 成功？ │─── Yes ──▶ 重试原请求
+   │Success?│─── Yes ──▶ Retry original request
    └───┬────┘
        │ No
        ▼
 ┌──────────────┐
-│ 清除认证信息 │
+│ Clear auth   │
 └──────┬───────┘
        │
        ▼
 ┌──────────────┐
-│ 跳转登录页   │
+│ Redirect to  │
+│ login page   │
 └──────────────┘
 ```
 
 ---
 
-## 📝 后端 API 规范
+## Backend API Spec
 
-### 登录接口应返回：
+### Login endpoint response shape:
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -201,16 +201,16 @@ api.getRankingList('total', false)  // 第4个参数设为 false
 }
 ```
 
-### 刷新 Token 接口：
-- **路径**: `/api/v1/auth/refresh`
-- **方法**: `POST`
-- **请求体**:
+### Token refresh endpoint:
+- **Path**: `/api/v1/auth/refresh`
+- **Method**: `POST`
+- **Request body**:
   ```json
   {
     "refreshToken": "refresh_token_here"
   }
   ```
-- **响应**:
+- **Response**:
   ```json
   {
     "token": "new_access_token",
@@ -219,35 +219,35 @@ api.getRankingList('total', false)  // 第4个参数设为 false
   }
   ```
 
-### 认证请求头格式：
+### Auth header format:
 ```
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 ---
 
-## ⚠️ 注意事项
+## Notes
 
-1. **Token 过期时间**：建议设置为 2小时（7200秒），刷新令牌设置为 7天
-2. **自动刷新触发时机**：提前 5 分钟判定为即将过期
-3. **并发请求保护**：多个请求同时遇到 401 时，只会触发一次刷新
-4. **登录页路径**：需要确保 `/pages/login/login` 页面存在
-5. **Storage Key**：不要手动修改 `auth_token`、`refresh_token` 等 key
+1. **Token expiry**: Recommended TTL is 2 hours (7200s); refresh token TTL is 7 days.
+2. **Proactive refresh**: Tokens are considered near-expiry 5 minutes before the deadline.
+3. **Concurrent request protection**: Multiple simultaneous 401s trigger only one refresh cycle.
+4. **Login page path**: Ensure `/pages/login/login` exists before deploying.
+5. **Storage keys**: Do not manually modify `auth_token`, `refresh_token`, or related keys.
 
 ---
 
-## 🔍 调试技巧
+## Debugging
 
 ```javascript
-// 查看当前 Token
+// Inspect current token
 console.log('Token:', api.auth.getToken())
 
-// 查看 Token 是否过期
-console.log('已过期?', api.auth.isTokenExpired())
+// Check expiry status
+console.log('Expired?', api.auth.isTokenExpired())
 
-// 查看用户信息
-console.log('用户信息:', api.auth.getUserInfo())
+// Inspect user info
+console.log('User info:', api.auth.getUserInfo())
 
-// 手动清除 Token（测试用）
+// Manually clear token (for testing)
 api.auth.clearAuth()
 ```
