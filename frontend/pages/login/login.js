@@ -49,7 +49,11 @@ Page({
             } else if (status === 1) {
               wx.redirectTo({ url: '/pages/squad/squad' });
             } else {
+<<<<<<< HEAD
               wx.redirectTo({ url: '/pages/home/home' });
+=======
+              wx.switchTab({ url: '/pages/home/home' });
+>>>>>>> origin/feat-data-viz-(Andy-Jiang)
             }
           },
           fail: () => { wx.showToast({ title: '网络异常，请检查后端服务是否启动', icon: 'none' }); },
@@ -61,5 +65,10 @@ Page({
         this.setData({ loading: false });
       }
     });
+<<<<<<< HEAD
   }
 })
+=======
+  },
+})
+>>>>>>> origin/feat-data-viz-(Andy-Jiang)

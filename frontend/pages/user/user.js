@@ -98,7 +98,11 @@ Page({
         };
 
         wx.setStorageSync('registration_status', 2);
+<<<<<<< HEAD
         wx.redirectTo({ url: '/pages/home/home' });
+=======
+        wx.switchTab({ url: '/pages/home/home' });
+>>>>>>> origin/feat-data-viz-(Andy-Jiang)
       },
       fail: () => {
         wx.showToast({ title: '网络异常，请检查后端服务', icon: 'none' });

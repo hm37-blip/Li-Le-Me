@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 -- Li-Le-Me Database Initialization Script
 
 CREATE DATABASE IF NOT EXISTS lilema
@@ -50,3 +51,10 @@ CREATE TABLE IF NOT EXISTS daily_logs (
     rank_tier    VARCHAR(16),
     UNIQUE KEY uk_openid_date (openid, log_date)
 );
+=======
+MERGE INTO squads (squad_name, invite_code, admin_id, max_members, is_active, created_at)
+KEY (invite_code) VALUES ('测试战队', 'TEST2024', 'admin_001', 50, true, CURRENT_TIMESTAMP);
+
+MERGE INTO squads (squad_name, invite_code, admin_id, max_members, is_active, created_at)
+KEY (invite_code) VALUES ('CESA战队', 'CESA666', 'admin_001', 50, true, CURRENT_TIMESTAMP);
+>>>>>>> origin/feat-data-viz-(Andy-Jiang)

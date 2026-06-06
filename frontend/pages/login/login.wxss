@@ -31,6 +31,17 @@
   border-radius: 12rpx;
 }
 
+<<<<<<< HEAD
+=======
+.dev-login-btn {
+  background-color: #f0f0f0 !important;
+  color: #999 !important;
+  border: 1rpx dashed #ccc;
+  border-radius: 12rpx;
+  font-size: 26rpx;
+}
+
+>>>>>>> origin/feat-data-viz-(Andy-Jiang)
 .hint-text {
   display: block;
   font-size: 26rpx;

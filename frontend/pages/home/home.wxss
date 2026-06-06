@@ -98,3 +98,7 @@ page {
 .share-text {
   font-size: 24rpx;
   font-weight: 600;
+<<<<<<< HEAD
+=======
+}
+>>>>>>> origin/feat-data-viz-(Andy-Jiang)

@@ -5,7 +5,7 @@
   "backgroundColor": "#282828",
   "backgroundTextStyle": "light",
   "usingComponents": {
-    "ec-canvas": "/frontend/components/ec-canvas/ec-canvas",
-    "custom-tabbar": "/frontend/components/custom-tabbar/custom-tabbar"
+    "ec-canvas": "/components/ec-canvas/ec-canvas",
+    "custom-tabbar": "/components/custom-tabbar/custom-tabbar"
   }
 }

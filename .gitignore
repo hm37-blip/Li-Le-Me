@@ -16,32 +16,23 @@ project.private.config.json
 miniprogram_npm/
 
 # ECharts 核心文件（太大，需要手动下载）
-frontend/components/ec-canvas/echarts.min.js
 components/ec-canvas/echarts.min.js
 
 # Node modules
 node_modules/
 
-# 临时文件
-.tmp/
-.cache/
-*.log
-
-# 编译产物
-dist/
-build/
-target/
-
-# Temp / test export files
-*.xlsx
-*.xls
-*.csv
-*.txt.bak
-
 # 微信开发者工具生成的文件
 miniprogram_npm/
 .idea/
 
+# 临时文件
+.tmp/
+.cache/
+
 # 用户配置
 project.config.json
 project.private.config.json
+
+# 编译产物
+dist/
+build/

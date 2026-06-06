@@ -1,15 +1,22 @@
 App({
+  // 1. 整合了 Andy 的 lcId 和 Cici 的业务字段
   globalData: {
     baseUrl: 'http://localhost:8080',
     openid: '',
     token: '',
     userInfo: null,
-    inviteCode: '',
-    squadName: '',
-    lcId: null // lcId 加这里了
+    lcId: null,       // 保留 Andy 之后要用的标定字段
+    inviteCode: '',   // 保留 Cici 的组队邀请码
+    squadName: ''     // 保留 Cici 的战队名称
   },
 
   onLaunch() {
+    // 2. 保留 Andy 的云开发初始化
+    if (wx.cloud) {
+      wx.cloud.init({ traceUser: true });
+    }
+
+    // 3. 保留 Cici 的自动登录、状态校验与第二版的完整异常拦截
     const openid = wx.getStorageSync('openid');
     const token = wx.getStorageSync('token');
 
@@ -31,15 +38,17 @@ App({
             const status = Number(data.registration_status);
             wx.setStorageSync('registration_status', status);
 
+            // 根据注册状态自动重定向页面
             if (status === 0) {
               wx.redirectTo({ url: '/pages/registration/registration' });
             } else if (status === 1) {
               wx.redirectTo({ url: '/pages/squad/squad' });
             } else if (status >= 2) {
-              wx.redirectTo({ url: '/pages/home/home' });
+              // 注意：如果 home 是底部的 TabBar 页面，必须使用 switchTab 才能跳转成功
+              wx.switchTab({ url: '/pages/home/home' });
             }
           } else {
-            // 如果后端返回错误（如 401），也跳回登录页
+            // 如果后端返回错误（如 401 鉴权失败），跳回登录页
             wx.redirectTo({ url: '/pages/login/login' });
           }
         },
@@ -49,15 +58,14 @@ App({
           wx.redirectTo({
             url: '/pages/login/login',
             fail: (err) => {
-              console.error('跳转登录页失败，请检查 app.json 里的路径', err);
+              console.error('跳转登录页失败，请检查 app.json 里的路径配置', err);
             }
           });
         }
       });
     } else {
-      // 如果本地连 openid 都没有，直接去登录页
+      // 如果本地连 openid 或 token 都没有，直接去登录页
       wx.redirectTo({ url: '/pages/login/login' });
     }
   }
 })
-

@@ -1,5 +1,6 @@
 package com.lilema;
 
+<<<<<<< HEAD
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import org.mybatis.spring.annotation.MapperScan;
@@ -24,4 +25,16 @@ public class LiLeMeApplication {
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor());
         return interceptor;
     }
+=======
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class LiLeMeApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(LiLeMeApplication.class, args);
+	}
+
+>>>>>>> origin/feat-data-viz-(Andy-Jiang)
 }
