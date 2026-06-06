@@ -1,6 +1,5 @@
 package com.lilema.entity.po;
 
-<<<<<<< HEAD
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -184,5 +183,4 @@ public class User {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
->>>>>>> origin/feat-data-viz-(Andy-Jiang)
 }

@@ -97,12 +97,9 @@ Page({
           squad_name: data.squad_name || ''
         };
 
+        // 统一锁定为 redirectTo 跳转，完美绕过本地多出的独立前端文件夹路由机制
         wx.setStorageSync('registration_status', 2);
-<<<<<<< HEAD
         wx.redirectTo({ url: '/pages/home/home' });
-=======
-        wx.switchTab({ url: '/pages/home/home' });
->>>>>>> origin/feat-data-viz-(Andy-Jiang)
       },
       fail: () => {
         wx.showToast({ title: '网络异常，请检查后端服务', icon: 'none' });

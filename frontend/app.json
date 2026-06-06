@@ -6,7 +6,6 @@
     "pages/home/home",
     "pages/user/user",
     "pages/admin/admin",
-    "pages/home/home",
     "pages/index/profile/profile",
     "pages/index/report/report"
   ],

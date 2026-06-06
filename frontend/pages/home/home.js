@@ -1,17 +1,4 @@
-<<<<<<< HEAD
-#home.js
-=======
->>>>>>> origin/feat-data-viz-(Andy-Jiang)
-/**
- * home.js - Lileme
- * Logic: Includes user status validation, retrieving team members, sharing, and logout functionality
- */
-
-<<<<<<< HEAD
-const api = require('../../../utils/api.js')
-=======
 const api = require('../../utils/api.js')
->>>>>>> origin/feat-data-viz-(Andy-Jiang)
 
 Page({
   data: {
@@ -37,16 +24,12 @@ Page({
   },
 
   onShow() {
-<<<<<<< HEAD
-=======
-    // 设置底部 tabBar 高亮
+    // 设置底部 tabBar 高亮（保留 Andy 的自定义 Tabbar 联动逻辑）
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({
         current: 0
       });
     }
-
->>>>>>> origin/feat-data-viz-(Andy-Jiang)
     this.refreshPageData();
   },
   
@@ -60,10 +43,8 @@ Page({
     }
 
     this.fetchUserStatus();
-
     this.fetchMembers();
   },
-
 
   fetchUserStatus() {
     const app = getApp();
@@ -86,7 +67,6 @@ Page({
     });
   },
 
-  
   fetchMembers() {
     const app = getApp();
     this.setData({ loadingMembers: true });
@@ -113,21 +93,14 @@ Page({
     }, 1000);
   },
 
-  
   onShareAppMessage() {
-    const { lcId, totalSolved } = this.data.myInfo;
+    const { totalSolved } = this.data.myInfo;
     return {
       title: `我在「力了吗」已刷题 ${totalSolved} 道！`,
-<<<<<<< HEAD
-      path: '/frontend/pages/home/home',
-      imageUrl: '/frontend/static/images/share-cover.png'
-=======
-      path: '/pages/home/home',
-      imageUrl: '/static/images/share-cover.png'
->>>>>>> origin/feat-data-viz-(Andy-Jiang)
+      path: '/pages/home/home', // 👈 完美去套娃，删除多余的 /frontend
+      imageUrl: '/static/images/share-cover.png' // 👈 完美去套娃
     };
   },
-
 
   handleLogout() {
     wx.showModal({

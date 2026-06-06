@@ -49,15 +49,16 @@ Page({
             } else if (status === 1) {
               wx.redirectTo({ url: '/pages/squad/squad' });
             } else {
-<<<<<<< HEAD
+              // 统一采用 redirectTo，确保能顺利加载新总目录下的首页结构
               wx.redirectTo({ url: '/pages/home/home' });
-=======
-              wx.switchTab({ url: '/pages/home/home' });
->>>>>>> origin/feat-data-viz-(Andy-Jiang)
             }
           },
-          fail: () => { wx.showToast({ title: '网络异常，请检查后端服务是否启动', icon: 'none' }); },
-          complete: () => { this.setData({ loading: false }); }
+          fail: () => { 
+            wx.showToast({ title: '网络异常，请检查后端服务是否启动', icon: 'none' }); 
+          },
+          complete: () => { 
+            this.setData({ loading: false }); 
+          }
         });
       },
       fail: () => {
@@ -65,10 +66,5 @@ Page({
         this.setData({ loading: false });
       }
     });
-<<<<<<< HEAD
   }
 })
-=======
-  },
-})
->>>>>>> origin/feat-data-viz-(Andy-Jiang)

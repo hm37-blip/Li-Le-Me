@@ -31,8 +31,8 @@
   border-radius: 12rpx;
 }
 
-<<<<<<< HEAD
-=======
+
+
 .dev-login-btn {
   background-color: #f0f0f0 !important;
   color: #999 !important;
@@ -41,7 +41,7 @@
   font-size: 26rpx;
 }
 
->>>>>>> origin/feat-data-viz-(Andy-Jiang)
+
 .hint-text {
   display: block;
   font-size: 26rpx;
