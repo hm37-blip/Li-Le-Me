@@ -1,108 +1,91 @@
 package com.lilema.controller.user;
 
-import com.lilema.dto.ApiResponse;
-import com.lilema.service.UserService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.lilema.entity.po.Squad;
+import com.lilema.entity.po.User;
+import com.lilema.mapper.SquadMapper;
+import com.lilema.mapper.UserMapper;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
-@Slf4j
+/**
+ * master 前端契约的微信登录接口,跑在 dev 的 MyBatis-Plus 数据层上。
+ * mock 模式:openid = "mock_" + device_id(稳定标识同一虚拟账号)。
+ */
 @RestController
-@RequestMapping("/api")
-@RequiredArgsConstructor
+@RequestMapping("/api/wechat")
 public class WechatLoginController {
 
-    private final UserService userService;
+    private final UserMapper userMapper;
+    private final SquadMapper squadMapper;
 
-    /**
-     * POST /api/auth/login
-     * <p>
-     * Exchange a WeChat js_code for an openid.
-     * Request body: {"js_code": "..."}
-     * Response: {"openid": "...", "registration_status": "new"|"existing"}
-     */
-    @PostMapping("/auth/login")
-    public ApiResponse<Map<String, Object>> login(@RequestBody Map<String, String> body) {
+    public WechatLoginController(UserMapper userMapper, SquadMapper squadMapper) {
+        this.userMapper = userMapper;
+        this.squadMapper = squadMapper;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> body) {
         String jsCode = body.get("js_code");
-        if (jsCode == null || jsCode.isBlank()) {
-            return ApiResponse.error(400, "js_code is required");
+        String deviceId = body.get("device_id");
+
+        String openid;
+        if (deviceId != null && !deviceId.isBlank()) {
+            openid = "mock_" + deviceId;
+        } else {
+            openid = "mock_" + (jsCode == null ? "anon" : Integer.toString(jsCode.hashCode()));
         }
-        try {
-            Map<String, Object> result = userService.wechatLogin(jsCode);
-            return ApiResponse.success(result);
-        } catch (RuntimeException e) {
-            log.error("WeChat login error: {}", e.getMessage());
-            return ApiResponse.error(500, e.getMessage());
+
+        User user = userMapper.selectOne(new QueryWrapper<User>().eq("openid", openid).last("LIMIT 1"));
+        boolean isNew = (user == null);
+        if (isNew) {
+            user = new User();
+            user.setOpenid(openid);
+            user.setTotalSolved(0);
+            user.setTotalPoints(0);
+            user.setDailySteps(0);
+            user.setRegistrationStatus(0);
+            user.setToken(UUID.randomUUID().toString());
+            user.setCreatedAt(LocalDateTime.now());
+            userMapper.insert(user);
+        } else if (user.getToken() == null || user.getToken().isBlank()) {
+            String token = UUID.randomUUID().toString();
+            userMapper.update(null, new UpdateWrapper<User>().eq("openid", openid).set("token", token));
+            user.setToken(token);
         }
+
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("openid", user.getOpenid());
+        resp.put("is_new_user", isNew);
+        resp.put("token", user.getToken());
+        resp.put("registration_status", user.getRegistrationStatus());
+        if (!isNew) {
+            resp.put("user_info", buildUserInfo(user));
+        }
+        return ResponseEntity.ok(resp);
     }
 
-    /**
-     * POST /api/auth/bind-lc
-     * <p>
-     * Bind a LeetCode account to the current user.
-     * Request body: {"openid": "...", "lc_username": "..."}
-     */
-    @PostMapping("/auth/bind-lc")
-    public ApiResponse<Void> bindLeetCode(@RequestBody Map<String, String> body) {
-        String openid = body.get("openid");
-        String lcUsername = body.get("lc_username");
-        if (openid == null || openid.isBlank()) {
-            return ApiResponse.error(400, "openid is required");
+    private Map<String, Object> buildUserInfo(User user) {
+        Map<String, Object> info = new HashMap<>();
+        info.put("nickname", user.getNickname());
+        info.put("leetcode_username", user.getLcId());
+        info.put("avatar_file_id", user.getAvatarUrl());
+        info.put("squad_id", user.getSquadId());
+        if (user.getSquadId() != null) {
+            Squad squad = squadMapper.selectById(user.getSquadId());
+            if (squad != null) {
+                info.put("squad_name", squad.getSquadName());
+            }
         }
-        if (lcUsername == null || lcUsername.isBlank()) {
-            return ApiResponse.error(400, "lc_username is required");
-        }
-        try {
-            userService.bindLeetCode(openid, lcUsername);
-            return ApiResponse.success("LeetCode account bound successfully", null);
-        } catch (RuntimeException e) {
-            log.error("Bind LC error for {}: {}", openid, e.getMessage());
-            return ApiResponse.error(500, e.getMessage());
-        }
-    }
-
-    /**
-     * POST /api/user/profile
-     * <p>
-     * Update the user's display profile.
-     * Request body: {"openid": "...", "nickname": "...", "avatar_url": "..."}
-     */
-    @PostMapping("/user/profile")
-    public ApiResponse<Void> updateProfile(@RequestBody Map<String, String> body) {
-        String openid = body.get("openid");
-        if (openid == null || openid.isBlank()) {
-            return ApiResponse.error(400, "openid is required");
-        }
-        String nickname = body.get("nickname");
-        String avatarUrl = body.get("avatar_url");
-        try {
-            userService.updateUserProfile(openid, nickname, avatarUrl);
-            return ApiResponse.success("Profile updated", null);
-        } catch (RuntimeException e) {
-            log.error("Update profile error for {}: {}", openid, e.getMessage());
-            return ApiResponse.error(500, e.getMessage());
-        }
-    }
-
-    /**
-     * DELETE /api/user/account
-     * 销号：删除用户、历史日志，级联更新战队人数。
-     * Request body: {"openid": "..."}
-     */
-    @DeleteMapping("/user/account")
-    public ApiResponse<Void> deleteAccount(@RequestBody Map<String, String> body) {
-        String openid = body.get("openid");
-        if (openid == null || openid.isBlank()) {
-            return ApiResponse.error(400, "openid is required");
-        }
-        try {
-            userService.deleteAccount(openid);
-            return ApiResponse.success("账号已注销", null);
-        } catch (RuntimeException e) {
-            log.error("Delete account error for {}: {}", openid, e.getMessage());
-            return ApiResponse.error(500, e.getMessage());
-        }
+        return info;
     }
 }

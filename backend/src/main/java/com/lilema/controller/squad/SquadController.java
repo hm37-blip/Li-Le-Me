@@ -1,78 +1,61 @@
 package com.lilema.controller.squad;
 
-import com.lilema.dto.ApiResponse;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lilema.entity.po.Squad;
-import com.lilema.service.SquadService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import com.lilema.entity.po.User;
+import com.lilema.mapper.SquadMapper;
+import com.lilema.mapper.UserMapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.Map;
 
-@Slf4j
+/**
+ * master 前端契约:校验邀请码(只校验,不入队;入队走 /api/user/join-squad)。
+ */
 @RestController
 @RequestMapping("/api/squad")
-@RequiredArgsConstructor
 public class SquadController {
 
-    private final SquadService squadService;
+    private final SquadMapper squadMapper;
+    private final UserMapper userMapper;
 
-    /**
-     * POST /api/squad/create
-     * <p>
-     * Create a new squad.
-     * Request body: {"squad_name": "...", "openid": "..."}
-     * Response: the created Squad entity.
-     */
-    @PostMapping("/create")
-    public ApiResponse<Squad> createSquad(@RequestBody Map<String, String> body) {
-        String squadName = body.get("squad_name");
-        String openid = body.get("openid");
-
-        if (squadName == null || squadName.isBlank()) {
-            return ApiResponse.error(400, "squad_name is required");
-        }
-        if (openid == null || openid.isBlank()) {
-            return ApiResponse.error(400, "openid is required");
-        }
-
-        try {
-            Squad squad = squadService.generateSquad(squadName, openid);
-            return ApiResponse.success("Squad created successfully", squad);
-        } catch (RuntimeException e) {
-            log.error("Create squad error for {}: {}", openid, e.getMessage());
-            return ApiResponse.error(500, e.getMessage());
-        }
+    public SquadController(SquadMapper squadMapper, UserMapper userMapper) {
+        this.squadMapper = squadMapper;
+        this.userMapper = userMapper;
     }
 
-    /**
-     * POST /api/squad/join
-     * <p>
-     * Join a squad using an invite code.
-     * Request body: {"invite_code": "...", "openid": "..."}
-     * Response: the Squad entity the user joined.
-     */
-    @PostMapping("/join")
-    public ApiResponse<Squad> joinSquad(@RequestBody Map<String, String> body) {
+    @PostMapping("/verify-invite")
+    public ResponseEntity<Map<String, Object>> verifyInvite(@RequestBody Map<String, String> body) {
         String inviteCode = body.get("invite_code");
-        String openid = body.get("openid");
 
-        if (inviteCode == null || inviteCode.isBlank()) {
-            return ApiResponse.error(400, "invite_code is required");
+        Squad squad = squadMapper.selectOne(new QueryWrapper<Squad>().eq("invite_code", inviteCode).last("LIMIT 1"));
+        if (squad == null) {
+            return ResponseEntity.ok(fail("邀请码不存在"));
         }
-        if (openid == null || openid.isBlank()) {
-            return ApiResponse.error(400, "openid is required");
+        if (!Boolean.TRUE.equals(squad.getIsActive())) {
+            return ResponseEntity.ok(fail("该战队已关闭"));
+        }
+        long memberCount = userMapper.selectCount(new QueryWrapper<User>().eq("squad_id", squad.getId()));
+        if (memberCount >= squad.getMaxMembers()) {
+            return ResponseEntity.ok(fail("战队已满"));
         }
 
-        try {
-            Squad squad = squadService.verifyInviteCode(inviteCode, openid);
-            return ApiResponse.success("Joined squad successfully", squad);
-        } catch (RuntimeException e) {
-            log.error("Join squad error for {}: {}", openid, e.getMessage());
-            return ApiResponse.error(500, e.getMessage());
-        }
+        Map<String, Object> ok = new HashMap<>();
+        ok.put("valid", true);
+        ok.put("squad_name", squad.getSquadName());
+        ok.put("error_msg", "");
+        return ResponseEntity.ok(ok);
+    }
+
+    private Map<String, Object> fail(String msg) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("valid", false);
+        m.put("error_msg", msg);
+        return m;
     }
 }
