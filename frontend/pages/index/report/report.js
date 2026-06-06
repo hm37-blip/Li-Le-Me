@@ -3,7 +3,7 @@ const api = require('../../../utils/api.js')
 const mockData = require('../../../utils/mockData.js')
 
 // 测试模式开关：true 使用模拟数据，false 使用真实API
-const USE_MOCK_DATA = true
+const USE_MOCK_DATA = false
 
 let weekChart = null
 let monthChart = null

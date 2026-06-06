@@ -5,8 +5,8 @@
 
 const auth = require('./auth.js')
 
-// API基础URL - 需要根据后端B提供的实际地址修改
-const BASE_URL = 'https://your-cloud-function-url.com'
+// API基础URL - 指向本地 Java 后端(master-dev 集成)
+const BASE_URL = 'http://localhost:8080'
 
 // Token 刷新标记（防止并发刷新）
 let isRefreshing = false
