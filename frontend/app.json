@@ -5,7 +5,10 @@
     "pages/squad/squad",
     "pages/user/user",
     "pages/home/home",
-    "pages/admin/admin"
+    "pages/admin/admin",
+    "pages/index/home/home",
+    "pages/index/report/report",
+    "pages/index/profile/profile"
   ],
   "window": {
     "navigationBarBackgroundColor": "#07c160",

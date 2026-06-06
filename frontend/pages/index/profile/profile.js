@@ -190,10 +190,10 @@ Page({
               duration: 2000
             })
 
-            // 延迟返回首页
+            // 延迟返回登录页
             setTimeout(() => {
               wx.reLaunch({
-                url: '/frontend/pages/index/home/home'
+                url: '/pages/login/login'
               })
             }, 2000)
 

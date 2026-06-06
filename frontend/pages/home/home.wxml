@@ -18,5 +18,6 @@
     </view>
   </view>
 
-  <button class="logout-btn mt-32" bindtap="handleLogout">退出登录</button>
+  <button class="report-btn mt-32" type="primary" bindtap="goReport">查看我的战报 📊</button>
+  <button class="logout-btn mt-24" bindtap="handleLogout">退出登录</button>
 </view>

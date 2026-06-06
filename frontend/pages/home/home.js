@@ -50,6 +50,10 @@ Page({
     });
   },
 
+  goReport() {
+    wx.navigateTo({ url: '/pages/index/report/report' });
+  },
+
   handleLogout() {
     const deviceId = wx.getStorageSync('device_id');
     wx.clearStorageSync();

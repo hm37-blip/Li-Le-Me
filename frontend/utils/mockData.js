@@ -23,8 +23,11 @@ function generateTrendData(days = 7) {
     const day = String(date.getDate()).padStart(2, '0')
     dates.push(`${month}-${day}`)
 
-    // 生成随机积分 (1-10)
-    const points = Math.floor(Math.random() * 10) + 1
+    // 稳健上升趋势（去随机，便于 demo 录制）
+    const position = (days - 1) - i // 0=最早, days-1=今天
+    const ramp = days <= 1 ? 7 : 3 + (position / (days - 1)) * 7 // 3 → 10
+    const wiggle = position % 4 === 2 ? 1 : (position % 4 === 0 ? -1 : 0)
+    const points = Math.max(1, Math.round(ramp + wiggle))
     daily_points.push(points)
   }
 
@@ -77,16 +80,8 @@ function generateMonthTrendData() {
  */
 function generateYearTrendData() {
   const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
-  const daily_points = []
-
-  // 生成递增趋势的月积分数据 (40-150)
-  let basePoints = 40
-  for (let i = 0; i < 12; i++) {
-    const randomIncrease = Math.floor(Math.random() * 20) - 5 // -5 到 15 的随机增长
-    basePoints += randomIncrease
-    basePoints = Math.max(40, basePoints) // 最小40分
-    daily_points.push(basePoints)
-  }
+  // 固定的稳健上升曲线（去随机，便于 demo 录制）
+  const daily_points = [40, 48, 55, 63, 72, 80, 90, 99, 110, 122, 135, 150]
 
   // 计算平均线
   const totalPoints = daily_points.reduce((sum, val) => sum + val, 0)
@@ -105,25 +100,13 @@ function generateYearTrendData() {
  * @returns {Object} { easy, medium, hard } （符合 Module 4 规范）
  */
 function generateDifficultyDistribution(type = 'TOTAL') {
-  let easy, medium, hard
-
+  // 固定数值（稳健选手人设，去随机，便于 demo 录制）
   if (type === 'MONTHLY') {
-    // 月数据：较小的数量
-    easy = Math.floor(Math.random() * 20) + 10    // 10-30
-    medium = Math.floor(Math.random() * 15) + 5   // 5-20
-    hard = Math.floor(Math.random() * 10) + 2     // 2-12
-  } else {
-    // TOTAL数据：较大的数量
-    easy = Math.floor(Math.random() * 100) + 80    // 80-180
-    medium = Math.floor(Math.random() * 80) + 60   // 60-140
-    hard = Math.floor(Math.random() * 50) + 20     // 20-70
+    // 本月新增：30 道
+    return { easy: 18, medium: 9, hard: 3 }
   }
-
-  return {
-    easy,
-    medium,
-    hard
-  }
+  // 累计：150 道（简单 90 / 中等 45 / 困难 15）
+  return { easy: 90, medium: 45, hard: 15 }
 }
 
 /**
@@ -147,9 +130,9 @@ function generateFullReportData() {
   return {
     // 用户基本信息
     openid: 'mock_openid_123456',
-    lcId: 'demo_user',
-    totalSolved: 256,
-    consecutiveDays: 12,
+    lcId: 'steady_coder',
+    totalSolved: 150,
+    consecutiveDays: 7,
 
     // 周积分和月积分
     weekTrend: generateWeekTrendData(),

@@ -112,6 +112,8 @@ Page({
           leetcode_username: username
         };
 
+        app.globalData.lcId = username;
+        wx.setStorageSync('lcId', username);
         wx.setStorageSync('registration_status', 1);
         wx.redirectTo({ url: '/pages/squad/squad' });
       },
