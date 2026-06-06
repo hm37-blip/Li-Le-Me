@@ -1,12 +1,6 @@
--- Li-Le-Me Database Initialization Script
+-- H2 schema (translated from backend/sql/init.sql, MySQL -> H2 MODE=MySQL)
+-- Auto-run by spring.sql.init on every startup (CREATE TABLE IF NOT EXISTS => idempotent).
 
-CREATE DATABASE IF NOT EXISTS lilema
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
-
-USE lilema;
-
--- Squads table
 CREATE TABLE IF NOT EXISTS squads (
     id            BIGINT PRIMARY KEY AUTO_INCREMENT,
     squad_name    VARCHAR(64)  NOT NULL,
@@ -18,7 +12,6 @@ CREATE TABLE IF NOT EXISTS squads (
     created_at    DATETIME     DEFAULT CURRENT_TIMESTAMP
 );
 
--- Users table
 CREATE TABLE IF NOT EXISTS users (
     id                  BIGINT PRIMARY KEY AUTO_INCREMENT,
     openid              VARCHAR(128) NOT NULL UNIQUE,
@@ -35,7 +28,6 @@ CREATE TABLE IF NOT EXISTS users (
     created_at          DATETIME     DEFAULT CURRENT_TIMESTAMP
 );
 
--- Daily logs table
 CREATE TABLE IF NOT EXISTS daily_logs (
     id           BIGINT PRIMARY KEY AUTO_INCREMENT,
     openid       VARCHAR(128) NOT NULL,
@@ -48,5 +40,5 @@ CREATE TABLE IF NOT EXISTS daily_logs (
     daily_points INT          DEFAULT 0,
     created_at   DATETIME     DEFAULT CURRENT_TIMESTAMP,
     rank_tier    VARCHAR(16),
-    UNIQUE KEY uk_openid_date (openid, log_date)
+    UNIQUE (openid, log_date)
 );
