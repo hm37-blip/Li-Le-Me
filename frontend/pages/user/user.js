@@ -72,7 +72,7 @@ Page({
     this.setData({ loading: true, nicknameError: '' });
 
     wx.request({
-      url: `${app.globalData.baseUrl}/api/user/join-squad`,
+      url: `${app.globalData.baseUrl}/api/v1/user/squad/join`,
       method: 'POST',
       data: {
         openid: app.globalData.openid,
@@ -85,7 +85,7 @@ Page({
       },
       success: (res) => {
         const data = res.data || {};
-        if (res.statusCode !== 200 || !data.join_success) {
+        if (res.statusCode !== 200 || !data.squad_join_success) {
           wx.showToast({ title: data.error_msg || '加入失败，请重试', icon: 'none' });
           return;
         }

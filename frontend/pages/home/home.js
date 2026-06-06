@@ -12,7 +12,7 @@ Page({
     if (!app.globalData.token) return;
 
     wx.request({
-      url: `${app.globalData.baseUrl}/api/user/status`,
+      url: `${app.globalData.baseUrl}/api/v1/user/status`,
       method: 'GET',
       header: { Authorization: `Bearer ${app.globalData.token}` },
       success: (res) => {
@@ -36,7 +36,7 @@ Page({
     if (!app.globalData.token) return;
     this.setData({ loadingMembers: true });
     wx.request({
-      url: `${app.globalData.baseUrl}/api/user/squad-members`,
+      url: `${app.globalData.baseUrl}/api/v1/user/squad-members`,
       method: 'GET',
       header: { Authorization: `Bearer ${app.globalData.token}` },
       success: (res) => {

@@ -22,7 +22,7 @@ import java.util.UUID;
  * mock 模式:openid = "mock_" + device_id(稳定标识同一虚拟账号)。
  */
 @RestController
-@RequestMapping("/api/wechat")
+@RequestMapping("/api/v1/user")
 public class WechatLoginController {
 
     private final UserMapper userMapper;

@@ -15,7 +15,7 @@ import java.time.LocalDate;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/leaderboard")
+@RequestMapping("/api/v1/rank")
 @RequiredArgsConstructor
 public class LeaderboardController {
 

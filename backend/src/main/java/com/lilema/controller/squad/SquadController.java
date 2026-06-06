@@ -18,7 +18,7 @@ import java.util.Map;
  * master 前端契约:校验邀请码(只校验,不入队;入队走 /api/user/join-squad)。
  */
 @RestController
-@RequestMapping("/api/squad")
+@RequestMapping("/api/v1/squad")
 public class SquadController {
 
     private final SquadMapper squadMapper;
@@ -29,7 +29,7 @@ public class SquadController {
         this.userMapper = userMapper;
     }
 
-    @PostMapping("/verify-invite")
+    @PostMapping("/verify")
     public ResponseEntity<Map<String, Object>> verifyInvite(@RequestBody Map<String, String> body) {
         String inviteCode = body.get("invite_code");
 

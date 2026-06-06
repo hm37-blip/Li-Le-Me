@@ -26,7 +26,7 @@ Page({
           return;
         }
         wx.request({
-          url: `${app.globalData.baseUrl}/api/wechat/login`,
+          url: `${app.globalData.baseUrl}/api/v1/user/login`,
           method: 'POST',
           data: { js_code: loginRes.code, device_id: deviceId },
           success: (res) => {

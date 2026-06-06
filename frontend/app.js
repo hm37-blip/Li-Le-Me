@@ -18,7 +18,7 @@ App({
       this.globalData.token = token;
 
       wx.request({
-        url: `${this.globalData.baseUrl}/api/user/status`,
+        url: `${this.globalData.baseUrl}/api/v1/user/status`,
         method: 'GET',
         header: {
           Authorization: `Bearer ${token}`

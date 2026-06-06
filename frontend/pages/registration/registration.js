@@ -88,7 +88,7 @@ Page({
     this.setData({ loading: true, errorMessage: '' });
 
     wx.request({
-      url: `${app.globalData.baseUrl}/api/user/bindlc`,
+      url: `${app.globalData.baseUrl}/api/v1/user/bind`,
       method: 'POST',
       data: {
         openid: app.globalData.openid,
@@ -102,7 +102,7 @@ Page({
 
         if (res.statusCode !== 200 || data.LC_bind_success === false) {
           this.setData({
-            errorMessage: data.error_message || data.error || '绑定失败，请检查用户名后重试'
+            errorMessage: data.error_msg || data.error_message || data.error || '绑定失败，请检查用户名后重试'
           });
           return;
         }

@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  * master 前端契约:加入战队(设置昵称/头像 + 入队 + 状态置 2)。
  */
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/v1/user")
 public class JoinSquadController {
 
     private static final Pattern NICKNAME_PATTERN = Pattern.compile("^[\\u4e00-\\u9fa5a-zA-Z0-9]{2,20}$");
@@ -34,7 +34,7 @@ public class JoinSquadController {
         this.squadMapper = squadMapper;
     }
 
-    @PostMapping("/join-squad")
+    @PostMapping("/squad/join")
     public ResponseEntity<Map<String, Object>> joinSquad(@RequestBody Map<String, String> body) {
         String openid = body.get("openid");
         String inviteCode = body.get("invite_code");
@@ -70,14 +70,14 @@ public class JoinSquadController {
                 .set("registration_status", 2));
 
         Map<String, Object> ok = new HashMap<>();
-        ok.put("join_success", true);
+        ok.put("squad_join_success", true);
         ok.put("squad_name", squad.getSquadName());
         return ResponseEntity.ok(ok);
     }
 
     private Map<String, Object> fail(String msg) {
         Map<String, Object> m = new HashMap<>();
-        m.put("join_success", false);
+        m.put("squad_join_success", false);
         m.put("error_msg", msg);
         return m;
     }

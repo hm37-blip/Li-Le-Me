@@ -25,7 +25,7 @@ Page({
     this.setData({ loading: true, errorMessage: '' });
 
     wx.request({
-      url: `${app.globalData.baseUrl}/api/squad/verify-invite`,
+      url: `${app.globalData.baseUrl}/api/v1/squad/verify`,
       method: 'POST',
       data: { invite_code: code },
       success: (res) => {

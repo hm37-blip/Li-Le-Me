@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * 鉴权:Authorization: Bearer <token>(/status, /squad-members)。
  */
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/v1/user")
 public class LeetCodeBindController {
 
     private static final Pattern LC_USERNAME_PATTERN = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]{2,29}$");
@@ -35,7 +35,7 @@ public class LeetCodeBindController {
         this.squadMapper = squadMapper;
     }
 
-    @PostMapping("/bindlc")
+    @PostMapping("/bind")
     public ResponseEntity<Map<String, Object>> bindLeetCode(@RequestBody Map<String, String> body) {
         String openid = body.get("openid");
         String lc = body.get("leetcode_username");
@@ -60,7 +60,7 @@ public class LeetCodeBindController {
 
         Map<String, Object> ok = new HashMap<>();
         ok.put("LC_bind_success", true);
-        ok.put("error_message", "");
+        ok.put("error_msg", "");
         return ResponseEntity.ok(ok);
     }
 
@@ -127,7 +127,7 @@ public class LeetCodeBindController {
     private Map<String, Object> fail(String msg) {
         Map<String, Object> m = new HashMap<>();
         m.put("LC_bind_success", false);
-        m.put("error_message", msg);
+        m.put("error_msg", msg);
         return m;
     }
 }
