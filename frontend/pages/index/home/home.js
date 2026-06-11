@@ -22,41 +22,12 @@ Page({
 
   onLoad() {
     this.loadUserInfo()
-    // Demo：使用固定的战队排行榜假数据
-    this.loadStaticTestData()
+    this.fetchLeaderboard()
   },
 
   onShow() {
     // 页面显示时刷新头像和用户信息
     this.loadUserInfo()
-  },
-
-  /**
-   * 加载战队排行榜静态假数据（Demo 用，稳健选手人设）
-   */
-  loadStaticTestData() {
-    const avatar = this.data.myInfo.avatarUrl
-    const roster = [
-      { rank: 1, openid: 'm1', nickname: '卷王阿伟', lcId: 'grind_awei',   totalSolved: 312, dailySteps: 6, avatarUrl: avatar },
-      { rank: 2, openid: 'm2', nickname: '算法张三', lcId: 'zhang_algo',    totalSolved: 268, dailySteps: 5, avatarUrl: avatar },
-      { rank: 3, openid: 'm3', nickname: '稳健码农', lcId: 'steady_coder',  totalSolved: 150, dailySteps: 4, avatarUrl: avatar },
-      { rank: 4, openid: 'm4', nickname: '二分查找', lcId: 'binary_search', totalSolved: 142, dailySteps: 3, avatarUrl: avatar },
-      { rank: 5, openid: 'm5', nickname: '动态规划', lcId: 'dp_master',     totalSolved: 121, dailySteps: 2, avatarUrl: avatar },
-      { rank: 6, openid: 'm6', nickname: '链表小李', lcId: 'li_linkedlist', totalSolved: 98,  dailySteps: 1, avatarUrl: avatar },
-      { rank: 7, openid: 'm7', nickname: '回溯小美', lcId: 'mei_backtrack', totalSolved: 76,  dailySteps: 2, avatarUrl: avatar },
-      { rank: 8, openid: 'm8', nickname: '新手向前', lcId: 'newbie_go',     totalSolved: 41,  dailySteps: 1, avatarUrl: avatar }
-    ]
-    this.setData({
-      rankList: roster,
-      teamName: '测试战队',
-      teamMemberCount: roster.length,
-      teamMemberLimit: 50,
-      'myInfo.rank': 3,
-      'myInfo.nickname': '稳健码农',
-      'myInfo.totalSolved': 150,
-      'myInfo.dailySteps': 4,
-      'myInfo.rankTier': 'Elite'
-    })
   },
 
   /**
@@ -69,14 +40,17 @@ Page({
     // 获取 lcId 和 openid
     const lcId = app.globalData.lcId || wx.getStorageSync('lcId') || 'Guest'
     const openid = app.globalData.openid || wx.getStorageSync('openid') || ''
+    const userInfo = app.globalData.userInfo || wx.getStorageSync('userInfo') || {}
 
     // 获取头像（优先从本地存储）
-    const savedAvatar = wx.getStorageSync('userAvatar') || defaultAvatar
+    const savedAvatar = userInfo.avatar_file_id || userInfo.avatarUrl || wx.getStorageSync('userAvatar') || defaultAvatar
 
     this.setData({
-      'myInfo.lcId': lcId,
+      'myInfo.lcId': userInfo.leetcode_username || lcId,
+      'myInfo.nickname': userInfo.nickname || userInfo.user_nickname || this.data.myInfo.nickname,
       'myInfo.openid': openid,
-      'myInfo.avatarUrl': savedAvatar
+      'myInfo.avatarUrl': savedAvatar,
+      teamName: userInfo.squad_name || this.data.teamName
     })
   },
 
@@ -85,76 +59,116 @@ Page({
    * 获取排行榜数据
    */
   async fetchLeaderboard() {
-    // TODO: 后端实现排行榜接口后启用
-    // wx.showLoading({
-    //   title: '加载中...',
-    //   mask: true
-    // })
+    const app = getApp()
+    const openid = app.globalData.openid || wx.getStorageSync('openid')
 
-    // try {
-    //   // 调用排行榜 API
-    //   const data = await api.getRankingList('total')
-    //
-    //   // 获取当前用户的 openid
-    //   const app = getApp()
-    //   const currentOpenid = app.globalData.openid || wx.getStorageSync('openid')
-    //
-    //   // 查找当前用户在排行榜中的位置
-    //   let myInfo = this.data.myInfo
-    //   const myRankData = data.find(item => item.openid === currentOpenid)
-    //
-    //   if (myRankData) {
-    //     myInfo = {
-    //       ...myInfo,
-    //       nickname: myRankData.nickname || myInfo.lcId,
-    //       rank: myRankData.rank,
-    //       dailySteps: myRankData.dailySteps,
-    //       totalSolved: myRankData.totalSolved || 0,
-    //       rankTier: myRankData.rankTier || '-',
-    //       avatarUrl: myRankData.avatarUrl || myInfo.avatarUrl
-    //     }
-    //   }
-    //
-    //   // 计算战队人数（最多显示50人）
-    //   const teamMemberCount = Math.min(data.length, 50)
-    //
-    //   this.setData({
-    //     rankList: data.slice(0, 50),
-    //     myInfo: myInfo,
-    //     teamMemberCount: teamMemberCount,
-    //     loading: false
-    //   })
-    //
-    //   wx.hideLoading()
-    //
-    // } catch (error) {
-    //   console.error('获取排行榜失败:', error)
-    //
-    //   wx.hideLoading()
-    //   wx.showToast({
-    //     title: '加载失败',
-    //     icon: 'none',
-    //     duration: 2000
-    //   })
-    //
-    //   // 加载失败时使用默认数据
-    //   this.setData({
-    //     loading: false
-    //   })
-    // }
+    if (!openid) {
+      this.setData({ rankList: [], loading: false })
+      return
+    }
 
-    // 暂时使用 data 中的模拟数据
-    console.log('使用模拟排行榜数据（等待后端接口）')
-    this.setData({
-      loading: false
+    this.setData({ loading: true })
+
+    try {
+      const userInfo = await this.ensureUserInfo()
+      const squadId = userInfo.squad_id || userInfo.squadId
+
+      if (!squadId) {
+        this.setData({
+          rankList: [],
+          teamMemberCount: 0,
+          loading: false
+        })
+        return
+      }
+
+      const data = await api.getDailyLeaderboard(squadId, openid)
+      const rankList = this.normalizeRankList(data.rankList || [])
+      const mySummary = data.mySummary || {}
+      const myRankData = rankList.find(item => item.openid === openid)
+
+      this.setData({
+        rankList,
+        teamName: data.squadName || userInfo.squad_name || this.data.teamName,
+        teamMemberCount: data.totalMembers || rankList.length,
+        teamMemberLimit: userInfo.max_members || this.data.teamMemberLimit,
+        myInfo: {
+          ...this.data.myInfo,
+          nickname: (myRankData && myRankData.nickname) || this.data.myInfo.nickname,
+          rank: mySummary.myRank || (myRankData && myRankData.rank) || 0,
+          dailySteps: mySummary.myDailySteps || (myRankData && myRankData.dailySteps) || 0,
+          totalSolved: (myRankData && myRankData.totalSolved) || this.data.myInfo.totalSolved || 0,
+          rankTier: (myRankData && myRankData.rankTier) || this.data.myInfo.rankTier || '-',
+          avatarUrl: (myRankData && myRankData.avatarUrl) || this.data.myInfo.avatarUrl
+        },
+        loading: false
+      })
+    } catch (error) {
+      console.error('获取排行榜失败:', error)
+      this.setData({
+        rankList: [],
+        teamMemberCount: 0,
+        loading: false
+      })
+      wx.showToast({
+        title: '排行榜加载失败',
+        icon: 'none',
+        duration: 2000
+      })
+    }
+  },
+
+  ensureUserInfo() {
+    const app = getApp()
+    const cached = app.globalData.userInfo || wx.getStorageSync('userInfo') || {}
+    if (cached.squad_id || cached.squadId) {
+      return Promise.resolve(cached)
+    }
+
+    const token = app.globalData.token || wx.getStorageSync('token')
+    if (!token) {
+      return Promise.resolve(cached)
+    }
+
+    return new Promise((resolve) => {
+      wx.request({
+        url: `${app.globalData.baseUrl}/api/v1/user/status`,
+        method: 'GET',
+        header: { Authorization: `Bearer ${token}` },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data) {
+            const userInfo = res.data.user_info || {}
+            app.globalData.userInfo = userInfo
+            wx.setStorageSync('userInfo', userInfo)
+            this.loadUserInfo()
+            resolve(userInfo)
+          } else {
+            resolve(cached)
+          }
+        },
+        fail: () => resolve(cached)
+      })
     })
+  },
+
+  normalizeRankList(rankList) {
+    return rankList.map(item => ({
+      rank: item.rank,
+      openid: item.openid,
+      nickname: item.nickname || item.openid || '匿名用户',
+      lcId: item.lcId || item.leetcode_username || item.openid || '-',
+      totalSolved: item.totalSolved || item.totalPoints || 0,
+      dailySteps: item.dailySteps || item.dailyPoints || 0,
+      rankTier: item.rankTier || '-',
+      avatarUrl: item.avatarUrl || this.data.myInfo.avatarUrl
+    }))
   },
 
   /**
    * 下拉刷新
    */
   onPullDownRefresh() {
-    this.fetchLeaderboard().then(() => {
+    Promise.resolve(this.fetchLeaderboard()).then(() => {
       wx.stopPullDownRefresh()
     })
   },

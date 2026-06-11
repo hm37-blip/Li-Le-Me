@@ -17,7 +17,7 @@
         <view class="info-row-stats">
           <text class="stat-item">排名 {{myInfo.rank || '-'}}</text>
           <text class="stat-divider">|</text>
-          <text class="stat-item">总题数 {{myInfo.totalSolved || 0}}</text>
+          <text class="stat-item">总积分 {{myInfo.totalSolved || 0}}</text>
           <text class="stat-divider">|</text>
           <text class="stat-item">今日 +{{myInfo.dailySteps}}</text>
         </view>
@@ -37,7 +37,7 @@
   <!-- 榜单标题 -->
   <view class="section-header">
     <text class="section-title">战队排行榜</text>
-    <text class="section-desc">按总刷题数排序</text>
+    <text class="section-desc">按今日积分排序</text>
   </view>
 
   <!-- 排行榜 -->

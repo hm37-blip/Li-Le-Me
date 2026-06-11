@@ -213,9 +213,34 @@ function getSharePoster(openid) {
   })
 }
 
+/**
+ * 获取战队每日排行榜
+ * @param {Number|String} squadId - 战队 ID
+ * @param {String} openid - 当前用户 openid
+ * @param {String} date - 可选，yyyy-MM-dd
+ * @returns {Promise}
+ */
+function getDailyLeaderboard(squadId, openid, date = '') {
+  const data = {
+    squad_id: squadId,
+    openid
+  }
+  if (date) {
+    data.date = date
+  }
+
+  return request('/api/v1/rank/daily', data, 'GET', false).then(res => {
+    if (res.code && res.code !== 200) {
+      throw new Error(res.msg || '获取排行榜失败')
+    }
+    return res.data || res
+  })
+}
+
 module.exports = {
   getTrendData,
   getDifficultyDistribution,
   getSharePoster,
+  getDailyLeaderboard,
   auth // 导出 auth 模块，方便其他文件使用
 }
