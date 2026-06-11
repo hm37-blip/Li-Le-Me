@@ -15,9 +15,6 @@ project.config.json
 project.private.config.json
 miniprogram_npm/
 
-# ECharts 核心文件（太大，需要手动下载）
-frontend/components/ec-canvas/echarts.min.js
-
 # Node modules
 node_modules/
 
