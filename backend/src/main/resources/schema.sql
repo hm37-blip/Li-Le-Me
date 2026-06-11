@@ -1,5 +1,4 @@
--- H2 schema (translated from backend/sql/init.sql, MySQL -> H2 MODE=MySQL)
--- Auto-run by spring.sql.init on every startup (CREATE TABLE IF NOT EXISTS => idempotent).
+-- MySQL schema. Auto-run by spring.sql.init on startup.
 
 CREATE TABLE IF NOT EXISTS squads (
     id            BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -10,7 +9,7 @@ CREATE TABLE IF NOT EXISTS squads (
     member_count  INT          DEFAULT 0,
     is_active     BOOLEAN      DEFAULT TRUE,
     created_at    DATETIME     DEFAULT CURRENT_TIMESTAMP
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS users (
     id                  BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -26,7 +25,7 @@ CREATE TABLE IF NOT EXISTS users (
     token               VARCHAR(128),
     last_update         DATETIME,
     created_at          DATETIME     DEFAULT CURRENT_TIMESTAMP
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS daily_logs (
     id           BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -40,5 +39,5 @@ CREATE TABLE IF NOT EXISTS daily_logs (
     daily_points INT          DEFAULT 0,
     created_at   DATETIME     DEFAULT CURRENT_TIMESTAMP,
     rank_tier    VARCHAR(16),
-    UNIQUE (openid, log_date)
-);
+    UNIQUE KEY uk_openid_date (openid, log_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
