@@ -1,0 +1,53 @@
+/* 通用加载组件样式 - 橙灰色调 */
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 32rpx;
+  min-height: 400rpx;
+}
+
+/* 加载动画 */
+.loading-spinner {
+  width: 80rpx;
+  height: 80rpx;
+  position: relative;
+  margin-bottom: 32rpx;
+}
+
+.spinner-circle {
+  width: 100%;
+  height: 100%;
+  border: 6rpx solid #f0f0f0;
+  border-top-color: #FFA116;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 加载文案 */
+.loading-text {
+  font-size: 28rpx;
+  color: #595959;
+  font-weight: 500;
+  margin-bottom: 12rpx;
+}
+
+/* 提示文案 */
+.loading-hint {
+  font-size: 24rpx;
+  color: #8c8c8c;
+  text-align: center;
+  line-height: 1.6;
+  max-width: 500rpx;
+}
