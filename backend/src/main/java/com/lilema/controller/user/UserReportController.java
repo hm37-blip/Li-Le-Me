@@ -15,8 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/user")
@@ -86,7 +89,7 @@ public class UserReportController {
         data.put("lcId", user.getLcId());
         data.put("avatar", user.getAvatarUrl());
         data.put("totalSolved", resolveTotalSolved(user, latest, difficulty));
-        data.put("ranking", 0);
+        data.put("ranking", calculateSquadRanking(user, latest));
 
         return ResponseEntity.ok(success(data));
     }
@@ -152,6 +155,33 @@ public class UserReportController {
             return latest.getTotalSolved();
         }
         return difficulty.easy + difficulty.medium + difficulty.hard;
+    }
+
+    private int calculateSquadRanking(User user, DailyLog latest) {
+        if (user.getSquadId() == null || latest == null || latest.getLogDate() == null) {
+            return 0;
+        }
+
+        List<User> squadUsers = userMapper.selectBySquadId(user.getSquadId());
+        Map<String, User> userByOpenid = squadUsers.stream()
+                .collect(Collectors.toMap(User::getOpenid, u -> u));
+        List<DailyLog> logs = dailyLogMapper.selectBySquadAndDate(user.getSquadId(), latest.getLogDate());
+
+        List<DailyLog> sorted = logs.stream()
+                .sorted(Comparator
+                        .comparingInt((DailyLog log) -> nz(log.getDailyPoints())).reversed()
+                        .thenComparingInt((DailyLog log) -> {
+                            User rankingUser = userByOpenid.get(log.getOpenid());
+                            return rankingUser != null ? nz(rankingUser.getTotalPoints()) : 0;
+                        }).reversed())
+                .toList();
+
+        for (int i = 0; i < sorted.size(); i++) {
+            if (user.getOpenid().equals(sorted.get(i).getOpenid())) {
+                return i + 1;
+            }
+        }
+        return 0;
     }
 
     private Map<String, Object> success(Map<String, Object> data) {
