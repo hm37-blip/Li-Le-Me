@@ -10,6 +10,11 @@
       catchtap="switchTab"
       hover-class="tabbar-item-hover"
       hover-stay-time="100">
+      <image
+        class="tabbar-icon"
+        src="{{current === index ? item.selectedIconPath : item.iconPath}}"
+        mode="aspectFit"
+      />
       <text class="tabbar-text">{{item.text}}</text>
     </view>
   </view>

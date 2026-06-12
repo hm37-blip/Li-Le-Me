@@ -11,15 +11,21 @@ Component({
     list: [
       {
         pagePath: '/pages/index/home/home',
-        text: '主页'
+        text: '主页',
+        iconPath: '/static/images/tabbar/home.png',
+        selectedIconPath: '/static/images/tabbar/home-active.png'
       },
       {
         pagePath: '/pages/index/report/report',
-        text: '趋势'
+        text: '趋势',
+        iconPath: '/static/images/tabbar/trend.png',
+        selectedIconPath: '/static/images/tabbar/trend-active.png'
       },
       {
         pagePath: '/pages/index/profile/profile',
-        text: '我的'
+        text: '我的',
+        iconPath: '/static/images/tabbar/profile.png',
+        selectedIconPath: '/static/images/tabbar/profile-active.png'
       }
     ]
   },

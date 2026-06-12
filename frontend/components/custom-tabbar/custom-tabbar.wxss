@@ -32,25 +32,33 @@
 .tabbar-item {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
   z-index: 99999;
+  gap: 4rpx;
+}
+
+.tabbar-icon {
+  width: 44rpx;
+  height: 44rpx;
+  display: block;
 }
 
 .tabbar-text {
-  font-size: 32rpx;
+  font-size: 22rpx;
   font-weight: 500;
   color: #999999;
   transition: all 0.3s ease;
-  letter-spacing: 1rpx;
+  line-height: 1;
+  letter-spacing: 0;
 }
 
 .tabbar-item.active .tabbar-text {
   color: #FFA116;
   font-weight: 600;
-  font-size: 34rpx;
-  transform: scale(1.05);
+  font-size: 22rpx;
 }
 
 /* 选中状态底部指示条 */
