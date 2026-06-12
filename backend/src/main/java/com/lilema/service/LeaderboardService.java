@@ -93,6 +93,7 @@ public class LeaderboardService {
             item.setDailyPoints(dl.getDailyPoints());
             item.setDetails(details);
             item.setTotalPoints(u.getTotalPoints() != null ? u.getTotalPoints() : 0);
+            item.setRankTier(dl.getRankTier() != null && !dl.getRankTier().isBlank() ? dl.getRankTier() : "-");
             item.setTopThree(i < 3);
 
             rankList.add(item);

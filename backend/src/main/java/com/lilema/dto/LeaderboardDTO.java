@@ -53,6 +53,8 @@ public class LeaderboardDTO {
         private DifficultyDetails details;
         /** All-time accumulated points */
         private int totalPoints;
+        /** Daily rank tier, e.g. Hardcore, Top Tier, Elite, NPC, Completed */
+        private String rankTier;
         /** True if rank <= 3 */
         private boolean isTopThree;
     }
