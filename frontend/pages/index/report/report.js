@@ -603,7 +603,7 @@ Page({
 
     dataPromise.then(res => {
       // Zero-Filling: 填充缺失日期
-      const filledData = { dates: res.dates, daily_points: res.daily_points }
+      const filledData = this.fillMissingDates(res.dates, res.daily_points, 30)
 
       // 计算本月积分
       const monthPoints = filledData.daily_points.reduce((sum, val) => sum + val, 0)
@@ -648,7 +648,7 @@ Page({
 
     dataPromise.then(res => {
       // Zero-Filling: 填充缺失日期
-      const filledData = { dates: res.dates, daily_points: res.daily_points }
+      const filledData = this.fillMissingDates(res.dates, res.daily_points, 365)
 
       // 更新图表
       if (yearChart) {
