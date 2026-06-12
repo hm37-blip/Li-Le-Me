@@ -1,10 +1,12 @@
 package com.lilema.controller.squad;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.lilema.dto.ApiResponse;
 import com.lilema.entity.po.Squad;
 import com.lilema.entity.po.User;
 import com.lilema.mapper.SquadMapper;
 import com.lilema.mapper.UserMapper;
+import com.lilema.service.SquadService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,7 +17,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * master 前端契约:校验邀请码(只校验,不入队;入队走 /api/user/join-squad)。
+ * User-side squad contract:
+ * - POST /api/v1/squad/create creates a squad for the requesting user.
+ * - POST /api/v1/squad/verify validates an invite code; joining uses /api/v1/user/squad/join.
  */
 @RestController
 @RequestMapping("/api/v1/squad")
@@ -23,10 +27,32 @@ public class SquadController {
 
     private final SquadMapper squadMapper;
     private final UserMapper userMapper;
+    private final SquadService squadService;
 
-    public SquadController(SquadMapper squadMapper, UserMapper userMapper) {
+    public SquadController(SquadMapper squadMapper, UserMapper userMapper, SquadService squadService) {
         this.squadMapper = squadMapper;
         this.userMapper = userMapper;
+        this.squadService = squadService;
+    }
+
+    @PostMapping("/create")
+    public ApiResponse<Squad> createSquad(@RequestBody Map<String, String> body) {
+        String squadName = body.get("squad_name");
+        String openid = body.get("openid");
+
+        if (squadName == null || squadName.isBlank()) {
+            return ApiResponse.error(400, "squad_name is required");
+        }
+        if (openid == null || openid.isBlank()) {
+            return ApiResponse.error(400, "openid is required");
+        }
+
+        try {
+            Squad squad = squadService.generateSquad(squadName, openid);
+            return ApiResponse.success("Squad created successfully", squad);
+        } catch (RuntimeException e) {
+            return ApiResponse.error(500, e.getMessage());
+        }
     }
 
     @PostMapping("/verify")
