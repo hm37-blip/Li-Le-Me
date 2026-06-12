@@ -18,6 +18,7 @@ const USER_INFO_KEY = 'user_info'
 function setToken(token, refreshToken = null, expiresIn = null) {
   try {
     wx.setStorageSync(TOKEN_KEY, token)
+    wx.setStorageSync('token', token)
 
     if (refreshToken) {
       wx.setStorageSync(REFRESH_TOKEN_KEY, refreshToken)
@@ -90,6 +91,7 @@ function clearAuth() {
     wx.removeStorageSync(REFRESH_TOKEN_KEY)
     wx.removeStorageSync(TOKEN_EXPIRE_TIME)
     wx.removeStorageSync(USER_INFO_KEY)
+    wx.removeStorageSync('token')
   } catch (e) {
     console.error('清除认证信息失败:', e)
   }

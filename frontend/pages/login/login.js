@@ -1,3 +1,5 @@
+const auth = require('../../utils/auth.js');
+
 Page({
   data: {
     loading: false
@@ -40,7 +42,7 @@ Page({
             app.globalData.token = data.token || '';
             app.globalData.userInfo = data.user_info || null;
             wx.setStorageSync('openid', data.openid);
-            wx.setStorageSync('token', data.token || '');
+            auth.setToken(data.token || '', data.refreshToken, data.expiresIn);
             wx.setStorageSync('registration_status', data.registration_status ?? 0);
 
             const status = Number(data.registration_status);

@@ -28,6 +28,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserService {
 
+    private static final int TOKEN_EXPIRES_IN_SECONDS = 7200;
+
     @Value("${wechat.appid}")
     private String appid;
 
@@ -119,10 +121,41 @@ public class UserService {
         result.put("openid", user.getOpenid());
         result.put("is_new_user", isNew);
         result.put("token", user.getToken());
+        result.put("refreshToken", user.getToken());
+        result.put("expiresIn", TOKEN_EXPIRES_IN_SECONDS);
         result.put("registration_status", user.getRegistrationStatus());
         if (!isNew) {
             result.put("user_info", buildUserInfo(user));
         }
+        return result;
+    }
+
+    /**
+     * Refresh the current auth token.
+     * This project stores one bearer token per user, so refresh rotates that token and
+     * returns the new value as both access token and next refresh token.
+     */
+    public Map<String, Object> refreshToken(String refreshToken) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new IllegalArgumentException("refreshToken is required");
+        }
+
+        User user = userMapper.selectOne(new QueryWrapper<User>()
+                .eq("token", refreshToken)
+                .last("LIMIT 1"));
+        if (user == null) {
+            throw new IllegalArgumentException("Invalid refreshToken");
+        }
+
+        String newToken = UUID.randomUUID().toString();
+        userMapper.update(null, new UpdateWrapper<User>()
+                .eq("id", user.getId())
+                .set("token", newToken));
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("token", newToken);
+        result.put("refreshToken", newToken);
+        result.put("expiresIn", TOKEN_EXPIRES_IN_SECONDS);
         return result;
     }
 
