@@ -177,22 +177,19 @@ Page({
    * 分享战绩
    */
   shareAchievement() {
-    const { lcId, rank, totalSolved, dailySteps, rankTier } = this.data.myInfo
+    const { rank, totalSolved, dailySteps, rankTier } = this.data.myInfo
 
-    // 生成分享文案
     const shareText = `我在「力了吗」已刷题 ${totalSolved} 道！\n当前排名：第 ${rank} 名\n段位等级：${rankTier}\n今日积分：${dailySteps}\n\n一起来卷 LeetCode 吧！`
 
-    // 方式一：调用微信分享（需要用户主动触发分享按钮）
-    // 这里我们弹出提示，让用户点击右上角分享
-    wx.showModal({
-      title: '分享战绩',
-      content: '点击右上角「...」按钮，即可分享到微信好友或朋友圈！',
-      showCancel: true,
-      cancelText: '取消',
-      confirmText: '复制文案',
+    wx.showActionSheet({
+      itemList: ['生成分享海报', '复制分享文案'],
       success: (res) => {
-        if (res.confirm) {
-          // 复制分享文案到剪贴板
+        if (res.tapIndex === 0) {
+          this.generateSharePoster()
+          return
+        }
+
+        if (res.tapIndex === 1) {
           wx.setClipboardData({
             data: shareText,
             success: () => {
@@ -204,37 +201,47 @@ Page({
             }
           })
         }
+      },
+      fail: (err) => {
+        if (err.errMsg && err.errMsg.includes('cancel')) {
+          return
+        }
+        console.error('打开分享菜单失败:', err)
       }
     })
-
-    // 方式二：生成分享海报（需要后端支持）
-    // this.generateSharePoster()
   },
 
   /**
    * 生成分享海报（可选功能）
    */
   generateSharePoster() {
+    const app = getApp()
+    const openid = app.globalData.openid || wx.getStorageSync('openid')
+
+    if (!openid) {
+      wx.showToast({
+        title: '请先登录',
+        icon: 'none',
+        duration: 2000
+      })
+      return
+    }
+
     wx.showLoading({
       title: '生成海报中...',
       mask: true
     })
 
-    // 获取 openid
-    const app = getApp()
-    const openid = app.globalData.openid || wx.getStorageSync('openid')
-
-    // 调用后端 API 生成海报
     api.getSharePoster(openid)
       .then(res => {
-        wx.hideLoading()
+        const posterUrl = res.poster_url || res.posterUrl
+        if (!posterUrl) {
+          throw new Error('海报地址为空')
+        }
 
-        // 预览海报
-        wx.previewImage({
-          urls: [res.poster_url],
-          current: res.poster_url
-        })
-
+        return this.previewPoster(posterUrl)
+      })
+      .then(() => {
         wx.showToast({
           title: '长按保存海报',
           icon: 'none',
@@ -243,13 +250,52 @@ Page({
       })
       .catch(err => {
         console.error('生成海报失败:', err)
-        wx.hideLoading()
         wx.showToast({
-          title: '生成失败',
+          title: err.message || '生成失败',
           icon: 'none',
           duration: 2000
         })
       })
+      .finally(() => {
+        wx.hideLoading()
+      })
+  },
+
+  previewPoster(posterUrl) {
+    return new Promise((resolve, reject) => {
+      wx.downloadFile({
+        url: posterUrl,
+        success: (downloadRes) => {
+          const imagePath = downloadRes.statusCode === 200 && downloadRes.tempFilePath
+            ? downloadRes.tempFilePath
+            : posterUrl
+          this.openPosterPreview(imagePath, posterUrl, resolve, reject)
+        },
+        fail: () => {
+          this.openPosterPreview(posterUrl, posterUrl, resolve, reject)
+        }
+      })
+    })
+  },
+
+  openPosterPreview(imagePath, fallbackUrl, resolve, reject) {
+    wx.previewImage({
+      urls: [imagePath],
+      current: imagePath,
+      success: resolve,
+      fail: (err) => {
+        if (imagePath === fallbackUrl) {
+          reject(err)
+          return
+        }
+        wx.previewImage({
+          urls: [fallbackUrl],
+          current: fallbackUrl,
+          success: resolve,
+          fail: reject
+        })
+      }
+    })
   },
 
   /**

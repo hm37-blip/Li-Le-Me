@@ -237,10 +237,51 @@ function getDailyLeaderboard(squadId, openid, date = '') {
   })
 }
 
+function updateUserProfile(openid, profile = {}) {
+  const data = { openid }
+  if (profile.nickname) {
+    data.nickname = profile.nickname
+  }
+  if (profile.avatarUrl) {
+    data.avatar_url = profile.avatarUrl
+  }
+
+  return request('/api/user/profile', data, 'POST').then(res => {
+    if (res.code && res.code !== 200) {
+      throw new Error(res.msg || res.message || '更新资料失败')
+    }
+    return res.data || res
+  })
+}
+
+function bindLeetCodeAccount(openid, leetcodeUsername) {
+  return request('/api/v1/user/bind', {
+    openid,
+    leetcode_username: leetcodeUsername
+  }, 'POST').then(res => {
+    if (res.LC_bind_success === false) {
+      throw new Error(res.error_msg || 'LeetCode 绑定失败')
+    }
+    return res
+  })
+}
+
+function deleteUserAccount(openid) {
+  return request('/api/user/account', { openid }, 'DELETE').then(res => {
+    if (res.code && res.code !== 200) {
+      throw new Error(res.msg || res.message || '注销账号失败')
+    }
+    return res.data || res
+  })
+}
+
 module.exports = {
   getTrendData,
   getDifficultyDistribution,
   getSharePoster,
   getDailyLeaderboard,
+  updateUserProfile,
+  bindLeetCodeAccount,
+  deleteUserAccount,
   auth // 导出 auth 模块，方便其他文件使用
 }

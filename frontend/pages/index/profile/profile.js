@@ -35,10 +35,28 @@ Page({
     }
   },
 
+  getOpenid() {
+    const openid = this.data.openid || getApp().globalData.openid || wx.getStorageSync('openid') || ''
+    if (openid && openid !== this.data.openid) {
+      this.setData({ openid })
+    }
+    return openid
+  },
+
   /**
    * 上传头像
    */
   uploadAvatar() {
+    const openid = this.getOpenid()
+    if (!openid) {
+      wx.showToast({
+        title: '请先登录',
+        icon: 'none',
+        duration: 2000
+      })
+      return
+    }
+
     wx.chooseImage({
       count: 1,
       sizeType: ['compressed'],
@@ -46,36 +64,41 @@ Page({
       success: (res) => {
         const tempFilePath = res.tempFilePaths[0]
 
-        // 显示加载提示
         wx.showLoading({
           title: '上传中...',
           mask: true
         })
 
-        // 上传到云存储或本地使用
-        // 这里先使用本地临时路径
-        this.setData({
-          userAvatar: tempFilePath
-        })
+        api.updateUserProfile(openid, { avatarUrl: tempFilePath })
+          .then(() => {
+            this.setData({
+              userAvatar: tempFilePath
+            })
 
-        // 保存到本地存储（所有页面都会读取这个）
-        wx.setStorageSync('userAvatar', tempFilePath)
+            wx.setStorageSync('userAvatar', tempFilePath)
 
-        // 更新全局数据（可选，用于其他页面实时获取）
-        const app = getApp()
-        if (app.globalData) {
-          app.globalData.userAvatar = tempFilePath
-        }
+            const app = getApp()
+            if (app.globalData) {
+              app.globalData.userAvatar = tempFilePath
+            }
 
-        wx.hideLoading()
-        wx.showToast({
-          title: '头像上传成功',
-          icon: 'success',
-          duration: 2000
-        })
-
-        // TODO: 如果需要上传到云端，可以调用云函数
-        // this.uploadToCloud(tempFilePath)
+            wx.showToast({
+              title: '头像上传成功',
+              icon: 'success',
+              duration: 2000
+            })
+          })
+          .catch((err) => {
+            console.error('头像保存失败:', err)
+            wx.showToast({
+              title: err.message || '头像保存失败',
+              icon: 'none',
+              duration: 2000
+            })
+          })
+          .finally(() => {
+            wx.hideLoading()
+          })
       },
       fail: (err) => {
         console.error('选择图片失败:', err)
@@ -92,6 +115,16 @@ Page({
    * 修改 LeetCode ID
    */
   editLcId() {
+    const openid = this.getOpenid()
+    if (!openid) {
+      wx.showToast({
+        title: '请先登录',
+        icon: 'none',
+        duration: 2000
+      })
+      return
+    }
+
     wx.showModal({
       title: '修改 LeetCode ID',
       editable: true,
@@ -117,21 +150,16 @@ Page({
           })
 
           try {
-            // TODO: 后端实现后，调用验证和绑定接口
-            // const isValid = await api.validateLeetCodeId(newLcId)
-            // if (!isValid) { ... }
-            // await api.bindLeetCodeAccount(this.data.openid, newLcId)
+            await api.bindLeetCodeAccount(openid, newLcId)
 
-            // 更新本地数据
             this.setData({
               lcId: newLcId
             })
 
-            // 更新全局数据
             getApp().globalData.lcId = newLcId
 
-            // 保存到本地存储
             wx.setStorageSync('lcId', newLcId)
+            wx.setStorageSync('registration_status', 1)
 
             wx.hideLoading()
             wx.showToast({
@@ -143,7 +171,7 @@ Page({
           } catch (err) {
             wx.hideLoading()
             wx.showToast({
-              title: 'ID 验证失败',
+              title: err.message || 'ID 验证失败',
               icon: 'none',
               duration: 2000
             })
@@ -158,6 +186,16 @@ Page({
    * 注销账号
    */
   handleLogout() {
+    const openid = this.getOpenid()
+    if (!openid) {
+      wx.showToast({
+        title: '请先登录',
+        icon: 'none',
+        duration: 2000
+      })
+      return
+    }
+
     wx.showModal({
       title: '确认注销',
       content: '注销后将清除所有本地数据，确定要继续吗?',
@@ -172,16 +210,16 @@ Page({
           })
 
           try {
-            // TODO: 后端实现后，调用解绑接口
-            // await api.unbindLeetCodeAccount(this.data.openid)
+            await api.deleteUserAccount(openid)
 
-            // 清除本地存储
             wx.clearStorageSync()
 
-            // 清除全局数据
             const app = getApp()
             app.globalData.lcId = ''
             app.globalData.openid = ''
+            app.globalData.token = ''
+            app.globalData.userInfo = null
+            app.globalData.userAvatar = ''
 
             wx.hideLoading()
             wx.showToast({
