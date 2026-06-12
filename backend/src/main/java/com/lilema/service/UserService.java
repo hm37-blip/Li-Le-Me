@@ -21,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -43,19 +44,29 @@ public class UserService {
     private final SquadMapper squadMapper;
     private final LcEngineService lcEngineService;
 
-    /**
-     * Exchange a WeChat js_code for an openid and return login status.
-     *
-     * @param jsCode the temporary code from wx.login()
-     * @return a map containing "openid" and "registration_status" ("new" or "existing")
-     */
     public Map<String, Object> wechatLogin(String jsCode) {
+        return wechatLogin(jsCode, null);
+    }
+
+    /**
+     * Exchange a WeChat js_code for an openid and return the frontend login contract.
+     *
+     * @param jsCode            the temporary code from wx.login()
+     * @param devOpenidOverride optional local-dev openid, used for simulator accounts
+     */
+    public Map<String, Object> wechatLogin(String jsCode, String devOpenidOverride) {
         String openid;
-        if (mockOpenid != null && !mockOpenid.isBlank()) {
+        if (devOpenidOverride != null && !devOpenidOverride.isBlank()) {
+            openid = devOpenidOverride;
+            log.warn("[DEV] Using request mock openid: {}", openid);
+        } else if (mockOpenid != null && !mockOpenid.isBlank()) {
             // 本地开发 mock 模式，跳过真实微信接口
             openid = mockOpenid;
             log.warn("[DEV] Using mock openid: {}", openid);
         } else {
+            if (jsCode == null || jsCode.isBlank()) {
+                throw new RuntimeException("js_code is required");
+            }
             String url = String.format(
                     "https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code",
                     appid, secret, jsCode);
@@ -81,27 +92,53 @@ public class UserService {
 
         // Check whether user already exists
         User existing = userMapper.selectOne(new QueryWrapper<User>().eq("openid", openid));
-        String registrationStatus;
-        if (existing == null) {
-            User newUser = new User();
-            newUser.setOpenid(openid);
-            newUser.setTotalSolved(0);
-            newUser.setTotalPoints(0);
-            newUser.setDailySteps(0);
-            newUser.setRegistrationStatus(0);
-            newUser.setCreatedAt(LocalDateTime.now());
-            userMapper.insert(newUser);
-            registrationStatus = "new";
+        boolean isNew = existing == null;
+        User user = existing;
+        if (isNew) {
+            user = new User();
+            user.setOpenid(openid);
+            user.setTotalSolved(0);
+            user.setTotalPoints(0);
+            user.setDailySteps(0);
+            user.setRegistrationStatus(0);
+            user.setToken(UUID.randomUUID().toString());
+            user.setCreatedAt(LocalDateTime.now());
+            userMapper.insert(user);
             log.info("New user registered: {}", openid);
         } else {
-            registrationStatus = "existing";
+            if (user.getToken() == null || user.getToken().isBlank()) {
+                user.setToken(UUID.randomUUID().toString());
+                userMapper.update(null, new UpdateWrapper<User>()
+                        .eq("openid", openid)
+                        .set("token", user.getToken()));
+            }
             log.debug("Existing user logged in: {}", openid);
         }
 
         Map<String, Object> result = new HashMap<>();
-        result.put("openid", openid);
-        result.put("registration_status", registrationStatus);
+        result.put("openid", user.getOpenid());
+        result.put("is_new_user", isNew);
+        result.put("token", user.getToken());
+        result.put("registration_status", user.getRegistrationStatus());
+        if (!isNew) {
+            result.put("user_info", buildUserInfo(user));
+        }
         return result;
+    }
+
+    private Map<String, Object> buildUserInfo(User user) {
+        Map<String, Object> info = new HashMap<>();
+        info.put("nickname", user.getNickname());
+        info.put("leetcode_username", user.getLcId());
+        info.put("avatar_file_id", user.getAvatarUrl());
+        info.put("squad_id", user.getSquadId());
+        if (user.getSquadId() != null) {
+            Squad squad = squadMapper.selectById(user.getSquadId());
+            if (squad != null) {
+                info.put("squad_name", squad.getSquadName());
+            }
+        }
+        return info;
     }
 
     /**
