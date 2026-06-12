@@ -1,3 +1,5 @@
+const api = require('../../utils/api.js');
+
 Page({
   data: {
     nickname: '',
@@ -7,47 +9,43 @@ Page({
     loadingMembers: false
   },
 
-  onShow() {
+  async onShow() {
     const app = getApp();
-    if (!app.globalData.token) return;
+    const token = api.auth.getToken() || app.globalData.token;
+    if (!token) return;
 
-    wx.request({
-      url: `${app.globalData.baseUrl}/api/v1/user/status`,
-      method: 'GET',
-      header: { Authorization: `Bearer ${app.globalData.token}` },
-      success: (res) => {
-        if (res.statusCode === 200 && res.data) {
-          const info = res.data.user_info || {};
-          app.globalData.userInfo = info;
-          this.setData({
-            nickname: info.user_nickname || info.nickname || '',
-            leetcodeUsername: info.leetcode_username || '',
-            squadName: info.squad_name || ''
-          });
-        }
-      }
-    });
+    try {
+      const data = await api.getUserStatus();
+      const info = data.user_info || {};
+      app.globalData.token = api.auth.getToken() || token;
+      app.globalData.userInfo = info;
+      this.setData({
+        nickname: info.user_nickname || info.nickname || '',
+        leetcodeUsername: info.leetcode_username || '',
+        squadName: info.squad_name || ''
+      });
+    } catch (err) {
+      console.error('获取用户状态失败:', err);
+    }
 
     this.fetchMembers();
   },
 
-  fetchMembers() {
+  async fetchMembers() {
     const app = getApp();
-    if (!app.globalData.token) return;
+    const token = api.auth.getToken() || app.globalData.token;
+    if (!token) return;
     this.setData({ loadingMembers: true });
-    wx.request({
-      url: `${app.globalData.baseUrl}/api/v1/user/squad-members`,
-      method: 'GET',
-      header: { Authorization: `Bearer ${app.globalData.token}` },
-      success: (res) => {
-        if (res.statusCode === 200 && Array.isArray(res.data)) {
-          this.setData({ members: res.data });
-        }
-      },
-      complete: () => {
-        this.setData({ loadingMembers: false });
+    try {
+      const members = await api.getSquadMembers();
+      if (Array.isArray(members)) {
+        this.setData({ members });
       }
-    });
+    } catch (err) {
+      console.error('获取战队成员失败:', err);
+    } finally {
+      this.setData({ loadingMembers: false });
+    }
   },
 
   goReport() {

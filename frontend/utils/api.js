@@ -266,6 +266,39 @@ function bindLeetCodeAccount(openid, leetcodeUsername) {
   })
 }
 
+function getUserStatus() {
+  return request('/api/v1/user/status', {}, 'GET')
+}
+
+function getSquadMembers() {
+  return request('/api/v1/user/squad-members', {}, 'GET')
+}
+
+function verifySquadInvite(inviteCode) {
+  return request('/api/v1/squad/verify', {
+    invite_code: inviteCode
+  }, 'POST', false).then(res => {
+    if (!res.valid) {
+      throw new Error(res.error_msg || '邀请码验证失败')
+    }
+    return res
+  })
+}
+
+function joinUserSquad(openid, inviteCode, nickname, avatarFileId) {
+  return request('/api/v1/user/squad/join', {
+    openid,
+    invite_code: inviteCode,
+    user_nickname: nickname,
+    avatar_file_id: avatarFileId
+  }, 'POST').then(res => {
+    if (!res.squad_join_success) {
+      throw new Error(res.error_msg || '加入失败，请重试')
+    }
+    return res
+  })
+}
+
 function deleteUserAccount(openid) {
   return request('/api/user/account', { openid }, 'DELETE').then(res => {
     if (res.code && res.code !== 200) {
@@ -282,6 +315,10 @@ module.exports = {
   getDailyLeaderboard,
   updateUserProfile,
   bindLeetCodeAccount,
+  getUserStatus,
+  getSquadMembers,
+  verifySquadInvite,
+  joinUserSquad,
   deleteUserAccount,
   auth // 导出 auth 模块，方便其他文件使用
 }

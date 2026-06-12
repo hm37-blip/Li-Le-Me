@@ -1,3 +1,4 @@
+const api = require('../../utils/api.js');
 const DEFAULT_AVATAR = 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI9FhqQBHgHOvGMpKibibiaGJR7OYHKlPqubNAtEhMI0VAfnFUVJQR4RTZQ2s0ibZ3CKSEzHEgg/0';
 const NICKNAME_REGEX = /^[\u4e00-\u9fa5a-zA-Z0-9]{2,20}$/;
 
@@ -50,7 +51,7 @@ Page({
     return '';
   },
 
-  handleJoin() {
+  async handleJoin() {
     if (this.data.loading) return;
 
     const nicknameError = this.validateNickname(this.data.nickname);
@@ -63,49 +64,37 @@ Page({
     const nickname = this.data.nickname.trim();
     const avatarFileId = this.data.avatarUrl;
     const inviteCode = app.globalData.inviteCode || '';
+    const openid = app.globalData.openid || wx.getStorageSync('openid');
 
     if (!inviteCode) {
       wx.showToast({ title: '邀请码丢失，请返回重新输入', icon: 'none' });
       return;
     }
+    if (!openid) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
 
     this.setData({ loading: true, nicknameError: '' });
 
-    wx.request({
-      url: `${app.globalData.baseUrl}/api/v1/user/squad/join`,
-      method: 'POST',
-      data: {
-        openid: app.globalData.openid,
-        invite_code: inviteCode,
+    try {
+      const data = await api.joinUserSquad(openid, inviteCode, nickname, avatarFileId);
+
+      app.globalData.openid = openid;
+      app.globalData.token = api.auth.getToken() || app.globalData.token;
+      app.globalData.userInfo = {
+        ...(app.globalData.userInfo || {}),
         user_nickname: nickname,
-        avatar_file_id: avatarFileId
-      },
-      header: {
-        Authorization: app.globalData.token ? `Bearer ${app.globalData.token}` : ''
-      },
-      success: (res) => {
-        const data = res.data || {};
-        if (res.statusCode !== 200 || !data.squad_join_success) {
-          wx.showToast({ title: data.error_msg || '加入失败，请重试', icon: 'none' });
-          return;
-        }
+        avatar_file_id: avatarFileId,
+        squad_name: data.squad_name || ''
+      };
 
-        app.globalData.userInfo = {
-          ...(app.globalData.userInfo || {}),
-          user_nickname: nickname,
-          avatar_file_id: avatarFileId,
-          squad_name: data.squad_name || ''
-        };
-
-        wx.setStorageSync('registration_status', 2);
-        wx.redirectTo({ url: '/pages/home/home' });
-      },
-      fail: () => {
-        wx.showToast({ title: '网络异常，请检查后端服务', icon: 'none' });
-      },
-      complete: () => {
-        this.setData({ loading: false });
-      }
-    });
+      wx.setStorageSync('registration_status', 2);
+      wx.redirectTo({ url: '/pages/home/home' });
+    } catch (err) {
+      wx.showToast({ title: err.message || '加入失败，请重试', icon: 'none' });
+    } finally {
+      this.setData({ loading: false });
+    }
   }
 })

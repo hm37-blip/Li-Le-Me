@@ -118,37 +118,30 @@ Page({
     }
   },
 
-  ensureUserInfo() {
+  async ensureUserInfo() {
     const app = getApp()
     const cached = app.globalData.userInfo || wx.getStorageSync('userInfo') || {}
     if (cached.squad_id || cached.squadId) {
-      return Promise.resolve(cached)
+      return cached
     }
 
-    const token = app.globalData.token || wx.getStorageSync('token')
+    const token = api.auth.getToken() || app.globalData.token || wx.getStorageSync('token')
     if (!token) {
-      return Promise.resolve(cached)
+      return cached
     }
 
-    return new Promise((resolve) => {
-      wx.request({
-        url: `${app.globalData.baseUrl}/api/v1/user/status`,
-        method: 'GET',
-        header: { Authorization: `Bearer ${token}` },
-        success: (res) => {
-          if (res.statusCode === 200 && res.data) {
-            const userInfo = res.data.user_info || {}
-            app.globalData.userInfo = userInfo
-            wx.setStorageSync('userInfo', userInfo)
-            this.loadUserInfo()
-            resolve(userInfo)
-          } else {
-            resolve(cached)
-          }
-        },
-        fail: () => resolve(cached)
-      })
-    })
+    try {
+      const data = await api.getUserStatus()
+      const userInfo = data.user_info || {}
+      app.globalData.token = api.auth.getToken() || token
+      app.globalData.userInfo = userInfo
+      wx.setStorageSync('userInfo', userInfo)
+      this.loadUserInfo()
+      return userInfo
+    } catch (err) {
+      console.error('获取用户状态失败:', err)
+      return cached
+    }
   },
 
   normalizeRankList(rankList) {

@@ -1,3 +1,4 @@
+const api = require('../../utils/api.js');
 const LC_USERNAME_REGEX = /^[a-zA-Z_][a-zA-Z0-9_]{2,29}$/;
 const ADMIN_CODE = 'xyz123'; // TODO: [Security] Move to backend before Product launch
 
@@ -73,7 +74,7 @@ Page({
   },
 
   // ── 绑定 LC ──────────────────────────────────────
-  handleBind() {
+  async handleBind() {
     if (this.data.loading) return;
 
     const errorMessage = this.validateUsername(this.data.leetcodeUsername);
@@ -84,45 +85,35 @@ Page({
 
     const username = this.data.leetcodeUsername.trim().toLowerCase();
     const app = getApp();
+    const openid = app.globalData.openid || wx.getStorageSync('openid');
+
+    if (!openid) {
+      this.setData({ errorMessage: '请先登录' });
+      return;
+    }
 
     this.setData({ loading: true, errorMessage: '' });
 
-    wx.request({
-      url: `${app.globalData.baseUrl}/api/v1/user/bind`,
-      method: 'POST',
-      data: {
-        openid: app.globalData.openid,
+    try {
+      await api.bindLeetCodeAccount(openid, username);
+
+      app.globalData.userInfo = {
+        ...(app.globalData.userInfo || {}),
         leetcode_username: username
-      },
-      header: {
-        Authorization: app.globalData.token ? `Bearer ${app.globalData.token}` : ''
-      },
-      success: (res) => {
-        const data = res.data || {};
+      };
 
-        if (res.statusCode !== 200 || data.LC_bind_success === false) {
-          this.setData({
-            errorMessage: data.error_msg || data.error_message || data.error || '绑定失败，请检查用户名后重试'
-          });
-          return;
-        }
-
-        app.globalData.userInfo = {
-          ...(app.globalData.userInfo || {}),
-          leetcode_username: username
-        };
-
-        app.globalData.lcId = username;
-        wx.setStorageSync('lcId', username);
-        wx.setStorageSync('registration_status', 1);
-        wx.redirectTo({ url: '/pages/squad/squad' });
-      },
-      fail: () => {
-        this.setData({ errorMessage: '网络异常，请检查后端服务' });
-      },
-      complete: () => {
-        this.setData({ loading: false });
-      }
-    });
+      app.globalData.openid = openid;
+      app.globalData.token = api.auth.getToken() || app.globalData.token;
+      app.globalData.lcId = username;
+      wx.setStorageSync('lcId', username);
+      wx.setStorageSync('registration_status', 1);
+      wx.redirectTo({ url: '/pages/squad/squad' });
+    } catch (err) {
+      this.setData({
+        errorMessage: err.message || '绑定失败，请检查用户名后重试'
+      });
+    } finally {
+      this.setData({ loading: false });
+    }
   }
 })
