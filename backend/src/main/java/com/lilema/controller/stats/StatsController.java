@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -181,26 +182,73 @@ public class StatsController {
     @GetMapping("/trend")
     public Map<String, Object> trend(@RequestParam String openid,
                                      @RequestParam(name = "range_days", defaultValue = "7") int rangeDays) {
-        LocalDate from = LocalDate.now().minusDays(Math.max(1, rangeDays) - 1L);
+        if (rangeDays >= 365) {
+            return monthlyTrend(openid);
+        }
+        return dailyTrend(openid, rangeDays);
+    }
+
+    private Map<String, Object> dailyTrend(String openid, int rangeDays) {
+        int days = rangeDays == 30 ? 30 : 7;
+        LocalDate from = LocalDate.now().minusDays(days - 1L);
         List<DailyLog> logs = dailyLogMapper.selectList(new QueryWrapper<DailyLog>()
                 .eq("openid", openid).ge("log_date", from).orderByAsc("log_date"));
+
+        Map<LocalDate, Integer> pointsByDate = new HashMap<>();
+        for (DailyLog log : logs) {
+            pointsByDate.put(log.getLogDate(), nz(log.getDailyPoints()));
+        }
 
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MM-dd");
         List<String> dates = new ArrayList<>();
         List<Integer> points = new ArrayList<>();
         int sum = 0;
-        for (DailyLog l : logs) {
-            dates.add(l.getLogDate().format(fmt));
-            int p = nz(l.getDailyPoints());
+        for (int i = 0; i < days; i++) {
+            LocalDate date = from.plusDays(i);
+            int p = pointsByDate.getOrDefault(date, 0);
+            dates.add(date.format(fmt));
             points.add(p);
             sum += p;
         }
-        double avg = points.isEmpty() ? 0 : Math.round((double) sum / points.size() * 100.0) / 100.0;
 
         Map<String, Object> m = new HashMap<>();
         m.put("dates", dates);
         m.put("daily_points", points);
-        m.put("average_line", avg);
+        m.put("average_line", average(sum, days));
+        return m;
+    }
+
+    private Map<String, Object> monthlyTrend(String openid) {
+        YearMonth currentMonth = YearMonth.now();
+        YearMonth firstMonth = currentMonth.minusMonths(11);
+        LocalDate from = firstMonth.atDay(1);
+
+        List<DailyLog> logs = dailyLogMapper.selectList(new QueryWrapper<DailyLog>()
+                .eq("openid", openid)
+                .ge("log_date", from)
+                .orderByAsc("log_date"));
+
+        Map<YearMonth, Integer> pointsByMonth = new HashMap<>();
+        for (DailyLog log : logs) {
+            YearMonth month = YearMonth.from(log.getLogDate());
+            pointsByMonth.merge(month, nz(log.getDailyPoints()), Integer::sum);
+        }
+
+        List<String> dates = new ArrayList<>();
+        List<Integer> points = new ArrayList<>();
+        int sum = 0;
+        for (int i = 0; i < 12; i++) {
+            YearMonth month = firstMonth.plusMonths(i);
+            int p = pointsByMonth.getOrDefault(month, 0);
+            dates.add(month.getMonthValue() + "月");
+            points.add(p);
+            sum += p;
+        }
+
+        Map<String, Object> m = new HashMap<>();
+        m.put("dates", dates);
+        m.put("daily_points", points);
+        m.put("average_line", average(sum, 12));
         return m;
     }
 
@@ -266,6 +314,10 @@ public class StatsController {
     private void drawCentered(Graphics2D g, String text, int centerX, int baselineY) {
         int width = g.getFontMetrics().stringWidth(text);
         g.drawString(text, centerX - width / 2, baselineY);
+    }
+
+    private double average(int sum, int divisor) {
+        return divisor <= 0 ? 0 : Math.round((double) sum / divisor * 100.0) / 100.0;
     }
 
     private static int nz(Integer i) {

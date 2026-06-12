@@ -647,8 +647,11 @@ Page({
       : api.getTrendData(openid, 365)
 
     dataPromise.then(res => {
-      // Zero-Filling: 填充缺失日期
-      const filledData = this.fillMissingDates(res.dates, res.daily_points, 365)
+      // 后端年趋势按月汇总时返回 12 个点；旧日级数据才需要前端补齐
+      const isMonthlySummary = res.dates && res.dates.length === 12 && res.dates[0].includes('月')
+      const filledData = isMonthlySummary
+        ? { dates: res.dates, daily_points: res.daily_points }
+        : this.fillMissingDates(res.dates, res.daily_points, 365)
 
       // 更新图表
       if (yearChart) {
