@@ -22,7 +22,7 @@ public class LeaderboardController {
     private final LeaderboardService leaderboardService;
 
     /**
-     * GET /api/leaderboard/daily?squad_id=&date=&openid=
+     * GET /api/v1/rank/daily?squad_id=&date=&openid=
      * <p>
      * Returns the daily leaderboard for a squad.
      *

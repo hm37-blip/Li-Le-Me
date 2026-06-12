@@ -110,7 +110,88 @@ GET /api/user/info?lcId=example_user
 
 ---
 
-### 3. 获取趋势数据（历史刷题记录）
+### 3. 获取战队每日排行榜
+**用途**: 获取指定战队某日排行榜，用于首页排行榜展示
+
+**接口地址**: `/api/v1/rank/daily`
+
+**请求方式**: `GET`
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| squad_id | Number | 是 | 战队ID |
+| openid | String | 是 | 当前请求用户的微信 openid，用于返回 mySummary |
+| date | String | 否 | 查询日期，格式 `yyyy-MM-dd`，默认当天 |
+
+**请求示例**:
+```http
+GET /api/v1/rank/daily?squad_id=1&openid=oABC123&date=2026-06-12
+```
+
+**成功响应** (200):
+```json
+{
+  "code": 200,
+  "msg": "success",
+  "data": {
+    "squadName": "冲刺战队",
+    "settleTime": "2026-06-12",
+    "totalMembers": 5,
+    "mySummary": {
+      "myRank": 2,
+      "myDailySteps": 6,
+      "rankChange": "up"
+    },
+    "rankList": [
+      {
+        "rank": 1,
+        "openid": "oABC123",
+        "nickname": "Alice",
+        "avatarUrl": "https://example.com/avatar.png",
+        "dailyPoints": 12,
+        "details": {
+          "easyAdded": 2,
+          "mediumAdded": 2,
+          "hardAdded": 2
+        },
+        "totalPoints": 350,
+        "isTopThree": true
+      }
+    ]
+  }
+}
+```
+
+**字段说明**:
+
+| 字段名 | 类型 | 说明 |
+|--------|------|------|
+| squadName | String | 战队名称 |
+| settleTime | String | 排行榜对应日期 |
+| totalMembers | Number | 战队成员数 |
+| mySummary.myRank | Number | 当前用户当日排名 |
+| mySummary.myDailySteps | Number | 当前用户当日刷题数 |
+| mySummary.rankChange | String | 排名变化：`up`、`down`、`keep` |
+| rankList[].rank | Number | 当日排名 |
+| rankList[].dailyPoints | Number | 当日积分 |
+| rankList[].details | Object | 当日新增题目难度明细 |
+| rankList[].totalPoints | Number | 用户累计积分 |
+| rankList[].isTopThree | Boolean | 是否前三名 |
+
+**错误响应**:
+```json
+{
+  "code": 400,
+  "msg": "squad_id is required",
+  "data": null
+}
+```
+
+---
+
+### 4. 获取趋势数据（历史刷题记录）
 **用途**: 获取用户历史刷题趋势，用于图表展示和连续天数计算
 
 **接口地址**: `/api/v1/stats/trend`
@@ -197,7 +278,7 @@ GET /api/v1/stats/trend?openid=oABC123&range_days=7
 
 ---
 
-### 4. 获取难度分布数据
+### 5. 获取难度分布数据
 **用途**: 获取用户刷题难度分布，用于饼图展示
 
 **接口地址**: `/api/v1/stats/distribution`
@@ -396,4 +477,3 @@ GET /api/v1/stats/distribution?openid=oABC123&type=TOTAL
 
 ### Q7: daily_points 如何计算？
 **A**: daily_points = (当日新增简单题 × 1) + (当日新增中等题 × 2) + (当日新增困难题 × 3)
-
