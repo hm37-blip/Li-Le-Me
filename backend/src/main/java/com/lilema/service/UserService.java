@@ -21,14 +21,11 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
-
-    private static final int TOKEN_EXPIRES_IN_SECONDS = 7200;
 
     @Value("${wechat.appid}")
     private String appid;
@@ -45,6 +42,7 @@ public class UserService {
     private final DailyLogMapper dailyLogMapper;
     private final SquadMapper squadMapper;
     private final LcEngineService lcEngineService;
+    private final AuthTokenService authTokenService;
 
     public Map<String, Object> wechatLogin(String jsCode) {
         return wechatLogin(jsCode, null);
@@ -103,26 +101,17 @@ public class UserService {
             user.setTotalPoints(0);
             user.setDailySteps(0);
             user.setRegistrationStatus(0);
-            user.setToken(UUID.randomUUID().toString());
             user.setCreatedAt(LocalDateTime.now());
             userMapper.insert(user);
             log.info("New user registered: {}", openid);
         } else {
-            if (user.getToken() == null || user.getToken().isBlank()) {
-                user.setToken(UUID.randomUUID().toString());
-                userMapper.update(null, new UpdateWrapper<User>()
-                        .eq("openid", openid)
-                        .set("token", user.getToken()));
-            }
             log.debug("Existing user logged in: {}", openid);
         }
 
         Map<String, Object> result = new HashMap<>();
         result.put("openid", user.getOpenid());
         result.put("is_new_user", isNew);
-        result.put("token", user.getToken());
-        result.put("refreshToken", user.getToken());
-        result.put("expiresIn", TOKEN_EXPIRES_IN_SECONDS);
+        result.putAll(authTokenService.issueTokens(user));
         result.put("registration_status", user.getRegistrationStatus());
         if (!isNew) {
             result.put("user_info", buildUserInfo(user));
@@ -132,31 +121,9 @@ public class UserService {
 
     /**
      * Refresh the current auth token.
-     * This project stores one bearer token per user, so refresh rotates that token and
-     * returns the new value as both access token and next refresh token.
      */
     public Map<String, Object> refreshToken(String refreshToken) {
-        if (refreshToken == null || refreshToken.isBlank()) {
-            throw new IllegalArgumentException("refreshToken is required");
-        }
-
-        User user = userMapper.selectOne(new QueryWrapper<User>()
-                .eq("token", refreshToken)
-                .last("LIMIT 1"));
-        if (user == null) {
-            throw new IllegalArgumentException("Invalid refreshToken");
-        }
-
-        String newToken = UUID.randomUUID().toString();
-        userMapper.update(null, new UpdateWrapper<User>()
-                .eq("id", user.getId())
-                .set("token", newToken));
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("token", newToken);
-        result.put("refreshToken", newToken);
-        result.put("expiresIn", TOKEN_EXPIRES_IN_SECONDS);
-        return result;
+        return authTokenService.refreshTokens(refreshToken);
     }
 
     private Map<String, Object> buildUserInfo(User user) {
@@ -244,6 +211,7 @@ public class UserService {
 
         // ① 删除历史日志
         dailyLogMapper.delete(new QueryWrapper<DailyLog>().eq("openid", openid));
+        authTokenService.revokeRefreshToken(openid);
 
         // ② 更新战队人数
         if (user.getSquadId() != null) {

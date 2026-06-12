@@ -27,6 +27,15 @@ CREATE TABLE IF NOT EXISTS users (
     created_at          DATETIME     DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS user_refresh_tokens (
+    id            BIGINT PRIMARY KEY AUTO_INCREMENT,
+    openid        VARCHAR(128) NOT NULL UNIQUE,
+    refresh_token VARCHAR(128) NOT NULL UNIQUE,
+    expires_at    DATETIME     NOT NULL,
+    created_at    DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    updated_at    DATETIME     DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS daily_logs (
     id           BIGINT PRIMARY KEY AUTO_INCREMENT,
     openid       VARCHAR(128) NOT NULL,

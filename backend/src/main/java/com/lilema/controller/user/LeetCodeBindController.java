@@ -6,6 +6,7 @@ import com.lilema.entity.po.Squad;
 import com.lilema.entity.po.User;
 import com.lilema.mapper.SquadMapper;
 import com.lilema.mapper.UserMapper;
+import com.lilema.service.AuthTokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,10 +30,12 @@ public class LeetCodeBindController {
 
     private final UserMapper userMapper;
     private final SquadMapper squadMapper;
+    private final AuthTokenService authTokenService;
 
-    public LeetCodeBindController(UserMapper userMapper, SquadMapper squadMapper) {
+    public LeetCodeBindController(UserMapper userMapper, SquadMapper squadMapper, AuthTokenService authTokenService) {
         this.userMapper = userMapper;
         this.squadMapper = squadMapper;
+        this.authTokenService = authTokenService;
     }
 
     @PostMapping("/bind")
@@ -106,7 +109,7 @@ public class LeetCodeBindController {
         if (token.isBlank()) {
             return null;
         }
-        return userMapper.selectOne(new QueryWrapper<User>().eq("token", token).last("LIMIT 1"));
+        return authTokenService.findUserByAccessToken(token);
     }
 
     private Map<String, Object> buildUserInfo(User user) {

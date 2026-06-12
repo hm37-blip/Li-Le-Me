@@ -26,6 +26,11 @@ wechat:
   secret: your_secret
   mock-openid: "dev_user_001"
 
+auth:
+  jwt-secret: ${JWT_SECRET:li-le-me-dev-secret-change-me}
+  access-token-expires-in: ${JWT_ACCESS_TOKEN_EXPIRES_IN:7200}
+  refresh-token-expires-in: ${JWT_REFRESH_TOKEN_EXPIRES_IN:2592000}
+
 logging:
   level:
     com.lilema: DEBUG
