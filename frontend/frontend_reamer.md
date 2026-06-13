@@ -25,6 +25,6 @@ frontend/
 │   ├── images/              # 图标、背景图、Logo
 │   └── styles/              # 外部引入的 CSS 库
 └── utils/                   # 工具类 (逻辑封装)
-    ├── request.js           # 封装 wx.request (处理 Token 和统一报错)
-    ├── util.js              # 时间格式化、正则校验工具
-    └── constants.js         # 全局常量 (API 域名、口令、权限码)
+    ├── api.js               # 统一 API 封装、Token 刷新和重试
+    ├── auth.js              # 登录态、access token 和 refresh token 存储
+    └── mockData.js          # 本地演示/兜底数据

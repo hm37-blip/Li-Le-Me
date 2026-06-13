@@ -343,22 +343,33 @@ GET /api/v1/stats/distribution?openid=oABC123&type=TOTAL
 
 ---
 
-## 前后端协作流程
+## 当前联调状态
 
-### 阶段一：接口定义（第1-5天）
-- [x] 前端C（Andy）：定义接口需求
-- [ ] 后端B（Dennis）：确认接口可行性
-- [ ] 双方：确认接口格式
+当前 `master-dev` 已经把文档中的核心接口接到本地 Java 后端，不再需要在前端切换模拟数据。
 
-### 阶段二：并行开发（第5-15天）
-- [ ] 前端C：使用模拟数据开发页面
-- [ ] 后端B：实现云函数接口
+本地默认后端地址：
 
-### 阶段三：联调测试（第15-20天）
-1. 后端B提供测试环境地址
-2. 前端C修改 `utils/api.js` 中的 `BASE_URL`
-3. 前端C在 `pages/report/report.js` 中取消真实API调用的注释
-4. 双方联调测试，修复问题
+```javascript
+// frontend/utils/api.js
+const BASE_URL = 'http://localhost:8080'
+```
+
+后端技术栈：
+
+- Spring Boot 3.2
+- MyBatis-Plus
+- MySQL 8.0
+- JWT access token + refresh token
+
+普通用户链路请求已统一通过 `frontend/utils/api.js`，包含 Bearer token、401 refresh 和重试逻辑。登录接口和后台管理接口仍保留独立请求逻辑。
+
+联调步骤：
+
+1. 启动本机 MySQL 8.0。
+2. 在 `backend/` 启动 Spring Boot 服务。
+3. 用微信开发者工具打开 `frontend/` 目录。
+4. 开发阶段开启“不校验合法域名”。
+5. 访问页面验证登录、绑定、战队、排行榜和战报接口。
 
 ---
 
@@ -453,16 +464,13 @@ GET /api/v1/stats/distribution?openid=oABC123&type=TOTAL
 **A**: 不需要。daily_logs 表只记录有刷题的日期。但是 `/api/v1/stats/trend` 接口返回时，需要填充缺失日期，将 daily_points 设为 0。
 
 ### Q2: consecutiveDays后端算还是前端算？
-**A**: 建议后端计算并返回（基于 daily_logs 表），前端也有计算逻辑作为备用（在 `utils/dataHelper.js` 中）。
+**A**: 当前 `/api/user/report` 由后端基于 `daily_logs` 计算并返回。前端仍保留部分本地兜底逻辑。
 
 ### Q3: 年报的趋势数据返回365条记录会不会太大？
-**A**: 可以考虑按周或月汇总。具体方案可以讨论调整。建议：
-- 7天：返回每日数据
-- 30天：返回每日数据
-- 365天：返回每周或每月汇总（12-15个数据点）
+**A**: 当前 `/api/v1/stats/trend?range_days=365` 后端按月汇总返回，通常为 12 个数据点。7 天和 30 天返回连续每日数据，缺失日期补 0。
 
 ### Q4: LeetCode API有访问频率限制吗？
-**A**: 有的，建议后端做缓存，避免频繁调用LeetCode官方API。
+**A**: 有。当前后端以 `daily_logs` 和 `users` 表中的已结算数据作为主要数据源，缺少本地记录时才会尝试调用 LeetCode GraphQL 作为兜底。
 
 ### Q5: 用户报告接口和趋势数据接口有什么区别？
 **A**:
@@ -471,8 +479,10 @@ GET /api/v1/stats/distribution?openid=oABC123&type=TOTAL
 
 ### Q6: 后端数据库结构是什么？
 **A**:
-- `users` 表：存储用户基本信息（openid, lc_id, total_solved, daily_steps, last_update）
+- `users` 表：存储用户基本信息（openid, lc_id, nickname, avatar_url, total_solved, total_points, daily_steps, squad_id, registration_status）
 - `daily_logs` 表：存储每日刷题记录（openid, log_date, total_solved, daily_steps, easy_count, medium_count, hard_count, daily_points, rank_tier）
+- `squads` 表：存储战队信息和邀请码
+- `refresh_tokens` 表：存储 refresh token 哈希和过期时间
 - **不存在** `history_logs` 字段或数组
 
 ### Q7: daily_points 如何计算？
