@@ -57,7 +57,7 @@ public class LeaderboardService {
         // 4. Sort by daily_points desc, then total_points desc as tiebreaker
         List<DailyLog> sorted = logs.stream()
                 .sorted(Comparator
-                        .comparingInt(DailyLog::getDailyPoints).reversed()
+                        .comparingInt(DailyLog::getDailyPoints)
                         .thenComparingInt((DailyLog dl) -> {
                             User u = userByOpenid.get(dl.getOpenid());
                             return u != null && u.getTotalPoints() != null ? u.getTotalPoints() : 0;
@@ -191,7 +191,7 @@ public class LeaderboardService {
 
         List<DailyLog> sorted = logs.stream()
                 .sorted(Comparator
-                        .comparingInt(DailyLog::getDailyPoints).reversed()
+                        .comparingInt(DailyLog::getDailyPoints)
                         .thenComparingInt((DailyLog dl) -> {
                             User u = userByOpenid.get(dl.getOpenid());
                             return u != null && u.getTotalPoints() != null ? u.getTotalPoints() : 0;
