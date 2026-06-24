@@ -22,46 +22,47 @@ Page({
 
     wx.login({
       success: (loginRes) => {
-        if (!loginRes.code) {
-          wx.showToast({ title: '未获取到登录凭证，请重试', icon: 'none' });
-          this.setData({ loading: false });
-          return;
-        }
-        wx.request({
-          url: `${app.globalData.baseUrl}/api/v1/user/login`,
-          method: 'POST',
-          data: { js_code: loginRes.code, device_id: deviceId },
-          success: (res) => {
-            const data = res.data || {};
-            if (res.statusCode !== 200 || !data.openid) {
-              wx.showToast({ title: data.error_message || '登录失败，请稍后重试', icon: 'none' });
-              return;
-            }
-
-            app.globalData.openid = data.openid;
-            app.globalData.token = data.token || '';
-            app.globalData.userInfo = data.user_info || null;
-            wx.setStorageSync('openid', data.openid);
-            auth.setToken(data.token || '', data.refreshToken, data.expiresIn);
-            wx.setStorageSync('registration_status', data.registration_status ?? 0);
-
-            const status = Number(data.registration_status);
-            if (status === 0) {
-              wx.redirectTo({ url: '/pages/registration/registration' });
-            } else if (status === 1) {
-              wx.redirectTo({ url: '/pages/squad/squad' });
-            } else {
-              wx.redirectTo({ url: '/pages/home/home' });
-            }
-          },
-          fail: () => { wx.showToast({ title: '网络异常，请检查后端服务是否启动', icon: 'none' }); },
-          complete: () => { this.setData({ loading: false }); }
-        });
+        // 游客模式 / 测试号下 wx.login 可能拿不到 code（err 41002），后端 mock 不校验 code，用兜底值
+        this.sendLogin(loginRes.code || 'dev_mock_code', deviceId);
       },
       fail: () => {
-        wx.showToast({ title: '微信登录失败，请稍后重试', icon: 'none' });
-        this.setData({ loading: false });
+        // 游客模式下 wx.login 直接失败，仍走 mock 登录（后端按 device_id 生成 openid）
+        this.sendLogin('dev_mock_code', deviceId);
       }
+    });
+  },
+
+  sendLogin(jsCode, deviceId) {
+    const app = getApp();
+    wx.request({
+      url: `${app.globalData.baseUrl}/api/v1/user/login`,
+      method: 'POST',
+      data: { js_code: jsCode, device_id: deviceId },
+      success: (res) => {
+        const data = res.data || {};
+        if (res.statusCode !== 200 || !data.openid) {
+          wx.showToast({ title: data.error_message || '登录失败，请稍后重试', icon: 'none' });
+          return;
+        }
+
+        app.globalData.openid = data.openid;
+        app.globalData.token = data.token || '';
+        app.globalData.userInfo = data.user_info || null;
+        wx.setStorageSync('openid', data.openid);
+        auth.setToken(data.token || '', data.refreshToken, data.expiresIn);
+        wx.setStorageSync('registration_status', data.registration_status ?? 0);
+
+        const status = Number(data.registration_status);
+        if (status === 0) {
+          wx.redirectTo({ url: '/pages/registration/registration' });
+        } else if (status === 1) {
+          wx.redirectTo({ url: '/pages/squad/squad' });
+        } else {
+          wx.redirectTo({ url: '/pages/home/home' });
+        }
+      },
+      fail: () => { wx.showToast({ title: '网络异常，请检查后端服务是否启动', icon: 'none' }); },
+      complete: () => { this.setData({ loading: false }); }
     });
   }
 })
