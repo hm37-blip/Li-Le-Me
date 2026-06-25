@@ -43,6 +43,7 @@ public class UserService {
     private final SquadMapper squadMapper;
     private final LcEngineService lcEngineService;
     private final AuthTokenService authTokenService;
+    private final com.lilema.common.config.AppMode appMode;
 
     public Map<String, Object> wechatLogin(String jsCode) {
         return wechatLogin(jsCode, null);
@@ -56,11 +57,11 @@ public class UserService {
      */
     public Map<String, Object> wechatLogin(String jsCode, String devOpenidOverride) {
         String openid;
-        if (devOpenidOverride != null && !devOpenidOverride.isBlank()) {
+        if (appMode.isDevMode() && devOpenidOverride != null && !devOpenidOverride.isBlank()) {
             openid = devOpenidOverride;
             log.warn("[DEV] Using request mock openid: {}", openid);
-        } else if (mockOpenid != null && !mockOpenid.isBlank()) {
-            // 本地开发 mock 模式，跳过真实微信接口
+        } else if (appMode.isDevMode() && mockOpenid != null && !mockOpenid.isBlank()) {
+            // 本地开发 mock 模式，跳过真实微信接口（仅 dev-mode 生效）
             openid = mockOpenid;
             log.warn("[DEV] Using mock openid: {}", openid);
         } else {

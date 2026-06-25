@@ -21,6 +21,12 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
+# 开发/生产硬开关。dev-mode=true 放开 /debug/*、/api/admin/*、mock 登录（本地默认）。
+# 生产部署：APP_DEV_MODE=false 且 ADMIN_TOKEN=<强随机值>（重启生效）。
+app:
+  dev-mode: ${APP_DEV_MODE:true}
+  admin-token: ${ADMIN_TOKEN:}
+
 wechat:
   appid: your_appid
   secret: your_secret
