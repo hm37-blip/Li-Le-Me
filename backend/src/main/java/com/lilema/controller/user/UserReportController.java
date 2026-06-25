@@ -169,7 +169,7 @@ public class UserReportController {
 
         List<DailyLog> sorted = logs.stream()
                 .sorted(Comparator
-                        .comparingInt((DailyLog log) -> nz(log.getDailyPoints())).reversed()
+                        .comparingInt((DailyLog log) -> nz(log.getDailyPoints()))
                         .thenComparingInt((DailyLog log) -> {
                             User rankingUser = userByOpenid.get(log.getOpenid());
                             return rankingUser != null ? nz(rankingUser.getTotalPoints()) : 0;
