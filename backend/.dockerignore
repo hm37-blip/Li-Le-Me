@@ -1,0 +1,11 @@
+# 避免把本地构建产物/IDE 文件拷进构建上下文 (加快上传 + 防止污染镜像)
+target/
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+HELP.md
+data/
+.git/

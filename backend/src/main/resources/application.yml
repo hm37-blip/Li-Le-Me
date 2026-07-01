@@ -28,8 +28,8 @@ app:
   admin-token: ${ADMIN_TOKEN:}
 
 wechat:
-  appid: your_appid
-  secret: your_secret
+  appid: ${WECHAT_APPID:your_appid}
+  secret: ${WECHAT_SECRET:your_secret}
   mock-openid: "dev_user_001"
 
 auth:
