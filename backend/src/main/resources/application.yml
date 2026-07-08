@@ -2,7 +2,7 @@ server:
   port: 8080
 
 spring:
- datasource:
+  datasource:
     url: ${MYSQL_URL:jdbc:mysql://10.20.110.8:3306/mysql?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
     username: ${MYSQL_USER:root}
     password: ${MYSQL_PASSWORD:IYspc3VWOh5uF9QjTgkS}
