@@ -3,9 +3,9 @@ server:
 
 spring:
   datasource:
-    url: ${MYSQL_URL:jdbc:mysql://10.20.110.8:3306/mysql?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
-    username: ${MYSQL_USER:root}
-    password: ${MYSQL_PASSWORD:IYspc3VWOh5uF9QjTgkS}
+    url: jdbc:mysql://${MYSQL_ADDRESS}/lilema?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   sql:
     init:
