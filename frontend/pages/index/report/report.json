@@ -4,6 +4,7 @@
   "navigationBarTextStyle": "white",
   "backgroundColor": "#282828",
   "backgroundTextStyle": "light",
+  "enablePullDownRefresh": true,
   "usingComponents": {
     "ec-canvas": "/components/ec-canvas/ec-canvas",
     "custom-tabbar": "/components/custom-tabbar/custom-tabbar"

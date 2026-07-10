@@ -6,6 +6,7 @@ import com.lilema.entity.po.DailyLog;
 import com.lilema.entity.po.User;
 import com.lilema.mapper.DailyLogMapper;
 import com.lilema.mapper.UserMapper;
+import com.lilema.service.LcStatsRefreshService;
 import com.lilema.service.LcEngineService;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,11 +40,36 @@ public class StatsController {
     private final DailyLogMapper dailyLogMapper;
     private final UserMapper userMapper;
     private final LcEngineService lcEngineService;
+    private final LcStatsRefreshService lcStatsRefreshService;
 
-    public StatsController(DailyLogMapper dailyLogMapper, UserMapper userMapper, LcEngineService lcEngineService) {
+    public StatsController(DailyLogMapper dailyLogMapper,
+                           UserMapper userMapper,
+                           LcEngineService lcEngineService,
+                           LcStatsRefreshService lcStatsRefreshService) {
         this.dailyLogMapper = dailyLogMapper;
         this.userMapper = userMapper;
         this.lcEngineService = lcEngineService;
+        this.lcStatsRefreshService = lcStatsRefreshService;
+    }
+
+    /** POST /api/v1/stats/refresh {"openid": "..."} -> latest LeetCode snapshot */
+    @PostMapping("/refresh")
+    public Map<String, Object> refresh(@RequestBody Map<String, String> body) {
+        String openid = body.get("openid");
+        Map<String, Object> m = new HashMap<>();
+        if (openid == null || openid.isBlank()) {
+            m.put("refreshed", false);
+            m.put("error_msg", "openid is required");
+            return m;
+        }
+
+        try {
+            return lcStatsRefreshService.refreshByOpenid(openid);
+        } catch (Exception e) {
+            m.put("refreshed", false);
+            m.put("error_msg", e.getMessage());
+            return m;
+        }
     }
 
     /** GET /api/v1/stats/distribution?openid=&type=TOTAL|MONTHLY -> {easy, medium, hard} */

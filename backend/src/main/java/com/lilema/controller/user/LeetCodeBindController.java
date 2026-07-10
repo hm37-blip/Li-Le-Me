@@ -1,12 +1,12 @@
 package com.lilema.controller.user;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.lilema.entity.po.Squad;
 import com.lilema.entity.po.User;
 import com.lilema.mapper.SquadMapper;
 import com.lilema.mapper.UserMapper;
 import com.lilema.service.AuthTokenService;
+import com.lilema.service.LcStatsRefreshService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,11 +31,16 @@ public class LeetCodeBindController {
     private final UserMapper userMapper;
     private final SquadMapper squadMapper;
     private final AuthTokenService authTokenService;
+    private final LcStatsRefreshService lcStatsRefreshService;
 
-    public LeetCodeBindController(UserMapper userMapper, SquadMapper squadMapper, AuthTokenService authTokenService) {
+    public LeetCodeBindController(UserMapper userMapper,
+                                  SquadMapper squadMapper,
+                                  AuthTokenService authTokenService,
+                                  LcStatsRefreshService lcStatsRefreshService) {
         this.userMapper = userMapper;
         this.squadMapper = squadMapper;
         this.authTokenService = authTokenService;
+        this.lcStatsRefreshService = lcStatsRefreshService;
     }
 
     @PostMapping("/bind")
@@ -57,14 +62,16 @@ public class LeetCodeBindController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(fail("用户不存在"));
         }
 
-        userMapper.update(null, new UpdateWrapper<User>().eq("openid", openid)
-                .set("lc_id", lc)
-                .set("registration_status", 1));
-
         Map<String, Object> ok = new HashMap<>();
-        ok.put("LC_bind_success", true);
-        ok.put("error_msg", "");
-        return ResponseEntity.ok(ok);
+        try {
+            Map<String, Object> refresh = lcStatsRefreshService.bindAndRefresh(user, lc);
+            ok.put("LC_bind_success", true);
+            ok.put("error_msg", "");
+            ok.put("stats", refresh);
+            return ResponseEntity.ok(ok);
+        } catch (Exception e) {
+            return ResponseEntity.ok(fail("LeetCode 数据抓取失败：" + e.getMessage()));
+        }
     }
 
     @GetMapping("/status")

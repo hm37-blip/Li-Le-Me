@@ -411,6 +411,44 @@ Page({
     }, 300)
   },
 
+  async onPullDownRefresh() {
+    if (USE_MOCK_DATA) {
+      await this.loadChartData(this.data.openid)
+      wx.stopPullDownRefresh()
+      return
+    }
+
+    const openid = this.data.openid || getApp().globalData.openid || wx.getStorageSync('openid') || ''
+    if (!openid) {
+      wx.showToast({ title: '请先登录', icon: 'none' })
+      wx.stopPullDownRefresh()
+      return
+    }
+
+    this.setData({ openid })
+    wx.showNavigationBarLoading()
+
+    try {
+      await api.refreshLeetCodeStats(openid)
+      await this.loadChartData(openid)
+      wx.showToast({
+        title: '数据已刷新',
+        icon: 'success',
+        duration: 1500
+      })
+    } catch (err) {
+      console.error('刷新 LeetCode 数据失败:', err)
+      wx.showToast({
+        title: err.message || '刷新失败',
+        icon: 'none',
+        duration: 2000
+      })
+    } finally {
+      wx.hideNavigationBarLoading()
+      wx.stopPullDownRefresh()
+    }
+  },
+
   /**
    * 调整所有图表尺寸
    */
@@ -440,18 +478,14 @@ Page({
    * 加载图表数据
    */
   loadChartData(openid) {
-    // 加载用户基本信息（总题数、连续天数）
-    this.loadUserBasicInfo()
-    // 加载周趋势数据
-    this.loadWeekTrend(openid)
-    // 加载月趋势数据
-    this.loadMonthTrend(openid)
-    // 加载年趋势数据
-    this.loadYearTrend(openid)
-    // 加载月难度分布数据
-    this.loadMonthDifficultyDistribution(openid)
-    // 加载年难度分布数据
-    this.loadYearDifficultyDistribution(openid)
+    return Promise.all([
+      this.loadUserBasicInfo(),
+      this.loadWeekTrend(openid),
+      this.loadMonthTrend(openid),
+      this.loadYearTrend(openid),
+      this.loadMonthDifficultyDistribution(openid),
+      this.loadYearDifficultyDistribution(openid)
+    ])
   },
 
   /**
@@ -464,7 +498,7 @@ Page({
     if (USE_MOCK_DATA) {
       // Mock模式：使用当前页面数据即可
       console.log('使用Mock数据，用户基本信息已在data中初始化')
-      return
+      return Promise.resolve()
     }
 
     // 真实API模式：totalSolved 会在 loadYearDifficultyDistribution 中从 TOTAL 数据计算得出
@@ -472,7 +506,7 @@ Page({
     // 这里可以调用 getTrendData 来计算连续天数
     const openid = this.data.openid
 
-    api.getTrendData(openid, 365)
+    return api.getTrendData(openid, 365)
       .then(res => {
         // 计算连续打卡天数
         const consecutiveDays = this.calculateConsecutiveDays(res.daily_points)
@@ -556,7 +590,7 @@ Page({
       ? Promise.resolve(mockData.generateWeekTrendData())
       : api.getTrendData(openid, 7)
 
-    dataPromise.then(res => {
+    return dataPromise.then(res => {
       // Zero-Filling: 填充缺失日期
       const filledData = this.fillMissingDates(res.dates, res.daily_points, 7)
 
@@ -601,7 +635,7 @@ Page({
       ? Promise.resolve(mockData.generateMonthTrendData())
       : api.getTrendData(openid, 30)
 
-    dataPromise.then(res => {
+    return dataPromise.then(res => {
       // Zero-Filling: 填充缺失日期
       const filledData = this.fillMissingDates(res.dates, res.daily_points, 30)
 
@@ -646,7 +680,7 @@ Page({
       ? Promise.resolve(mockData.generateYearTrendData())
       : api.getTrendData(openid, 365)
 
-    dataPromise.then(res => {
+    return dataPromise.then(res => {
       // 后端年趋势按月汇总时返回 12 个点；旧日级数据才需要前端补齐
       const isMonthlySummary = res.dates && res.dates.length === 12 && res.dates[0].includes('月')
       const filledData = isMonthlySummary
@@ -688,7 +722,7 @@ Page({
       ? Promise.resolve(mockData.generateMonthDifficultyDistribution())
       : api.getDifficultyDistribution(openid, 'MONTHLY')
 
-    dataPromise.then(res => {
+    return dataPromise.then(res => {
       // 计算总数（API不返回total字段，需要前端计算）
       const total = res.easy + res.medium + res.hard
 
@@ -737,7 +771,7 @@ Page({
       ? Promise.resolve(mockData.generateYearDifficultyDistribution())
       : api.getDifficultyDistribution(openid, 'TOTAL')
 
-    dataPromise.then(res => {
+    return dataPromise.then(res => {
       // 计算总数（API不返回total字段，需要前端计算）
       const total = res.easy + res.medium + res.hard
 

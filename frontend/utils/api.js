@@ -275,6 +275,15 @@ function getSharePoster(openid) {
   })
 }
 
+function refreshLeetCodeStats(openid) {
+  return request('/api/v1/stats/refresh', { openid }, 'POST').then(res => {
+    if (res.refreshed === false) {
+      throw new Error(res.error_msg || '刷新 LeetCode 数据失败')
+    }
+    return res.data || res
+  })
+}
+
 /**
  * 获取战队每日排行榜
  * @param {Number|String} squadId - 战队 ID
@@ -419,6 +428,7 @@ module.exports = {
   getTrendData,
   getDifficultyDistribution,
   getSharePoster,
+  refreshLeetCodeStats,
   getDailyLeaderboard,
   updateUserProfile,
   bindLeetCodeAccount,
