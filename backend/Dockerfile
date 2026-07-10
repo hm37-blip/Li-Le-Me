@@ -21,6 +21,13 @@ RUN mvn -B -s /root/.m2/settings.xml clean package -DskipTests
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 
+# 微信登录需要后端访问 https://api.weixin.qq.com/sns/jscode2session。
+# 显式安装并刷新 CA 证书，确保 Java TLS 校验能识别微信 HTTPS 证书链。
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && update-ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 # 应用内部用 Asia/Shanghai, 容器时区对齐 (定时任务/日志时间正确)
 ENV TZ=Asia/Shanghai
 
