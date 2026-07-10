@@ -3,6 +3,7 @@
   <!-- 顶部栏 -->
   <view class="top-bar">
     <button class="btn-create" bindtap="openCreateModal">＋ 创建新战队</button>
+    <button class="btn-token" bindtap="clearAdminToken">令牌</button>
     <button class="btn-logout" bindtap="handleLogout">退出</button>
   </view>
 
@@ -91,6 +92,29 @@
   <!-- 底部留白 -->
   <view class="page-bottom" />
 
+</view>
+
+<!-- ══ 管理令牌弹窗 ══ -->
+<view class="modal-overlay" wx:if="{{showAdminTokenModal}}">
+  <view class="modal-box" catchtap="noop">
+    <view class="modal-title">后台管理令牌</view>
+
+    <view class="modal-field">
+      <text class="modal-label">Admin Token</text>
+      <input class="modal-input"
+        password
+        placeholder="输入云托管环境变量 ADMIN_TOKEN"
+        value="{{adminTokenInput}}"
+        bindinput="onAdminTokenInput" />
+      <text class="field-hint">令牌只保存在本机微信 storage，不写入代码仓库</text>
+    </view>
+
+    <text class="form-error" wx:if="{{adminTokenError}}">⚠ {{adminTokenError}}</text>
+
+    <view class="modal-footer">
+      <button class="btn-modal-confirm" bindtap="saveAdminToken">确定</button>
+    </view>
+  </view>
 </view>
 
 <!-- ══ 创建战队弹窗 ══ -->

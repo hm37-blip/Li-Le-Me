@@ -1,4 +1,5 @@
 const auth = require('../../utils/auth.js');
+const api = require('../../utils/api.js');
 
 Page({
   data: {
@@ -34,15 +35,10 @@ Page({
 
   sendLogin(jsCode, deviceId) {
     const app = getApp();
-    wx.request({
-      url: `${app.globalData.baseUrl}/api/v1/user/login`,
-      method: 'POST',
-      data: { js_code: jsCode, device_id: deviceId },
-      success: (res) => {
-        const data = res.data || {};
-        if (res.statusCode !== 200 || !data.openid) {
-          wx.showToast({ title: data.error_message || '登录失败，请稍后重试', icon: 'none' });
-          return;
+    api.login(jsCode, deviceId)
+      .then(data => {
+        if (!data.openid) {
+          throw new Error(data.error_message || '登录失败，请稍后重试');
         }
 
         app.globalData.openid = data.openid;
@@ -60,9 +56,13 @@ Page({
         } else {
           wx.redirectTo({ url: '/pages/home/home' });
         }
-      },
-      fail: () => { wx.showToast({ title: '网络异常，请检查后端服务是否启动', icon: 'none' }); },
-      complete: () => { this.setData({ loading: false }); }
-    });
+      })
+      .catch(err => {
+        console.error('[LOGIN_FAIL]', err);
+        wx.showToast({ title: err.message || err.errMsg || '网络异常，请检查后端服务', icon: 'none' });
+      })
+      .finally(() => {
+        this.setData({ loading: false });
+      });
   }
 })

@@ -1,16 +1,85 @@
-/**
- * API接口封装
- * 用于与后端B提供的云函数接口通信
- */
-
 const auth = require('./auth.js')
-
-// API基础URL - 指向本地 Java 后端(master-dev 集成)
-const BASE_URL = 'http://localhost:8080'
+const env = require('../config/env.js')
 
 // Token 刷新标记（防止并发刷新）
 let isRefreshing = false
 let refreshSubscribers = []
+
+function ensureCloudConfig() {
+  if (!env.cloudEnv || env.cloudEnv === 'YOUR_CLOUD_ENV_ID') {
+    throw new Error('请先在 config/env.js 配置 cloudEnv')
+  }
+  if (!env.cloudService || env.cloudService === 'YOUR_CLOUD_SERVICE_NAME') {
+    throw new Error('请先在 config/env.js 配置 cloudService')
+  }
+}
+
+function normalizeResponse(res) {
+  const statusCode = res.statusCode || res.status || 200
+  return {
+    statusCode,
+    data: res.data || {}
+  }
+}
+
+function rawRequest(url, data = {}, method = 'GET', header = {}) {
+  if (env.mode === 'local' || env.mode === 'domain') {
+    const baseUrl = env.mode === 'domain' ? env.serverDomain : env.localBaseUrl
+    const requestUrl = `${baseUrl}${url}`
+    return new Promise((resolve, reject) => {
+      console.log('[API]', method, requestUrl)
+      wx.request({
+        url: requestUrl,
+        data,
+        method,
+        header,
+        timeout: env.requestTimeout || 20000,
+        success: res => resolve(normalizeResponse(res)),
+        fail: err => {
+          console.error('[API_FAIL]', method, requestUrl, err)
+          reject(err)
+        }
+      })
+    })
+  }
+
+  if (env.mode !== 'cloud') {
+    return Promise.reject(new Error(`未知 API 模式: ${env.mode}`))
+  }
+
+  ensureCloudConfig()
+  return new Promise((resolve, reject) => {
+    const requestMeta = `${method} ${url}`
+    console.log('[CLOUD_API]', requestMeta, {
+      env: env.cloudEnv,
+      service: env.cloudService
+    })
+    wx.cloud.callContainer({
+      config: {
+        env: env.cloudEnv
+      },
+      path: url,
+      method,
+      data,
+      header: {
+        ...header,
+        'X-WX-SERVICE': env.cloudService
+      },
+      success: res => {
+        console.log('[CLOUD_API_RES]', requestMeta, res)
+        resolve(normalizeResponse(res))
+      },
+      fail: err => {
+        console.error('[CLOUD_API_FAIL]', requestMeta, {
+          env: env.cloudEnv,
+          service: env.cloudService,
+          err
+        })
+        reject(err)
+      }
+    })
+  })
+}
 
 /**
  * 通用请求封装（带 Token 鉴权）
@@ -37,12 +106,8 @@ function request(url, data = {}, method = 'GET', needAuth = true) {
       }
     }
 
-    wx.request({
-      url: `${BASE_URL}${url}`,
-      data,
-      method,
-      header,
-      success(res) {
+    rawRequest(url, data, method, header)
+      .then(res => {
         // 处理成功响应
         if (res.statusCode === 200) {
           resolve(res.data)
@@ -54,14 +119,11 @@ function request(url, data = {}, method = 'GET', needAuth = true) {
         }
         // 处理其他错误状态码
         else {
-          const message = (res.data && res.data.message) || '未知错误'
+          const message = (res.data && (res.data.message || res.data.error_message || res.data.error)) || '未知错误'
           reject(new Error(`请求失败: ${res.statusCode} - ${message}`))
         }
-      },
-      fail(err) {
-        reject(err)
-      }
-    })
+      })
+      .catch(reject)
   })
 }
 
@@ -128,14 +190,10 @@ function refreshToken() {
   }
 
   return new Promise((resolve, reject) => {
-    wx.request({
-      url: `${BASE_URL}/api/v1/auth/refresh`,
-      method: 'POST',
-      data: { refreshToken },
-      header: {
+    rawRequest('/api/v1/auth/refresh', { refreshToken }, 'POST', {
         'content-type': 'application/json'
-      },
-      success(res) {
+      })
+      .then(res => {
         if (res.statusCode === 200 && res.data.token) {
           // 保存新的 Token
           auth.setToken(
@@ -147,12 +205,16 @@ function refreshToken() {
         } else {
           reject(new Error('刷新 Token 失败'))
         }
-      },
-      fail(err) {
-        reject(err)
-      }
-    })
+      })
+      .catch(reject)
   })
+}
+
+function login(jsCode, deviceId) {
+  return request('/api/v1/user/login', {
+    js_code: jsCode,
+    device_id: deviceId
+  }, 'POST', false)
 }
 
 /**
@@ -308,7 +370,52 @@ function deleteUserAccount(openid) {
   })
 }
 
+function getAdminTokenHeader() {
+  const token = wx.getStorageSync('admin_token')
+  return token ? { 'X-Admin-Token': token } : {}
+}
+
+function adminRequest(url, data = {}, method = 'GET') {
+  const header = {
+    'content-type': 'application/json',
+    ...getAdminTokenHeader()
+  }
+
+  return rawRequest(url, data, method, header).then(res => {
+    if (res.statusCode === 200) {
+      return res.data
+    }
+    const message = (res.data && (res.data.error_message || res.data.error || res.data.message)) || '后台请求失败'
+    throw new Error(`${message}（${res.statusCode}）`)
+  })
+}
+
+function getAdminSquads() {
+  return adminRequest('/api/admin/squads')
+}
+
+function getAdminSquadMembers(squadId) {
+  return adminRequest(`/api/admin/squads/${squadId}/members`)
+}
+
+function createAdminSquad(data) {
+  return adminRequest('/api/admin/squads', data, 'POST')
+}
+
+function updateAdminSquad(id, data) {
+  return adminRequest(`/api/admin/squads/${id}`, data, 'PUT')
+}
+
+function deleteAdminSquad(id) {
+  return adminRequest(`/api/admin/squads/${id}`, {}, 'DELETE')
+}
+
+function removeAdminSquadMember(squadId, userId) {
+  return adminRequest(`/api/admin/squads/${squadId}/members/${userId}`, {}, 'DELETE')
+}
+
 module.exports = {
+  login,
   getTrendData,
   getDifficultyDistribution,
   getSharePoster,
@@ -320,5 +427,12 @@ module.exports = {
   verifySquadInvite,
   joinUserSquad,
   deleteUserAccount,
+  getAdminSquads,
+  getAdminSquadMembers,
+  createAdminSquad,
+  updateAdminSquad,
+  deleteAdminSquad,
+  removeAdminSquadMember,
+  request,
   auth // 导出 auth 模块，方便其他文件使用
 }

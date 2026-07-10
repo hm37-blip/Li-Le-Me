@@ -787,31 +787,12 @@ Page({
 
   // 获取用户 openid
   getUserOpenId() {
-    // 添加超时保护
-    const timeout = setTimeout(() => {
-      console.warn('获取 openid 超时，使用模拟数据')
-      this.setData({
-        openid: 'mock_openid_for_test'
-      })
-    }, 3000) // 3秒超时
+    const openid = getApp().globalData.openid || wx.getStorageSync('openid') || ''
+    if (openid) {
+      this.setData({ openid })
+      return
+    }
 
-    wx.cloud.callFunction({
-      name: 'login',
-      timeout: 5000, // 5秒超时
-      success: res => {
-        clearTimeout(timeout)
-        getApp().globalData.openid = res.result.openid
-        this.setData({
-          openid: res.result.openid
-        })
-      },
-      fail: err => {
-        clearTimeout(timeout)
-        console.error('获取 openid 失败:', err)
-        this.setData({
-          openid: 'mock_openid_for_test'
-        })
-      }
-    })
+    wx.redirectTo({ url: '/pages/login/login' })
   }
 })

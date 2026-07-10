@@ -42,6 +42,17 @@
   line-height: 64rpx;
 }
 
+.btn-token {
+  font-size: 26rpx;
+  color: #07c160;
+  background: #f0faf4 !important;
+  border: none;
+  border-radius: 14rpx;
+  padding: 0 28rpx;
+  height: 64rpx;
+  line-height: 64rpx;
+}
+
 /* ══════════════════════════════════════
    看板标题行
 ══════════════════════════════════════ */

@@ -1,6 +1,7 @@
+const api = require('../../utils/api.js');
+
 // 名称规则：3-30个汉字/数字/英文字母
 const NAME_REGEX = /^[\u4e00-\u9fa50-9a-zA-Z]{3,30}$/;
-const TIMEOUT = 10000;
 
 function generateInviteCode() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -27,74 +28,109 @@ Page({
     editForm: { name: '', code: '', max: '50' },
     editFormError: '',
     submittingEdit: false,
+
+    showAdminTokenModal: false,
+    adminTokenInput: '',
+    adminTokenError: '',
   },
 
   onLoad() {
-    this.fetchSquads();
+    this.ensureAdminToken();
   },
 
   onPullDownRefresh() {
     this.fetchSquads(() => wx.stopPullDownRefresh());
   },
 
-  fetchSquads(callback) {
-    const app = getApp();
-    this.setData({ loadingSquads: true, fetchError: '' });
-    wx.request({
-      url: `${app.globalData.baseUrl}/api/admin/squads`,
-      method: 'GET',
-      timeout: TIMEOUT,
-      success: (res) => {
-        if (res.statusCode === 200 && Array.isArray(res.data)) {
-          const squads = res.data.map(s => ({
-            ...s,
-            id: Number(s.id),
-            members: [],
-            membersPreview: [],
-            membersLoaded: false,
-            showAll: false,
-          }));
-          this.setData({ squads });
-          squads.forEach((sq, idx) => this.fetchMembersForSquad(idx, sq.id));
-        } else {
-          this.setData({ fetchError: `加载失败（${res.statusCode}）` });
-        }
-      },
-      fail: () => {
-        this.setData({ fetchError: '连接失败，请确认后端服务已启动' });
-      },
-      complete: () => {
-        this.setData({ loadingSquads: false });
-        if (callback) callback();
-      }
+  ensureAdminToken() {
+    const token = wx.getStorageSync('admin_token');
+    if (token) {
+      this.fetchSquads();
+      return;
+    }
+    this.setData({
+      showAdminTokenModal: true,
+      adminTokenInput: '',
+      adminTokenError: ''
     });
   },
 
-  fetchMembersForSquad(idx, squadId) {
-    const app = getApp();
-    wx.request({
-      url: `${app.globalData.baseUrl}/api/admin/squads/${squadId}/members`,
-      method: 'GET',
-      timeout: TIMEOUT,
-      success: (res) => {
-        if (res.statusCode === 200) {
-          const members = (res.data || []).map(m => ({
-            ...m,
-            avatarChar: (m.nickname || '?').charAt(0)
-          }));
-          this.setData({
-            [`squads[${idx}].members`]: members,
-            [`squads[${idx}].membersPreview`]: members.slice(0, 3),
-            [`squads[${idx}].membersLoaded`]: true,
-          });
-        } else {
-          this.setData({ [`squads[${idx}].membersLoaded`]: true });
-        }
-      },
-      fail: () => {
-        this.setData({ [`squads[${idx}].membersLoaded`]: true });
-      }
+  onAdminTokenInput(e) {
+    this.setData({
+      adminTokenInput: e.detail.value,
+      adminTokenError: ''
     });
+  },
+
+  saveAdminToken() {
+    const token = (this.data.adminTokenInput || '').trim();
+    if (!token) {
+      this.setData({ adminTokenError: '请输入后台管理令牌' });
+      return;
+    }
+    wx.setStorageSync('admin_token', token);
+    this.setData({
+      showAdminTokenModal: false,
+      adminTokenInput: '',
+      adminTokenError: ''
+    });
+    this.fetchSquads();
+  },
+
+  clearAdminToken() {
+    wx.removeStorageSync('admin_token');
+    this.setData({
+      showAdminTokenModal: true,
+      adminTokenInput: '',
+      adminTokenError: '',
+      squads: [],
+      fetchError: ''
+    });
+  },
+
+  fetchSquads(callback) {
+    this.setData({ loadingSquads: true, fetchError: '' });
+    api.getAdminSquads()
+      .then((data) => {
+        if (!Array.isArray(data)) {
+          throw new Error('后台返回格式异常');
+        }
+        const squads = data.map(s => ({
+          ...s,
+          id: Number(s.id),
+          members: [],
+          membersPreview: [],
+          membersLoaded: false,
+          showAll: false,
+        }));
+        this.setData({ squads });
+        squads.forEach((sq, idx) => this.fetchMembersForSquad(idx, sq.id));
+      })
+      .catch((err) => {
+        this.setData({ fetchError: err.message || '连接失败，请确认后端服务已启动' });
+      })
+      .finally(() => {
+        this.setData({ loadingSquads: false });
+        if (callback) callback();
+      });
+  },
+
+  fetchMembersForSquad(idx, squadId) {
+    api.getAdminSquadMembers(squadId)
+      .then((data) => {
+        const members = (data || []).map(m => ({
+          ...m,
+          avatarChar: (m.nickname || '?').charAt(0)
+        }));
+        this.setData({
+          [`squads[${idx}].members`]: members,
+          [`squads[${idx}].membersPreview`]: members.slice(0, 3),
+          [`squads[${idx}].membersLoaded`]: true,
+        });
+      })
+      .catch(() => {
+        this.setData({ [`squads[${idx}].membersLoaded`]: true });
+      });
   },
 
   // ── 表单校验 ─────────────────────────────────────────
@@ -140,25 +176,23 @@ Page({
     if (err) { this.setData({ formError: err }); return; }
 
     const { name, code, max } = this.data.form;
-    const app = getApp();
     this.setData({ submittingForm: true, formError: '' });
-    wx.request({
-      url: `${app.globalData.baseUrl}/api/admin/squads`,
-      method: 'POST',
-      timeout: TIMEOUT,
-      data: { squad_name: name.trim(), invite_code: code.trim(), max_members: parseInt(max, 10) },
-      success: (res) => {
-        const data = res.data || {};
-        if (res.statusCode !== 200 || !data.success) {
-          this.setData({ formError: data.error_message || data.error || '创建失败' });
-          return;
-        }
+    api.createAdminSquad({
+      squad_name: name.trim(),
+      invite_code: code.trim(),
+      max_members: parseInt(max, 10)
+    })
+      .then((data) => {
+        if (!data.success) throw new Error(data.error_message || data.error || '创建失败');
         this.setData({ showCreateModal: false });
         this.fetchSquads();
-      },
-      fail: () => { this.setData({ formError: '网络异常，请检查后端服务' }); },
-      complete: () => { this.setData({ submittingForm: false }); }
-    });
+      })
+      .catch((err) => {
+        this.setData({ formError: err.message || '网络异常，请检查后端服务' });
+      })
+      .finally(() => {
+        this.setData({ submittingForm: false });
+      });
   },
 
   // ── 修改战队 ──────────────────────────────────────────
@@ -187,25 +221,23 @@ Page({
 
     const { name, code, max } = this.data.editForm;
     const id = this.data.editingSquadId;
-    const app = getApp();
     this.setData({ submittingEdit: true, editFormError: '' });
-    wx.request({
-      url: `${app.globalData.baseUrl}/api/admin/squads/${id}`,
-      method: 'PUT',
-      timeout: TIMEOUT,
-      data: { squad_name: name.trim(), invite_code: code.trim(), max_members: parseInt(max, 10) },
-      success: (res) => {
-        const data = res.data || {};
-        if (res.statusCode !== 200 || !data.success) {
-          this.setData({ editFormError: data.error_message || data.error || '修改失败' });
-          return;
-        }
+    api.updateAdminSquad(id, {
+      squad_name: name.trim(),
+      invite_code: code.trim(),
+      max_members: parseInt(max, 10)
+    })
+      .then((data) => {
+        if (!data.success) throw new Error(data.error_message || data.error || '修改失败');
         this.setData({ showEditModal: false, editingSquadId: null });
         this.fetchSquads();
-      },
-      fail: () => { this.setData({ editFormError: '网络异常，请检查后端服务' }); },
-      complete: () => { this.setData({ submittingEdit: false }); }
-    });
+      })
+      .catch((err) => {
+        this.setData({ editFormError: err.message || '网络异常，请检查后端服务' });
+      })
+      .finally(() => {
+        this.setData({ submittingEdit: false });
+      });
   },
 
   // ── 展开/收起全部成员 ─────────────────────────────────
@@ -226,21 +258,14 @@ Page({
       confirmColor: '#ff4d4f',
       success: (res) => {
         if (!res.confirm) return;
-        const app = getApp();
-        wx.request({
-          url: `${app.globalData.baseUrl}/api/admin/squads/${id}`,
-          method: 'DELETE',
-          timeout: TIMEOUT,
-          success: (r) => {
-            if (r.statusCode === 200) {
-              wx.showToast({ title: '已删除', icon: 'success' });
-              this.fetchSquads();
-            } else {
-              wx.showToast({ title: `删除失败（${r.statusCode}）`, icon: 'none' });
-            }
-          },
-          fail: () => { wx.showToast({ title: '网络异常，删除失败', icon: 'none' }); }
-        });
+        api.deleteAdminSquad(id)
+          .then(() => {
+            wx.showToast({ title: '已删除', icon: 'success' });
+            this.fetchSquads();
+          })
+          .catch((err) => {
+            wx.showToast({ title: err.message || '网络异常，删除失败', icon: 'none' });
+          });
       }
     });
   },
@@ -256,21 +281,14 @@ Page({
       confirmColor: '#ff4d4f',
       success: (res) => {
         if (!res.confirm) return;
-        const app = getApp();
-        wx.request({
-          url: `${app.globalData.baseUrl}/api/admin/squads/${squadId}/members/${userId}`,
-          method: 'DELETE',
-          timeout: TIMEOUT,
-          success: (r) => {
-            if (r.statusCode === 200) {
-              wx.showToast({ title: '已踢除', icon: 'success' });
-              this.fetchSquads();
-            } else {
-              wx.showToast({ title: `踢除失败（${r.statusCode}）`, icon: 'none' });
-            }
-          },
-          fail: () => { wx.showToast({ title: '网络异常', icon: 'none' }); }
-        });
+        api.removeAdminSquadMember(squadId, userId)
+          .then(() => {
+            wx.showToast({ title: '已踢除', icon: 'success' });
+            this.fetchSquads();
+          })
+          .catch((err) => {
+            wx.showToast({ title: err.message || '网络异常', icon: 'none' });
+          });
       }
     });
   },

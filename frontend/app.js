@@ -1,8 +1,9 @@
 const api = require('./utils/api.js');
+const env = require('./config/env.js');
 
 App({
   globalData: {
-    baseUrl: 'http://localhost:8080',
+    apiMode: env.mode,
     openid: '',
     token: '',
     userInfo: null,
@@ -12,6 +13,13 @@ App({
   },
 
   async onLaunch() {
+    if (env.mode === 'cloud' && wx.cloud) {
+      wx.cloud.init({
+        env: env.cloudEnv,
+        traceUser: true
+      });
+    }
+
     const openid = wx.getStorageSync('openid');
     const token = api.auth.getToken() || wx.getStorageSync('token');
 
