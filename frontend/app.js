@@ -1,5 +1,6 @@
 const api = require('./utils/api.js');
 const env = require('./config/env.js');
+const userInfoStore = require('./utils/user-info.js');
 
 App({
   globalData: {
@@ -30,7 +31,7 @@ App({
       try {
         const data = await api.getUserStatus();
         this.globalData.token = api.auth.getToken() || token;
-        this.globalData.userInfo = data.user_info || null;
+        userInfoStore.saveUserInfo(data.user_info || null);
         const status = Number(data.registration_status);
         wx.setStorageSync('registration_status', status);
 

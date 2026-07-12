@@ -1,5 +1,6 @@
 const api = require('../../utils/api.js');
-const DEFAULT_AVATAR = 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI9FhqQBHgHOvGMpKibibiaGJR7OYHKlPqubNAtEhMI0VAfnFUVJQR4RTZQ2s0ibZ3CKSEzHEgg/0';
+const avatar = require('../../utils/avatar.js');
+const DEFAULT_AVATAR = avatar.DEFAULT_AVATAR;
 const NICKNAME_REGEX = /^[\u4e00-\u9fa5a-zA-Z0-9]{2,20}$/;
 
 function generateRandomName() {
@@ -62,7 +63,7 @@ Page({
 
     const app = getApp();
     const nickname = this.data.nickname.trim();
-    const avatarFileId = this.data.avatarUrl;
+    const selectedAvatar = this.data.avatarUrl;
     const inviteCode = app.globalData.inviteCode || '';
     const openid = app.globalData.openid || wx.getStorageSync('openid');
 
@@ -78,7 +79,10 @@ Page({
     this.setData({ loading: true, nicknameError: '' });
 
     try {
+      const avatarFileId = await avatar.uploadAvatar(selectedAvatar, openid);
       const data = await api.joinUserSquad(openid, inviteCode, nickname, avatarFileId);
+      const displayAvatar = await avatar.resolveAvatarUrl(avatarFileId);
+      avatar.saveAvatar(avatarFileId, displayAvatar);
 
       app.globalData.openid = openid;
       app.globalData.token = api.auth.getToken() || app.globalData.token;
@@ -86,8 +90,10 @@ Page({
         ...(app.globalData.userInfo || {}),
         user_nickname: nickname,
         avatar_file_id: avatarFileId,
+        avatarUrl: displayAvatar,
         squad_name: data.squad_name || ''
       };
+      wx.setStorageSync('userInfo', app.globalData.userInfo);
 
       wx.setStorageSync('registration_status', 2);
       wx.redirectTo({ url: '/pages/home/home' });

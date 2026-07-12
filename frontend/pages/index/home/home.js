@@ -1,4 +1,6 @@
 const api = require('../../../utils/api.js')
+const avatar = require('../../../utils/avatar.js')
+const userInfoStore = require('../../../utils/user-info.js')
 
 Page({
   data: {
@@ -10,7 +12,7 @@ Page({
       dailySteps: 0,
       totalSolved: 0,
       rankTier: '-',
-      avatarUrl: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23FFA116"/%3E%3Ccircle cx="50" cy="35" r="18" fill="white"/%3E%3Cpath d="M20 85 Q20 55 50 55 Q80 55 80 85 Z" fill="white"/%3E%3C/svg%3E'
+      avatarUrl: avatar.DEFAULT_AVATAR
     },
 
     teamName: 'LeetCode 刷题战队',
@@ -28,6 +30,7 @@ Page({
   onShow() {
     // 页面显示时刷新头像和用户信息
     this.loadUserInfo()
+    this.syncLatestUserInfo()
   },
 
   /**
@@ -35,22 +38,32 @@ Page({
    */
   loadUserInfo() {
     const app = getApp()
-    const defaultAvatar = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23FFA116"/%3E%3Ccircle cx="50" cy="35" r="18" fill="white"/%3E%3Cpath d="M20 85 Q20 55 50 55 Q80 55 80 85 Z" fill="white"/%3E%3C/svg%3E'
 
     // 获取 lcId 和 openid
     const lcId = app.globalData.lcId || wx.getStorageSync('lcId') || 'Guest'
     const openid = app.globalData.openid || wx.getStorageSync('openid') || ''
     const userInfo = app.globalData.userInfo || wx.getStorageSync('userInfo') || {}
 
-    // 获取头像（优先从本地存储）
-    const savedAvatar = userInfo.avatar_file_id || userInfo.avatarUrl || wx.getStorageSync('userAvatar') || defaultAvatar
+    const savedAvatar = avatar.getProfileAvatar(userInfo)
 
     this.setData({
       'myInfo.lcId': userInfo.leetcode_username || lcId,
       'myInfo.nickname': userInfo.nickname || userInfo.user_nickname || this.data.myInfo.nickname,
       'myInfo.openid': openid,
-      'myInfo.avatarUrl': savedAvatar,
+      'myInfo.avatarUrl': wx.getStorageSync('userAvatar') || avatar.DEFAULT_AVATAR,
       teamName: userInfo.squad_name || this.data.teamName
+    })
+    avatar.resolveAvatarUrl(savedAvatar).then(avatarUrl => {
+      this.setData({ 'myInfo.avatarUrl': avatarUrl })
+    })
+  },
+
+  syncLatestUserInfo() {
+    userInfoStore.syncUserInfo(api).then(userInfo => {
+      if (userInfo) {
+        this.loadUserInfo()
+        this.fetchLeaderboard()
+      }
     })
   },
 
@@ -83,7 +96,7 @@ Page({
       }
 
       const data = await api.getDailyLeaderboard(squadId, openid)
-      const rankList = this.normalizeRankList(data.rankList || [])
+      const rankList = await this.normalizeRankList(data.rankList || [])
       const mySummary = data.mySummary || {}
       const myRankData = rankList.find(item => item.openid === openid)
 
@@ -120,32 +133,24 @@ Page({
 
   async ensureUserInfo() {
     const app = getApp()
-    const cached = app.globalData.userInfo || wx.getStorageSync('userInfo') || {}
-    if (cached.squad_id || cached.squadId) {
-      return cached
-    }
-
     const token = api.auth.getToken() || app.globalData.token || wx.getStorageSync('token')
     if (!token) {
-      return cached
+      return app.globalData.userInfo || wx.getStorageSync('userInfo') || {}
     }
 
     try {
-      const data = await api.getUserStatus()
-      const userInfo = data.user_info || {}
+      const userInfo = await userInfoStore.syncUserInfo(api) || {}
       app.globalData.token = api.auth.getToken() || token
-      app.globalData.userInfo = userInfo
-      wx.setStorageSync('userInfo', userInfo)
       this.loadUserInfo()
       return userInfo
     } catch (err) {
       console.error('获取用户状态失败:', err)
-      return cached
+      return app.globalData.userInfo || wx.getStorageSync('userInfo') || {}
     }
   },
 
-  normalizeRankList(rankList) {
-    return rankList.map(item => ({
+  async normalizeRankList(rankList) {
+    return Promise.all(rankList.map(async item => ({
       rank: item.rank,
       openid: item.openid,
       nickname: item.nickname || item.openid || '匿名用户',
@@ -153,8 +158,8 @@ Page({
       totalSolved: item.totalSolved || item.totalPoints || 0,
       dailySteps: item.dailySteps || item.dailyPoints || 0,
       rankTier: item.rankTier || '-',
-      avatarUrl: item.avatarUrl || this.data.myInfo.avatarUrl
-    }))
+      avatarUrl: await avatar.resolveAvatarUrl(item.avatarUrl || this.data.myInfo.avatarUrl)
+    })))
   },
 
   /**

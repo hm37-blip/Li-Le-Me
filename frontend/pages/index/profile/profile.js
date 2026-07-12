@@ -1,10 +1,12 @@
 // pages/profile/profile.js
 const api = require('../../../utils/api.js')
+const avatar = require('../../../utils/avatar.js')
+const userInfoStore = require('../../../utils/user-info.js')
 
 Page({
   data: {
     lcId: '',
-    userAvatar: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23FFA116"/%3E%3Ccircle cx="50" cy="35" r="18" fill="white"/%3E%3Cpath d="M20 85 Q20 55 50 55 Q80 55 80 85 Z" fill="white"/%3E%3C/svg%3E',
+    userAvatar: avatar.DEFAULT_AVATAR,
     openid: ''
   },
 
@@ -14,15 +16,14 @@ Page({
     const lcId = app.globalData.lcId || wx.getStorageSync('lcId') || ''
     const openid = app.globalData.openid || wx.getStorageSync('openid') || ''
 
-    // 从本地存储获取头像
-    const defaultAvatar = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23FFA116"/%3E%3Ccircle cx="50" cy="35" r="18" fill="white"/%3E%3Cpath d="M20 85 Q20 55 50 55 Q80 55 80 85 Z" fill="white"/%3E%3C/svg%3E'
-    const savedAvatar = wx.getStorageSync('userAvatar') || defaultAvatar
+    const savedAvatar = avatar.getProfileAvatar(app.globalData.userInfo || wx.getStorageSync('userInfo') || {})
 
     this.setData({
       lcId: lcId,
       openid: openid,
-      userAvatar: savedAvatar
+      userAvatar: wx.getStorageSync('userAvatar') || avatar.DEFAULT_AVATAR
     })
+    avatar.resolveAvatarUrl(savedAvatar).then(userAvatar => this.setData({ userAvatar }))
   },
 
   onShow() {
@@ -33,6 +34,17 @@ Page({
         lcId: app.globalData.lcId
       })
     }
+    this.syncLatestUserInfo()
+  },
+
+  syncLatestUserInfo() {
+    userInfoStore.syncUserInfo(api).then(userInfo => {
+      if (!userInfo) return
+      const source = avatar.getProfileAvatar(userInfo)
+      avatar.resolveAvatarUrl(source).then(userAvatar => {
+        this.setData({ userAvatar })
+      })
+    })
   },
 
   getOpenid() {
@@ -69,17 +81,28 @@ Page({
           mask: true
         })
 
-        api.updateUserProfile(openid, { avatarUrl: tempFilePath })
-          .then(() => {
+        avatar.uploadAvatar(tempFilePath, openid)
+          .then(fileId => {
+            return api.updateUserProfile(openid, { avatarUrl: fileId }).then(() => fileId)
+          })
+          .then(fileId => avatar.resolveAvatarUrl(fileId).then(displayUrl => ({ fileId, displayUrl })))
+          .then(({ fileId, displayUrl }) => {
+            avatar.saveAvatar(fileId, displayUrl)
             this.setData({
-              userAvatar: tempFilePath
+              userAvatar: displayUrl
             })
 
-            wx.setStorageSync('userAvatar', tempFilePath)
-
             const app = getApp()
+            const userInfo = {
+              ...(app.globalData.userInfo || wx.getStorageSync('userInfo') || {}),
+              avatar_file_id: fileId,
+              avatarUrl: displayUrl
+            }
+            app.globalData.userInfo = userInfo
+            wx.setStorageSync('userInfo', userInfo)
+
             if (app.globalData) {
-              app.globalData.userAvatar = tempFilePath
+              app.globalData.userAvatar = displayUrl
             }
 
             wx.showToast({

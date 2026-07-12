@@ -1,5 +1,7 @@
 // pages/report/report.js
 const api = require('../../../utils/api.js')
+const avatar = require('../../../utils/avatar.js')
+const userInfoStore = require('../../../utils/user-info.js')
 const mockData = require('../../../utils/mockData.js')
 
 // 测试模式开关：true 使用模拟数据，false 使用真实API
@@ -16,7 +18,7 @@ Page({
     // 用户信息（动态加载）
     lcId: '',
     openid: '',
-    userAvatar: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23FFA116"/%3E%3Ccircle cx="50" cy="35" r="18" fill="white"/%3E%3Cpath d="M20 85 Q20 55 50 55 Q80 55 80 85 Z" fill="white"/%3E%3C/svg%3E',
+    userAvatar: avatar.DEFAULT_AVATAR,
     totalSolved: 0,
     consecutiveDays: 0,
     weekPoints: 0,
@@ -354,9 +356,8 @@ Page({
     // 获取 openid（从微信登录信息或全局状态获取）
     const openid = app.globalData.openid || wx.getStorageSync('openid') || ''
 
-    // 获取头像
-    const defaultAvatar = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23FFA116"/%3E%3Ctext x="50" y="65" text-anchor="middle" fill="white" font-size="40" font-weight="bold" font-family="Arial"%3ELC%3C/text%3E%3C/svg%3E'
-    const userAvatar = wx.getStorageSync('userAvatar') || defaultAvatar
+    const avatarSource = avatar.getProfileAvatar(app.globalData.userInfo || wx.getStorageSync('userInfo') || {})
+    const userAvatar = wx.getStorageSync('userAvatar') || avatar.DEFAULT_AVATAR
 
     // 设置初始数据
     this.setData({
@@ -371,6 +372,7 @@ Page({
       weekPoints: 0,
       monthPoints: 0
     })
+    avatar.resolveAvatarUrl(avatarSource).then(resolvedAvatar => this.setData({ userAvatar: resolvedAvatar }))
 
     // 如果 openid 未加载，尝试获取（仅在非测试模式）
     if (!openid && !USE_MOCK_DATA) {
@@ -382,8 +384,8 @@ Page({
     // 页面显示时刷新头像和用户信息
     const app = getApp()
     const lcId = app.globalData.lcId || wx.getStorageSync('lcId') || this.data.lcId
-    const defaultAvatar = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23FFA116"/%3E%3Ctext x="50" y="65" text-anchor="middle" fill="white" font-size="40" font-weight="bold" font-family="Arial"%3ELC%3C/text%3E%3C/svg%3E'
-    const userAvatar = wx.getStorageSync('userAvatar') || defaultAvatar
+    const avatarSource = avatar.getProfileAvatar(app.globalData.userInfo || wx.getStorageSync('userInfo') || {})
+    const userAvatar = wx.getStorageSync('userAvatar') || avatar.DEFAULT_AVATAR
 
     if (lcId !== this.data.lcId || userAvatar !== this.data.userAvatar) {
       this.setData({
@@ -391,11 +393,27 @@ Page({
         userAvatar: userAvatar
       })
     }
+    avatar.resolveAvatarUrl(avatarSource).then(resolvedAvatar => {
+      if (resolvedAvatar !== this.data.userAvatar) {
+        this.setData({ userAvatar: resolvedAvatar })
+      }
+    })
+    this.syncLatestUserInfo()
 
     // 调整图表尺寸（处理从其他页面返回的情况）
     setTimeout(() => {
       this.resizeAllCharts()
     }, 150)
+  },
+
+  syncLatestUserInfo() {
+    userInfoStore.syncUserInfo(api).then(userInfo => {
+      if (!userInfo) return
+      const source = avatar.getProfileAvatar(userInfo)
+      avatar.resolveAvatarUrl(source).then(userAvatar => {
+        this.setData({ userAvatar })
+      })
+    })
   },
 
   onReady() {

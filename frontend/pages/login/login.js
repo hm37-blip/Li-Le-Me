@@ -1,5 +1,6 @@
 const auth = require('../../utils/auth.js');
 const api = require('../../utils/api.js');
+const userInfoStore = require('../../utils/user-info.js');
 
 Page({
   data: {
@@ -43,7 +44,7 @@ Page({
 
         app.globalData.openid = data.openid;
         app.globalData.token = data.token || '';
-        app.globalData.userInfo = data.user_info || null;
+        userInfoStore.saveUserInfo(data.user_info || null);
         wx.setStorageSync('openid', data.openid);
         auth.setToken(data.token || '', data.refreshToken, data.expiresIn);
         wx.setStorageSync('registration_status', data.registration_status ?? 0);

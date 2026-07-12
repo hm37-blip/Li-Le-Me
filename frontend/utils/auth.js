@@ -92,6 +92,9 @@ function clearAuth() {
     wx.removeStorageSync(TOKEN_EXPIRE_TIME)
     wx.removeStorageSync(USER_INFO_KEY)
     wx.removeStorageSync('token')
+    wx.removeStorageSync('openid')
+    wx.removeStorageSync('userInfo')
+    wx.removeStorageSync('registration_status')
   } catch (e) {
     console.error('清除认证信息失败:', e)
   }

@@ -169,7 +169,7 @@ function handleTokenExpired(url, data, method, needAuth, resolve, reject) {
       refreshSubscribers = []
 
       // 跳转到登录页面（可选）
-      wx.navigateTo({
+      wx.redirectTo({
         url: '/pages/login/login'
       })
     })
