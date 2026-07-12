@@ -351,12 +351,13 @@ Page({
   onLoad(options) {
     // 从路由参数获取用户ID，或从全局状态获取
     const app = getApp()
-    const lcId = options.lcId || app.globalData.lcId || wx.getStorageSync('lcId') || 'demo_user'
+    const userInfo = app.globalData.userInfo || wx.getStorageSync('userInfo') || {}
+    const lcId = options.lcId || userInfo.leetcode_username || userInfo.nickname || app.globalData.lcId || wx.getStorageSync('lcId') || ''
 
     // 获取 openid（从微信登录信息或全局状态获取）
     const openid = app.globalData.openid || wx.getStorageSync('openid') || ''
 
-    const avatarSource = avatar.getProfileAvatar(app.globalData.userInfo || wx.getStorageSync('userInfo') || {})
+    const avatarSource = avatar.getProfileAvatar(userInfo)
     const userAvatar = wx.getStorageSync('userAvatar') || avatar.DEFAULT_AVATAR
 
     // 设置初始数据
@@ -383,8 +384,9 @@ Page({
   onShow() {
     // 页面显示时刷新头像和用户信息
     const app = getApp()
-    const lcId = app.globalData.lcId || wx.getStorageSync('lcId') || this.data.lcId
-    const avatarSource = avatar.getProfileAvatar(app.globalData.userInfo || wx.getStorageSync('userInfo') || {})
+    const userInfo = app.globalData.userInfo || wx.getStorageSync('userInfo') || {}
+    const lcId = userInfo.leetcode_username || userInfo.nickname || app.globalData.lcId || wx.getStorageSync('lcId') || this.data.lcId
+    const avatarSource = avatar.getProfileAvatar(userInfo)
     const userAvatar = wx.getStorageSync('userAvatar') || avatar.DEFAULT_AVATAR
 
     if (lcId !== this.data.lcId || userAvatar !== this.data.userAvatar) {
@@ -409,6 +411,10 @@ Page({
   syncLatestUserInfo() {
     userInfoStore.syncUserInfo(api).then(userInfo => {
       if (!userInfo) return
+      const lcId = userInfo.leetcode_username || userInfo.nickname || this.data.lcId
+      if (lcId && lcId !== this.data.lcId) {
+        this.setData({ lcId })
+      }
       const source = avatar.getProfileAvatar(userInfo)
       avatar.resolveAvatarUrl(source).then(userAvatar => {
         this.setData({ userAvatar })
