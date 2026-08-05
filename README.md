@@ -1,26 +1,32 @@
-# 🚀 UIUC LeetCode Tracker (微信力了么小程序)
+#  CESA LeetCode Tracker (微信力了么 Mini-Program)
 
-本项目旨在通过社交激励（每日步数排行）提升学生会成员的算法练习积极性。
+> A data-driven, social-incentive Mini-Program designed to gamify LeetCode practice for campus tech communities through automated rank tracking, peer accountability, and interactive performance visualization.
 
-## 👥 团队分工
-- **Lead:** [Wendy Ma] (产品定义 & 进度监督) [KJ Chen] (技术指导 & 开发顾问）
-- **Cici:** 准 PM，负责用户登录、绑定逻辑及订阅推送
-- **Dannis:** 架构师，负责 LeetCode 海外版数据抓取引擎及数据库设计
-- **Andy:** 开发者，负责数据可视化报表及 UI 交互优化
+---
 
-## 🌿 分支说明
-- `main`: 生产分支，仅存稳定运行的代码。
-- `dev`: 开发主分支，所有功能在此集成测试。
-- `feat-*`: 各功能模块开发分支。
+## Product Overview
 
-## 📅 30天里程碑
-1. **Week 1:** 数据抓取可行性验证 & 微信登录跑通
-2. **Week 2:** 排行榜及每日步数逻辑实现
-3. **Week 3:** 个人数据可视化报表上线
-4. **Week 4:** Bug 修复、样式优化及 Demo 发布
+The **UIUC LeetCode Tracker** bridges the gap between individual interview preparation and peer-driven motivation. By leveraging real-time data ingestion via LeetCode's GraphQL API and social dynamics within WeChat, the platform tracks daily algorithmic problem-solving progress, quantifies user effort via weighted performance metrics, and dynamically updates squad leaderboards.
 
-## 🛠️ 技术栈
-- 微信小程序原生开发
-- 微信云开发 (Cloud Development)
-- LeetCode GraphQL API
-- ECharts / Canvas
+### Key Features
+* **Seamless Authentication & Onboarding:** Multi-stage WeChat OAuth flow with progressive profile completion and LeetCode ID binding.
+* **Algorithmic Weighting Engine:** Customized scoring algorithm prioritizing question difficulty (1 : 2 : 3 scale for Easy, Medium, Hard).
+* **Squad & Social Mechanics:** Invite-only squad interactions capped at 50 members with automated level locks and active user management.
+* **Data Visualization & Analytics:** Interactive ECharts dashboards depicting 7-day/30-day cumulative progress trends with automated zero-padding data pipelines.
+* **Gamified Tier System:** Dynamic percentile-based tiering (Top 20%, Elite, Elite Plus, NPC, Done) driven by automated daily settlement cron jobs.
+
+---
+
+##  System Architecture & Auth Flow
+
+###  Authentication Specification
+* **Mechanism:** WeChat Login API (`wx.login`) exchanging `js_code` for a signed JSON Web Token (JWT) encapsulating `OpenID` and `ExpireTime`.
+* **Header Standard:** `Authorization: Bearer <Your_Token_Here>` required for all non-login endpoints.
+* **Invalidation Handling:** Backend returns `HTTP 401 Unauthorized` for expired/tampered tokens; frontend automatically clears storage and prompts re-authentication.
+
+```text
+[WeChat Client] ──(wx.login)──> [Backend Service] ──(Exchange js_code)──> [WeChat Auth API]
+      │                                │                                       │
+      │<───────(Return JWT Token)──────┴<────────(Return OpenID)───────────────┘
+      │
+[Store Token (wx.setStorageSync)] ──(Bearer Token)──> [Protected APIs /api/v1/*]
