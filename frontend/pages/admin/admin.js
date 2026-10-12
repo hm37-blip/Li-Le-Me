@@ -34,7 +34,7 @@ Page({
     adminTokenError: '',
   },
 
-  onLoad() {
+  onShow() {
     this.ensureAdminToken();
   },
 

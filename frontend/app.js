@@ -14,7 +14,7 @@ App({
   },
 
   async onLaunch() {
-    if (env.mode === 'cloud' && wx.cloud) {
+    if (env.mode === 'cloud' && wx.cloud && env.cloudEnv) {
       wx.cloud.init({
         env: env.cloudEnv,
         traceUser: true

@@ -19,18 +19,13 @@ Page({
     teamMemberCount: 0,
     teamMemberLimit: 50,
     rankList: [],
-    loading: false
-  },
-
-  onLoad() {
-    this.loadUserInfo()
-    this.fetchLeaderboard()
+    loading: false,
+    leaderboardError: ''
   },
 
   onShow() {
-    // 页面显示时刷新头像和用户信息
     this.loadUserInfo()
-    this.syncLatestUserInfo()
+    return this.fetchLeaderboard()
   },
 
   /**
@@ -58,16 +53,6 @@ Page({
     })
   },
 
-  syncLatestUserInfo() {
-    userInfoStore.syncUserInfo(api).then(userInfo => {
-      if (userInfo) {
-        this.loadUserInfo()
-        this.fetchLeaderboard()
-      }
-    })
-  },
-
-
   /**
    * 获取排行榜数据
    */
@@ -80,7 +65,8 @@ Page({
       return
     }
 
-    this.setData({ loading: true })
+    if (this.data.loading) return
+    this.setData({ loading: true, leaderboardError: '' })
 
     try {
       const userInfo = await this.ensureUserInfo()
@@ -95,7 +81,20 @@ Page({
         return
       }
 
-      const data = await api.getDailyLeaderboard(squadId, openid)
+      // 成员人数与榜单独立更新；榜单失败不代表战队没有成员。
+      const [ranking, membership] = await Promise.all([
+        api.getDailyLeaderboard(squadId, openid).then(
+          value => ({ value }), error => ({ error })
+        ),
+        api.getSquadMembers().then(
+          value => ({ value }), error => ({ error })
+        )
+      ])
+      if (Array.isArray(membership.value)) {
+        this.setData({ teamMemberCount: membership.value.length })
+      }
+      if (ranking.error) throw ranking.error
+      const data = ranking.value
       const rankList = await this.normalizeRankList(data.rankList || [])
       const mySummary = data.mySummary || {}
       const myRankData = rankList.find(item => item.openid === openid)
@@ -103,7 +102,9 @@ Page({
       this.setData({
         rankList,
         teamName: data.squadName || userInfo.squad_name || this.data.teamName,
-        teamMemberCount: data.totalMembers || rankList.length,
+        teamMemberCount: Array.isArray(membership.value)
+          ? membership.value.length
+          : (data.totalMembers != null ? data.totalMembers : this.data.teamMemberCount),
         teamMemberLimit: userInfo.max_members || this.data.teamMemberLimit,
         myInfo: {
           ...this.data.myInfo,
@@ -119,8 +120,7 @@ Page({
     } catch (error) {
       console.error('获取排行榜失败:', error)
       this.setData({
-        rankList: [],
-        teamMemberCount: 0,
+        leaderboardError: error.message || '排行榜加载失败，请重试',
         loading: false
       })
       wx.showToast({

@@ -1,4 +1,5 @@
 const api = require('../../utils/api.js');
+const userInfoStore = require('../../utils/user-info.js');
 
 Page({
   data: {
@@ -18,7 +19,7 @@ Page({
       const data = await api.getUserStatus();
       const info = data.user_info || {};
       app.globalData.token = api.auth.getToken() || token;
-      app.globalData.userInfo = info;
+      userInfoStore.saveUserInfo(info);
       this.setData({
         nickname: info.user_nickname || info.nickname || '',
         leetcodeUsername: info.leetcode_username || '',

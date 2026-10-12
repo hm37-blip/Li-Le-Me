@@ -71,7 +71,11 @@
   </view>
 
   <!-- 空状态 -->
-  <view class="empty-area" wx:if="{{!loading && rankList.length === 0}}">
+  <view class="empty-area" wx:if="{{!loading && leaderboardError}}">
+    <text class="empty-text">{{leaderboardError}}</text>
+    <button size="mini" bindtap="fetchLeaderboard">重新加载</button>
+  </view>
+  <view class="empty-area" wx:if="{{!loading && !leaderboardError && rankList.length === 0}}">
     <text class="empty-text">暂无排行数据</text>
   </view>
 </scroll-view>

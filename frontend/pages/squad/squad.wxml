@@ -17,5 +17,6 @@
     <button class="submit-btn mt-32" type="primary" loading="{{loading}}" disabled="{{loading}}" bindtap="handleVerify">
       {{loading ? '验证中...' : '验证邀请码'}}
     </button>
+    <button class="rebind-btn mt-16" bindtap="handleRebind">返回重新绑定 LeetCode 账号</button>
   </view>
 </view>
