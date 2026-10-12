@@ -35,3 +35,9 @@ backend/
             ├── application.yml      # 主配置文件
             ├── application-dev.yml  # 本地开发环境配置 (Git已忽略)
             └── mapper/              # MyBatis XML 映射文件
+
+### 自有服务器头像上传
+
+`POST /api/user/avatar` 接收 multipart 字段 `file` 和 `openid`，使用 Bearer Token 鉴权，返回 `data.avatar_url`。前端随后使用资料/入队接口保存该 URL。图片通过 `/uploads/avatars/**` 公开访问，支持 PNG/JPG，上传限制 5MB。
+
+部署时将 `AVATAR_UPLOAD_DIR` 设置为持久化可写目录；容器需挂载数据卷。反向代理需将 `/api/` 与 `/uploads/avatars/` 转发至后端，并允许至少 6MB 的请求体。微信公众平台 uploadFile 合法域名需加入 `https://www.uiuccesa.com`。

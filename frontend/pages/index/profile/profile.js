@@ -105,6 +105,7 @@ Page({
               app.globalData.userAvatar = displayUrl
             }
 
+            wx.hideLoading()
             wx.showToast({
               title: '头像上传成功',
               icon: 'success',
@@ -112,15 +113,13 @@ Page({
             })
           })
           .catch((err) => {
+            wx.hideLoading()
             console.error('头像保存失败:', err)
             wx.showToast({
               title: err.message || '头像保存失败',
               icon: 'none',
               duration: 2000
             })
-          })
-          .finally(() => {
-            wx.hideLoading()
           })
       },
       fail: (err) => {

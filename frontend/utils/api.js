@@ -2,8 +2,7 @@ const auth = require('./auth.js')
 const env = require('../config/env.js')
 
 // Token 刷新标记（防止并发刷新）
-let isRefreshing = false
-let refreshSubscribers = []
+let refreshPromise = null
 
 function ensureCloudConfig() {
   if (!env.cloudEnv || env.cloudEnv === 'YOUR_CLOUD_ENV_ID') {
@@ -89,7 +88,7 @@ function rawRequest(url, data = {}, method = 'GET', header = {}) {
  * @param {Boolean} needAuth - 是否需要认证（默认 true）
  * @returns {Promise}
  */
-function request(url, data = {}, method = 'GET', needAuth = true) {
+function request(url, data = {}, method = 'GET', needAuth = true, hasRetried = false) {
   return new Promise((resolve, reject) => {
     // 构建请求头
     const header = {
@@ -113,13 +112,16 @@ function request(url, data = {}, method = 'GET', needAuth = true) {
           resolve(res.data)
         }
         // 处理 401 未授权（Token 过期或无效）
-        else if (res.statusCode === 401) {
-          console.warn('Token 无效或已过期，尝试刷新')
-          handleTokenExpired(url, data, method, needAuth, resolve, reject)
+        else if (res.statusCode === 401 && needAuth) {
+          if (hasRetried) {
+            reject(expireSession())
+          } else {
+            handleTokenExpired(url, data, method, needAuth, resolve, reject)
+          }
         }
         // 处理其他错误状态码
         else {
-          const message = (res.data && (res.data.message || res.data.error_message || res.data.error)) || '未知错误'
+          const message = (res.data && (res.data.message || res.data.error_message || res.data.error_msg || res.data.error)) || '未知错误'
           reject(new Error(`请求失败: ${res.statusCode} - ${message}`))
         }
       })
@@ -136,46 +138,28 @@ function request(url, data = {}, method = 'GET', needAuth = true) {
  * @param {Function} resolve - Promise resolve
  * @param {Function} reject - Promise reject
  */
+function expireSession() {
+  auth.clearAuth()
+  wx.redirectTo({ url: '/pages/login/login' })
+  return new Error('登录状态已失效，请重新登录')
+}
+
 function handleTokenExpired(url, data, method, needAuth, resolve, reject) {
-  // 如果正在刷新 Token，将请求加入队列
-  if (isRefreshing) {
-    refreshSubscribers.push(() => {
-      request(url, data, method, needAuth).then(resolve).catch(reject)
-    })
-    return
+  // 并发请求共享一次刷新；刷新失败时全部结束，不能再重试原请求。
+  if (!refreshPromise) {
+    refreshPromise = refreshToken()
+      .catch(() => {
+        throw expireSession()
+      })
+      .finally(() => {
+        refreshPromise = null
+      })
   }
 
-  isRefreshing = true
-
-  // 调用刷新 Token 的 API
-  refreshToken()
-    .then(() => {
-      // 刷新成功，重试原请求
-      request(url, data, method, needAuth).then(resolve).catch(reject)
-
-      // 执行队列中的请求
-      refreshSubscribers.forEach(callback => callback())
-      refreshSubscribers = []
-    })
-    .catch(err => {
-      console.error('刷新 Token 失败:', err)
-
-      // 清除认证信息
-      auth.clearAuth()
-
-      // 拒绝原请求和队列中的请求
-      reject(new Error('Token 已过期，请重新登录'))
-      refreshSubscribers.forEach(callback => callback())
-      refreshSubscribers = []
-
-      // 跳转到登录页面（可选）
-      wx.redirectTo({
-        url: '/pages/login/login'
-      })
-    })
-    .finally(() => {
-      isRefreshing = false
-    })
+  refreshPromise.then(() => {
+    // 每个请求最多重试一次，持续 401 时退出登录，避免无限刷新。
+    return request(url, data, method, needAuth, true)
+  }).then(resolve, reject)
 }
 
 /**
@@ -300,11 +284,50 @@ function getDailyLeaderboard(squadId, openid, date = '') {
     data.date = date
   }
 
-  return request('/api/v1/rank/daily', data, 'GET', false).then(res => {
+  return request('/api/v1/rank/daily', data, 'GET').then(res => {
     if (res.code && res.code !== 200) {
       throw new Error(res.msg || '获取排行榜失败')
     }
     return res.data || res
+  })
+}
+
+function uploadAvatar(filePath, openid, hasRetried = false) {
+  const baseUrl = env.mode === 'local' ? env.localBaseUrl : env.serverDomain
+  if (env.mode !== 'local' && env.mode !== 'domain') {
+    return Promise.reject(new Error('头像上传需要配置服务器接口模式'))
+  }
+  return new Promise((resolve, reject) => {
+    const token = auth.getToken()
+    wx.uploadFile({
+      url: `${baseUrl.replace(/\/$/, '')}/api/user/avatar`,
+      filePath,
+      name: 'file',
+      formData: { openid },
+      header: token ? { Authorization: `Bearer ${token}` } : {},
+      timeout: env.requestTimeout || 20000,
+      success: res => {
+        if (res.statusCode === 401) {
+          if (hasRetried) return reject(expireSession())
+          if (!refreshPromise) {
+            refreshPromise = refreshToken().catch(() => { throw expireSession() })
+              .finally(() => { refreshPromise = null })
+          }
+          refreshPromise.then(() => uploadAvatar(filePath, openid, true)).then(resolve, reject)
+          return
+        }
+        try {
+          const body = typeof res.data === 'string' ? JSON.parse(res.data) : res.data
+          if (res.statusCode !== 200 || body.code !== 200 || !body.data || !body.data.avatar_url) {
+            throw new Error(body.msg || body.message || '头像上传失败')
+          }
+          resolve(body.data.avatar_url)
+        } catch (err) {
+          reject(err)
+        }
+      },
+      fail: err => reject(new Error(err.errMsg || '头像上传失败，请检查网络'))
+    })
   })
 }
 
@@ -348,7 +371,7 @@ function getSquadMembers() {
 function verifySquadInvite(inviteCode) {
   return request('/api/v1/squad/verify', {
     invite_code: inviteCode
-  }, 'POST', false).then(res => {
+  }, 'POST').then(res => {
     if (!res.valid) {
       throw new Error(res.error_msg || '邀请码验证失败')
     }
@@ -431,6 +454,7 @@ module.exports = {
   refreshLeetCodeStats,
   getDailyLeaderboard,
   updateUserProfile,
+  uploadAvatar,
   bindLeetCodeAccount,
   getUserStatus,
   getSquadMembers,

@@ -33,3 +33,6 @@ target/
 *.xls
 *.csv
 *.txt.bak
+
+# Server-uploaded avatars
+backend/uploads/

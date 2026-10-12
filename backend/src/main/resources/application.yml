@@ -2,6 +2,10 @@ server:
   port: 8080
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
   datasource:
     url: jdbc:mysql://${MYSQL_ADDRESS}/lilema?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
     username: ${MYSQL_USERNAME}
@@ -24,6 +28,7 @@ mybatis-plus:
 # 开发/生产硬开关。dev-mode=true 放开 /debug/*、/api/admin/*、mock 登录（本地默认）。
 # 生产部署：APP_DEV_MODE=false 且 ADMIN_TOKEN=<强随机值>（重启生效）。
 app:
+  avatar-directory: ${AVATAR_UPLOAD_DIR:./uploads/avatars}
   dev-mode: ${APP_DEV_MODE:true}
   admin-token: ${ADMIN_TOKEN:}
 
